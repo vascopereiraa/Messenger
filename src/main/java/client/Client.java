@@ -17,17 +17,20 @@ public class Client {
     public static void main(String[] args) {
         System.out.println("Client");
 
-        if (args.length < 2) {
+        /*if (args.length < 2) {
             System.err.println("Missing args: <ip_grds> <port_grds>");
             return;
-        }
+        }*/
 
         InetAddress grdsIp;
         int grdsPort;
 
         try {
-            grdsIp = InetAddress.getByName(args[0]);
-            grdsPort = Integer.parseInt(args[1]);
+            /*grdsIp = InetAddress.getByName(args[0]);
+            grdsPort = Integer.parseInt(args[1]);*/
+
+            grdsPort = 3030;
+            grdsIp = InetAddress.getByName("230.30.30.30");
 
             System.out.println("GRDS: " + grdsIp.getHostName() + ":" + grdsPort);
 

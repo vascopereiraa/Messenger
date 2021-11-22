@@ -27,16 +27,19 @@ public class GRDS {
         // Start thread to accept new Clients and Servers
         try {
             // Unicast thread
-            ThreadNewClient unicastThreadAccept = new ThreadNewClient(new DatagramSocket(listeningPort));
-            unicastThreadAccept.run();
+            ThreadNewClient unicastThreadAccept = new ThreadNewClient(new DatagramSocket(listeningPort), "uni");
+            Thread t1 = new Thread(unicastThreadAccept);
+            t1.start();
 
             // Multicast thread
-            /*MulticastSocket ms = new MulticastSocket(MULTICAST_PORT);
+            MulticastSocket ms = new MulticastSocket(MULTICAST_PORT);
             InetAddress ia = InetAddress.getByName(MULTICAST_IP);
             InetSocketAddress addr = new InetSocketAddress(ia, MULTICAST_PORT);
             NetworkInterface ni = NetworkInterface.getByName("en0");
             ms.joinGroup(addr, ni);
-            ThreadNewClient multicastThreadAccept = new ThreadNewClient(ms);*/
+            ThreadNewClient multicastThreadAccept = new ThreadNewClient(ms, "multi");
+            Thread t2 = new Thread(multicastThreadAccept);
+            t2.start();
 
         } catch (SocketException e) {
             e.printStackTrace();
