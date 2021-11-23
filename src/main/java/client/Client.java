@@ -46,6 +46,7 @@ public class Client {
             DatagramPacket dp = new DatagramPacket(baos.toByteArray(),baos.toByteArray().length, grdsIp, grdsPort);
             ds.send(dp);
 
+            dp = new DatagramPacket(new byte[4096],4096);
             System.out.println("DatagramPacket enviado ao GRDS");
             ds.receive(dp);
 
