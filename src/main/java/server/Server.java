@@ -1,68 +1,92 @@
 package server;
 
-import data.ConnectionMessage;
-import data.ConnectionType;
+import server.connections.AcceptClientConnectionTCP;
+import server.connections.GRDSConnection;
 
-import java.io.*;
 import java.net.*;
 
 public class Server {
+
+    private static final String MULTICAST_GRDS_IP = "230.30.30.30" ;
+    private static final int MULTICAST_GRDS_PORT = 3030;
+
+    private static InetAddress grdsIp;
+    private static int grdsPort;
+    private static String dbmsLocation;
+
     public static void main(String[] args) {
         System.out.println("Server");
-        InetAddress grdsIp;
-        int grdsPort;
-        /*if(args.length < 2) { //todo: mudar length para 4 quando existir sgbd
-            System.err.println("Missing args: <ip_grds> <port_grds> <ip_sgbd> <port_sgbd>");
+
+        // Verifica argumentos
+        if(!argsProcessing(args)) return;
+
+        //todo: BDMS Connection
+
+        // Criar o SocketServer para ligações TCP com os Clients
+        AcceptClientConnectionTCP acceptClient = new AcceptClientConnectionTCP();
+
+        // Regista o IP TCP no GRDS
+        GRDSConnection grdsConnection = new GRDSConnection(grdsIp, grdsPort, acceptClient.getMessage());
+        if(!grdsConnection.connectGRDS()){
+            System.out.println("Server: An error occurred when connecting to GRDS");
             return;
-        }*/
-        try {
-            //Não recebeu o IP e PORTO do GRDS
-            //todo: alterar aqui, para funcionar com multicast
-            if(args.length != 3){
-                grdsPort = 9001;
-                grdsIp = InetAddress.getByName("127.0.0.1");
-            }else{ //todo: mudar para 3 para acrescentar a BD
-                grdsIp = InetAddress.getByName(args[0]);
-                grdsPort = Integer.parseInt(args[1]);
-            }
-            System.out.println("GRDS: " + grdsIp.getHostName() + ":" + grdsPort);
-
-            ConnectionMessage connectionMessage = new ConnectionMessage(ConnectionType.Server);
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(connectionMessage);
-            oos.flush();
-
-            DatagramSocket ds = new DatagramSocket();
-            //ds.setSoTimeout(3000);
-            DatagramPacket dp = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length, grdsIp, grdsPort);
-            ds.send(dp);
-
-            System.out.println("DatagramPacket enviado ao GRDS");
-            dp = new DatagramPacket(new byte[4096],4096);
-            ds.receive(dp);
-
-            ByteArrayInputStream bais = new ByteArrayInputStream(dp.getData(), 0, dp.getLength());
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            connectionMessage = (ConnectionMessage) ois.readObject();
-
-            // System.out.println("Server IP: " + connectionMessage.getIp() + ":" + connectionMessage.getPort());
-            System.out.println(connectionMessage.getMessage());
-            ds.close();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (SocketTimeoutException e) {
-            System.out.println("Exception.: Socket timeout");
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
 
+        // Inicia a Thread de aceitação de novos clientes
+        Thread clientAcceptionThread = new Thread(acceptClient);
+        clientAcceptionThread.start();
 
+        // Heartbeat server, 20 em 20 seg
+        ThreadHeartbearServer ths = new ThreadHeartbearServer();
+        Thread tths = new Thread();
+        tths.start();
 
+    }
 
+    public static boolean argsProcessing(String[] args) {
+        switch(args.length) {
+            case 2 -> {
+                dbmsLocation = args[0] + ":" + args[1];
+                grdsPort = MULTICAST_GRDS_PORT;
+                try {
+                    grdsIp = InetAddress.getByName(MULTICAST_GRDS_IP);
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                    System.err.println("""
+                                        Couldn't reach GRDS IP specified!
+                                        Launch program using: java Server <dbms_ip> <dbms_port> <grds_ip> <grds_port>
+                                        """);
+                    return false;
+                }
+                System.out.format("Missing GRDS location -> Using %s:%s to connect to GRDS\n",
+                        MULTICAST_GRDS_IP, MULTICAST_GRDS_PORT);
+                return true;
+            }
+            case 4 -> {
+                dbmsLocation = args[0] + ":" + args[1];
+                grdsPort = Integer.parseInt(args[3]);
+                try {
+                    grdsIp = InetAddress.getByName(args[2]);
+                } catch (UnknownHostException e) {
+                    System.err.println("""
+                                        Couldn't reach GRDS IP specified!
+                                        Launch program using: java Server <dbms_ip> <dbms_port> <grds_ip> <grds_port>
+                                        """);
+                    return false;
+                }
+                System.out.format("""
+                                    GRDS location: %s:%s
+                                    DBMS location: %s
+                                    """, grdsIp.getHostName(), grdsPort, dbmsLocation);
+                return true;
+            }
+            default -> {
+                System.err.println("""
+                                    Missing or Incorrect args
+                                    Launch program using: java Server <dbms_ip> <dbms_port> <grds_ip> <grds_port>
+                                    """);
+                return false;
+            }
+        }
     }
 }

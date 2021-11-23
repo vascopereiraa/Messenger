@@ -1,23 +1,25 @@
-package grds;
+package grds.data;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ServerList {
 
     private ArrayList<ServerInfo> serverList;
     private int next;
 
-    public ServerList() throws UnknownHostException {
-        serverList = new ArrayList<>(Arrays.asList(new ServerInfo(InetAddress.getByName("128.0.0.0"), 18902)));
+    public ServerList() {
+        serverList = new ArrayList<>();
         next = 0;
     }
 
-    public void addServer(ServerInfo newServer){
-        if(newServer != null)
-            serverList.add(newServer);
+    public boolean addServer(ServerInfo newServer){
+        if(newServer == null) return false;
+        if(serverList.contains(newServer)) {
+            serverList.get(serverList.indexOf(newServer)).markAsAlive();
+            return true;
+        }
+        serverList.add(newServer);
+        return true;
     }
 
     public void removeServer(ServerInfo remServer){
@@ -26,6 +28,8 @@ public class ServerList {
     }
 
     public ServerInfo getNextServer() {
+        if(serverList.size() == 0)
+            return new ServerInfo(null, 0);
         // System.out.println("Server number: " + ((++next) % serverList.size()));
         return serverList.get(((++next) % serverList.size()));
     }
@@ -34,7 +38,7 @@ public class ServerList {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (var x : serverList)
-            sb.append(x.getIp()).append(":").append(x.getPort());
+            sb.append(x);
         return sb.toString();
     }
 }

@@ -1,6 +1,6 @@
-package data;
+package messages;
 
-import grds.ServerInfo;
+import grds.data.ServerInfo;
 
 import java.io.Serial;
 import java.io.Serializable;

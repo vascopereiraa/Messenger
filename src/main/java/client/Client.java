@@ -1,7 +1,7 @@
 package client;
 
-import data.ConnectionMessage;
-import data.ConnectionType;
+import messages.ConnectionMessage;
+import messages.ConnectionType;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -35,38 +35,5 @@ public class Client {
 
             System.out.println("GRDS: " + grdsIp.getHostName() + ":" + grdsPort);
 
-            ConnectionMessage connectionMessage = new ConnectionMessage(ConnectionType.Client);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(connectionMessage);
-            oos.flush();
-
-            DatagramSocket ds = new DatagramSocket();
-            // ds.setSoTimeout(3000);
-            DatagramPacket dp = new DatagramPacket(baos.toByteArray(),baos.toByteArray().length, grdsIp, grdsPort);
-            ds.send(dp);
-
-            dp = new DatagramPacket(new byte[4096],4096);
-            System.out.println("DatagramPacket enviado ao GRDS");
-            ds.receive(dp);
-
-            ByteArrayInputStream bais = new ByteArrayInputStream(dp.getData(), 0, dp.getLength());
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            connectionMessage = (ConnectionMessage) ois.readObject();
-
-            System.out.println("Server IP: " + connectionMessage.getIp() + ":" + connectionMessage.getPort());
-            ds.close();
-
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (SocketTimeoutException e) {
-            System.out.println("Exception.: Socket timeout");
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
 }
 
