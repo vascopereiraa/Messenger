@@ -34,6 +34,10 @@ public class ServerList {
         return serverList.get(((++next) % serverList.size()));
     }
 
+    public ArrayList<ServerInfo> getServerInfo(){
+        return serverList;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
