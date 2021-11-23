@@ -1,6 +1,7 @@
 package client;
 
 import data.ConnectionMessage;
+import data.ConnectionType;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,12 +30,12 @@ public class Client {
             /*grdsIp = InetAddress.getByName(args[0]);
             grdsPort = Integer.parseInt(args[1]);*/
 
-            grdsPort = 3030;
-            grdsIp = InetAddress.getByName("230.30.30.30");
+            grdsPort = 9001;
+            grdsIp = InetAddress.getByName("127.0.0.1");
 
             System.out.println("GRDS: " + grdsIp.getHostName() + ":" + grdsPort);
 
-            ConnectionMessage connectionMessage = new ConnectionMessage();
+            ConnectionMessage connectionMessage = new ConnectionMessage(ConnectionType.Client);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(connectionMessage);
@@ -48,7 +49,7 @@ public class Client {
             System.out.println("DatagramPacket enviado ao GRDS");
             ds.receive(dp);
 
-            ByteArrayInputStream bais = new ByteArrayInputStream(dp.getData());
+            ByteArrayInputStream bais = new ByteArrayInputStream(dp.getData(), 0, dp.getLength());
             ObjectInputStream ois = new ObjectInputStream(bais);
             connectionMessage = (ConnectionMessage) ois.readObject();
 

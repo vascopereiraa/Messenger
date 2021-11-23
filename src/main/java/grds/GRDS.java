@@ -1,12 +1,7 @@
 package grds;
 
 import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.MulticastSocket;
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.net.*;
 
 public class GRDS {
 
@@ -15,6 +10,13 @@ public class GRDS {
 
     public static void main(String[] args) {
         System.out.println("GRDS");
+
+        ServerList serverList = null;
+        try {
+            serverList = new ServerList();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
 
         /*if (args.length < 1) {
             System.err.println("Missing Args: <Listening_Port>");
@@ -27,7 +29,7 @@ public class GRDS {
         // Start thread to accept new Clients and Servers
         try {
             // Unicast thread
-            ThreadNewClient unicastThreadAccept = new ThreadNewClient(new DatagramSocket(listeningPort), "uni");
+            ThreadNewConnection unicastThreadAccept = new ThreadNewConnection(new DatagramSocket(listeningPort), serverList);
             Thread t1 = new Thread(unicastThreadAccept);
             t1.start();
 
@@ -37,7 +39,7 @@ public class GRDS {
             InetSocketAddress addr = new InetSocketAddress(ia, MULTICAST_PORT);
             NetworkInterface ni = NetworkInterface.getByName("en0");
             ms.joinGroup(addr, ni);
-            ThreadNewClient multicastThreadAccept = new ThreadNewClient(ms, "multi");
+            ThreadNewConnection multicastThreadAccept = new ThreadNewConnection(ms, serverList);
             Thread t2 = new Thread(multicastThreadAccept);
             t2.start();
 
