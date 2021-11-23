@@ -37,7 +37,7 @@ public class ThreadNewConnection implements Runnable {
                 if(connectionMessage.getConnectionType() == ConnectionType.Server) {
                     serverList.addServer(new ServerInfo(dp.getAddress(),dp.getPort()));
                     connectionMessage.setMessage("Server Registered");
-                    System.out.println("Novo servidor registado");
+                    System.out.println("New server info: " + connectionMessage.getIp() + " : " + connectionMessage.getPort());
                     System.out.println(serverList);
                 }
                 else {
