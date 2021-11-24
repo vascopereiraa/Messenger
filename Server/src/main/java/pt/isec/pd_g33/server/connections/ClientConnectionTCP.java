@@ -1,5 +1,9 @@
 package pt.isec.pd_g33.server.connections;
 
+import pt.isec.pd_g33.shared.Data;
+import pt.isec.pd_g33.shared.Login;
+import pt.isec.pd_g33.shared.Register;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

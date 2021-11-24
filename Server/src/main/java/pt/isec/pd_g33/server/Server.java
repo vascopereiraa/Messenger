@@ -39,8 +39,8 @@ public class Server {
         clientAcceptionThread.start();
 
         // Heartbeat server, 20 em 20 seg
-        ThreadHeartbearServer ths = new ThreadHeartbearServer();
-        Thread tths = new Thread();
+        ThreadHeartbearServer ths = new ThreadHeartbearServer(grdsConnection);
+        Thread tths = new Thread(ths);
         tths.start();
 
         // Close DB connection

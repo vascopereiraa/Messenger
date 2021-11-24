@@ -17,6 +17,7 @@ public class Client {
     private static InetAddress grdsIp;
     private static int grdsPort;
     private static ConnectionMessage connectionMessage;
+    private static UserData user;
 
     public static boolean argsProcessing(String[] args) {
         try {

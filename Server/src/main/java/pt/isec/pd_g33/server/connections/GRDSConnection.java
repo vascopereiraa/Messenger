@@ -10,11 +10,13 @@ public class GRDSConnection {
     private InetAddress grdsIp;
     private int grdsPort;
     private ConnectionMessage connectionMessage;
+    private boolean grdsConnection;
 
     public GRDSConnection(InetAddress grdsIp, int grdsPort, ConnectionMessage connectionMessage) {
         this.grdsIp = grdsIp;
         this.grdsPort = grdsPort;
         this.connectionMessage = connectionMessage;
+        this.grdsConnection = false;
     }
 
     public boolean connectGRDS() {
@@ -47,26 +49,35 @@ public class GRDSConnection {
                 System.out.println(connectionMessage.getMessage());
                 ds.close();
                 //Caso corra tudo bem, termina tentativa de ligação ao GRDS
+                grdsConnection = true;
                 break;
             } catch (UnknownHostException e) {
                 System.out.println("Exception.: UnknownHostException");
                 e.printStackTrace();
+                grdsConnection = false;
                 return false;
             } catch (SocketTimeoutException e) {
                 System.out.println("Exception.: Socket timeout. Não foi possivel estabelecer ligação com o GRDS");
                 ++tentativaLigacaoGRDS;
+                grdsConnection = false;
             } catch (IOException e) {
                 System.out.println("Exception.: IOException");
                 e.printStackTrace();
+                grdsConnection = false;
                 return false;
             } catch (ClassNotFoundException e) {
                 System.out.println("Exception.:ClassNotFoundException");
                 e.printStackTrace();
+                grdsConnection = false;
                 return false;
             }
         }
         if(tentativaLigacaoGRDS == 3)
             return false;
         return true;
+    }
+
+    public boolean getGrdsConnection(){
+        return grdsConnection;
     }
 }
