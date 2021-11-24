@@ -2,23 +2,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>Messenger</artifactId>
+        <groupId>pt.isec.pd_g33.messenger</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>pt.isec.pd_g33.messenger</groupId>
-    <artifactId>Messenger</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
-    <modules>
-        <module>Client</module>
-        <module>GRDS</module>
-        <module>Server</module>
-        <module>Shared</module>
-    </modules>
+    <artifactId>Client</artifactId>
 
     <properties>
         <maven.compiler.source>16</maven.compiler.source>
         <maven.compiler.target>16</maven.compiler.target>
-        <project.build.souceEncoding>UTF-8</project.build.souceEncoding>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>pt.isec.pd_g33.messenger</groupId>
+            <artifactId>Shared</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
 </project>
