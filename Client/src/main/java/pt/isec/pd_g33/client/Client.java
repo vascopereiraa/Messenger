@@ -89,23 +89,9 @@ public class Client {
     }
 
     // Change to boolean later
-    public static void connectServerTCP(){
-        while(true) {
-            try {
-                Socket sCli = new Socket(connectionMessage.getIp(), connectionMessage.getPort());
+    /*public static void connectServerTCP(){
 
-                ObjectOutputStream oos = new ObjectOutputStream(sCli.getOutputStream());
-                ObjectInputStream ois = new ObjectInputStream(sCli.getInputStream());
-
-                oos.writeUnshared("Ola");
-                oos.flush();
-
-            } catch (IOException e) { //todo: Ponto4: Quando perde ligação com o servidor TCP, vai tentar reconnectar a um novo
-                System.err.println("Servidor fechou a porta TCP." + e);
-                connectGRDS();
-            }
-        }
-    }
+    }*/
 
     public static void main(String[] args) {
         System.out.println("Client");

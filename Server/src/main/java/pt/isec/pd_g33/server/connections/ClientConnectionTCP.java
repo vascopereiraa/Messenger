@@ -18,9 +18,20 @@ public class ClientConnectionTCP implements Runnable {
         try {
             ObjectOutputStream oos = new ObjectOutputStream(sCli.getOutputStream());
             ObjectInputStream ois = new ObjectInputStream(sCli.getInputStream());
-            String msg = (String) ois.readObject();
+            Object dataReceived = ois.readObject();
 
-            System.out.println("Mensagem recebida do cliente: " + msg);
+            if(dataReceived instanceof Login) {
+                //todo: codigo base dados
+            }
+
+            if(dataReceived instanceof Register){
+                //todo: codigo base dados
+            }
+
+            if(dataReceived instanceof Data){
+
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
