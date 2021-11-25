@@ -18,7 +18,7 @@ public class DatabaseConnection {
         this.bdmsLocation = "jdbc:mysql://" + bdmsLocation;
 
         try {
-            db = DriverManager.getConnection(bdmsLocation, username, password);
+            db = DriverManager.getConnection(this.bdmsLocation, username, password);
         } catch (SQLException e) {
             e.printStackTrace();
         }
