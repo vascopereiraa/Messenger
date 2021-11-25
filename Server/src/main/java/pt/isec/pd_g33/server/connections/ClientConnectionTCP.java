@@ -66,10 +66,10 @@ public class ClientConnectionTCP implements Runnable {
         try {
             if (databaseManager.checkUserLogin(((Login) dataReceived).getUsername(), ((Login) dataReceived).getPassword())) {
                 oos.writeUnshared("Login validado com sucesso.");
-                oos.flush();
+                // oos.flush();
             } else {
                 oos.writeUnshared("Login invalido.");
-                oos.flush();
+                // oos.flush();
             }
         } catch (IOException e) {
             System.err.println("Login IOExecption");
@@ -85,10 +85,10 @@ public class ClientConnectionTCP implements Runnable {
                                             ((Register) dataReceived).getUsername(),
                                             ((Register) dataReceived).getPassword())) {
                 oos.writeUnshared("Registo validado com sucesso.");
-                oos.flush();
+                // oos.flush();
             } else {
                 oos.writeUnshared("Registo invalido.");
-                oos.flush();
+                // oos.flush();
             }
         } catch (IOException e) {
             System.err.println("Register IOExecption");

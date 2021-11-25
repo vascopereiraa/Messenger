@@ -8,18 +8,15 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Scanner;
 
-import static pt.isec.pd_g33.client.Client.connectGRDS;
-
-
 public class ThreadServerConnection implements Runnable {
 
-    private ConnectionMessage connectionMessage;
+    private GRDSConnection grdsConnection;
     private Scanner scanner = new Scanner(System.in);
     private Socket sCli;
     private static UserData userData;
 
-    public ThreadServerConnection(ConnectionMessage connectionMessage){
-        this.connectionMessage = connectionMessage;
+    public ThreadServerConnection(GRDSConnection grdsConnection){
+        this.grdsConnection = grdsConnection;
     }
 
     @Override
@@ -30,7 +27,7 @@ public class ThreadServerConnection implements Runnable {
 
         while(true) {
             try {
-                sCli = new Socket(connectionMessage.getIp(), connectionMessage.getPort());
+                // sCli = new Socket(grdsConnection.getIp(), grdsConnection.getPort());
                 ObjectOutputStream oos = new ObjectOutputStream(sCli.getOutputStream());
                 ObjectInputStream ois = new ObjectInputStream(sCli.getInputStream());
 
@@ -61,7 +58,7 @@ public class ThreadServerConnection implements Runnable {
 
             } catch (IOException e) { //todo: Ponto4: Quando perde ligação com o servidor TCP, vai tentar reconnectar a um novo
                 System.err.println("Servidor fechou a porta TCP." + e);
-                connectGRDS();
+                // connectGRDS();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -91,7 +88,7 @@ public class ThreadServerConnection implements Runnable {
 
 
         try {
-            sCli = new Socket(connectionMessage.getIp(), connectionMessage.getPort());
+            // sCli = new Socket(grdsConnection.getIp(), grdsConnection.getPort());
             ObjectOutputStream oos = new ObjectOutputStream(sCli.getOutputStream());
             ObjectInputStream ois = new ObjectInputStream(sCli.getInputStream());
 
