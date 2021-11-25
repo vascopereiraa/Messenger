@@ -1,7 +1,5 @@
 package pt.isec.pd_g33.shared;
 
-import pt.isec.pd_g33.shared.ConnectionType;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.net.InetAddress;

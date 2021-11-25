@@ -2,6 +2,7 @@ package pt.isec.pd_g33.client;
 
 import pt.isec.pd_g33.client.connections.ThreadServerConnection;
 import pt.isec.pd_g33.shared.ConnectionMessage;
+import pt.isec.pd_g33.shared.UserData;
 import pt.isec.pd_g33.shared.ConnectionType;
 import pt.isec.pd_g33.shared.UserData;
 
@@ -17,7 +18,6 @@ public class Client {
     private static InetAddress grdsIp;
     private static int grdsPort;
     private static ConnectionMessage connectionMessage;
-    private static UserData user;
 
     public static boolean argsProcessing(String[] args) {
         try {

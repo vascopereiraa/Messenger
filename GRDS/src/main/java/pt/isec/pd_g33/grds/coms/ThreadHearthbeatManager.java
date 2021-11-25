@@ -17,22 +17,23 @@ public class ThreadHearthbeatManager implements Runnable {
     public void run() {
         while(true){
             try {
-                //todo: Ponto 5. Verificação se o servidor está vivo a cada 60 segundos.
-                Thread.sleep(60000);
-
+                Thread.sleep(20000);
                 Iterator<ServerInfo> it = serverList.iterator();
                 while(it.hasNext()) {
                     ServerInfo sv = it.next();
-                    if(sv.getHearthbeat())
+                    if(sv.getHearthbeat()){
+                        sv.resetHearthbeatFail();
                         sv.markAsDead();
-                    else
-                        it.remove();
+                    }
+                    else {
+                        sv.incHearthbeatFail();
+                        if(sv.getHearthbeatFail() == 3)
+                            it.remove();
+                    }
                 }
-
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
-
 }

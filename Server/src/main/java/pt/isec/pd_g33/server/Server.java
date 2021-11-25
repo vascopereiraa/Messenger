@@ -24,7 +24,8 @@ public class Server {
 
         // Start DB connection
         DatabaseConnection databasesConnection = new DatabaseConnection(dbmsLocation);
-        DatabaseManager databaseManager = new DatabaseManager(databasesConnection.getDb());
+        DatabaseManager databaseManager = new DatabaseManager(databasesConnection);
+
 
         // Criar o SocketServer para ligações TCP com os Clients
         AcceptClientConnectionTCP acceptClient = new AcceptClientConnectionTCP(databaseManager);

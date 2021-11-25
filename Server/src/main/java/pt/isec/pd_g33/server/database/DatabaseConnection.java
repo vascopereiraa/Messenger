@@ -34,6 +34,16 @@ public class DatabaseConnection {
         }
     }
 
+    public Connection getConnection(){
+        try {
+            return DriverManager.getConnection(this.bdmsLocation, username, password);
+        } catch (SQLException e) {
+            System.err.println();
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public Connection getDb() {
         return db;
     }

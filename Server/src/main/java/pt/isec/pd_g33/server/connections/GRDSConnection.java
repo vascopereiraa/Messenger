@@ -35,7 +35,8 @@ public class GRDSConnection {
                 ds.setSoTimeout(3000);
                 DatagramPacket dp = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length, grdsIp, grdsPort);
                 ds.send(dp);
-                System.out.println("DatagramPacket enviado ao GRDS");
+                //todo: debug
+                //System.out.println("DatagramPacket enviado ao GRDS");
 
                 // Criação de novo DatagramPacket para receber nova mensagem do GRDS confirmando a ligação correta com o GRDS
                 dp = new DatagramPacket(new byte[4096], 4096);

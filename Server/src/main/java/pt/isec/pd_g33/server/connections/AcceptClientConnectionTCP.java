@@ -9,16 +9,16 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 public class AcceptClientConnectionTCP implements Runnable {
 
     private ServerSocket ss;
     private DatabaseManager databaseManager;
 
-    public AcceptClientConnectionTCP(DatabaseManager db) {
+    public AcceptClientConnectionTCP(DatabaseManager databaseManager) {
 
         this.databaseManager = databaseManager;
-
         try {
             ss = new ServerSocket(0);
         } catch (IOException e) {

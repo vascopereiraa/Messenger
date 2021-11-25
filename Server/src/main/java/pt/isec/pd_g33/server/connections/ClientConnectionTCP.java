@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.sql.Connection;
 
 public class ClientConnectionTCP implements Runnable {
@@ -26,21 +27,29 @@ public class ClientConnectionTCP implements Runnable {
 
     @Override
     public void run() {
+        //todo: Debug
+        System.out.println("\nVou listar os users\n");
+        databaseManager.listUsers();
+        System.out.println("\n");
+
         try {
-            oos = new ObjectOutputStream(sCli.getOutputStream());
-            ois = new ObjectInputStream(sCli.getInputStream());
-            dataReceived = ois.readObject();
+            while(true){
+                oos = new ObjectOutputStream(sCli.getOutputStream());
+                ois = new ObjectInputStream(sCli.getInputStream());
+                dataReceived = ois.readObject();
 
-            if(dataReceived instanceof Login) {
-                if(!loginDatabase()) return;
+                if(dataReceived instanceof Login) {
+                    if(!loginDatabase()) return;
+                }
+                if(dataReceived instanceof Register){
+                    if(!registerDatabase()) return;
+                }
+                if(dataReceived instanceof Data){
+                    processData();
+                }
             }
-            if(dataReceived instanceof Register){
-                if(!registerDatabase()) return;
-            }
-            if(dataReceived instanceof Data){
-                processData();
-            }
-
+        } catch(SocketException e){
+            System.out.println("SocketException: O cliente foi-se embora!");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
@@ -72,9 +81,9 @@ public class ClientConnectionTCP implements Runnable {
 
     private boolean registerDatabase(){
         try {
-            if (databaseManager.insertUser( ((Register) dataReceived).getUsername(),
-                                            ((Register) dataReceived).getPassword(),
-                                            ((Register) dataReceived).getName())) {
+            if (databaseManager.insertUser( ((Register) dataReceived).getName(),
+                                            ((Register) dataReceived).getUsername(),
+                                            ((Register) dataReceived).getPassword())) {
                 oos.writeUnshared("Registo validado com sucesso.");
                 oos.flush();
             } else {

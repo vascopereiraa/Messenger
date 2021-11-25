@@ -9,12 +9,13 @@ public class Data implements Serializable {
     @Serial
     private final static long serialVersionUID = 1L;
 
-    private String content; // 1,username,password stringsplit ","
+    private String content;
     private String readState;
     private DataType dataType;
     private Date sentDate;
     private int toUserId;
     private int toGroupId;
+    private int menuOptionSelected;
 
     private UserData senderData;
 
@@ -23,8 +24,8 @@ public class Data implements Serializable {
         this.dataType = dataType;
     }
 
-    public Data(String content){
-
+    public Data(int menuOptionSelected){
+        this.menuOptionSelected = menuOptionSelected;
     }
 
     public String getContent() {
