@@ -10,8 +10,8 @@ import java.util.Scanner;
 
 public class ClientInputUI implements Runnable {
 
-    private ServerConnectionManager serverConnectionManager;
-    private ObjectOutputStream oos;
+    private final ServerConnectionManager serverConnectionManager;
+    private final ObjectOutputStream oos;
     private final Scanner scanner;
 
     public ClientInputUI(ServerConnectionManager scm) {
@@ -35,18 +35,27 @@ public class ClientInputUI implements Runnable {
             if (loginDecision == 2)
                 register();
             System.out.println();
-        } while(loginDecision < 1 || loginDecision > 2);
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while(loginDecision < 1 || loginDecision > 2 || !serverConnectionManager.isUserConnected());
+
+        menu();
     }
 
     private void writeToSocket(Object o) {
         try {
             oos.writeObject(o);
+            oos.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void login() {
+    private void login() {
         System.out.println("Login");
         System.out.print("Username: ");
         String username = scanner.nextLine();
@@ -55,7 +64,7 @@ public class ClientInputUI implements Runnable {
         writeToSocket(new Login(username, password));
     }
 
-    public void register() {
+    private void register() {
         System.out.println("Register");
         System.out.print("Name: ");
         String name = scanner.nextLine();
@@ -64,6 +73,21 @@ public class ClientInputUI implements Runnable {
         System.out.print("Password: ");
         String password = scanner.nextLine();
         writeToSocket(new Register(username, password, name));
+    }
+
+    private void menu() {
+        while(serverConnectionManager.isUserConnected() && serverConnectionManager.isServerConnected()) {
+            System.out.println("""
+                    Menu: 
+                    1 - Editar dados de utilizador
+                    2 - Listar todos os utilizadores
+                    3 - Pesquisar utilizador
+                    4 - Visualizar lista de contactos
+                    5 - Eliminar contacto
+                    6 - Criação de grupo""");
+            System.out.println();
+            int menuDecision = Integer.parseInt(scanner.nextLine());
+        }
     }
 
 }

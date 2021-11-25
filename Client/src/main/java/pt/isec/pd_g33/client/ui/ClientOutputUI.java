@@ -20,9 +20,13 @@ public class ClientOutputUI{
             try {
                 Object o = ois.readObject();
 
-                if(o instanceof String)
-                    System.out.println((String) o);
+                if(o instanceof String s) {
+                    // Login/Register success
+                    if(s.contains("validado"))
+                        serverConnectionManager.setUserConnected(true);
 
+                    System.out.println(s);
+                }
 
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();

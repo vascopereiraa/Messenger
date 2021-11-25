@@ -57,7 +57,7 @@ public class DatabaseManager {
 
             if(resultSet.next()){
                 userExists = true;
-            }else
+            } else
                 userExists = false;
 
             statement.close();

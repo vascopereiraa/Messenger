@@ -23,37 +23,38 @@ public class ClientConnectionTCP implements Runnable {
     public ClientConnectionTCP(Socket scli, DatabaseManager databaseManager){
         this.sCli = scli;
         this.databaseManager = databaseManager;
+
+        try {
+            oos = new ObjectOutputStream(sCli.getOutputStream());
+            ois = new ObjectInputStream(sCli.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void run() {
         //todo: Debug
-        System.out.println("\nVou listar os users\n");
+        /*System.out.println("\nVou listar os users\n");
         databaseManager.listUsers();
-        System.out.println("\n");
+        System.out.println("\n");*/
+        while(true){
 
-        try {
-            while(true){
-                oos = new ObjectOutputStream(sCli.getOutputStream());
-                ois = new ObjectInputStream(sCli.getInputStream());
+            try {
                 dataReceived = ois.readObject();
-
-                if(dataReceived instanceof Login) {
-                    if(!loginDatabase()) return;
-                }
-                if(dataReceived instanceof Register){
-                    if(!registerDatabase()) return;
-                }
-                if(dataReceived instanceof Data){
-                    processData();
-                }
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
             }
-        } catch(SocketException e){
-            System.out.println("SocketException: O cliente foi-se embora!");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+
+            if(dataReceived instanceof Login) {
+                if(!loginDatabase()) return;
+            }
+            if(dataReceived instanceof Register){
+                if(!registerDatabase()) return;
+            }
+            if(dataReceived instanceof Data){
+                processData();
+            }
         }
     }
 
@@ -64,13 +65,12 @@ public class ClientConnectionTCP implements Runnable {
 
     private boolean loginDatabase(){
         try {
-            if (databaseManager.checkUserLogin(((Login) dataReceived).getUsername(), ((Login) dataReceived).getPassword())) {
-                oos.writeUnshared("Login validado com sucesso.");
-                // oos.flush();
-            } else {
-                oos.writeUnshared("Login invalido.");
-                // oos.flush();
-            }
+            if (databaseManager.checkUserLogin(((Login) dataReceived).getUsername(), ((Login) dataReceived).getPassword()))
+                oos.writeObject("Login validado com sucesso.");
+            else
+                oos.writeObject("Login invalido.");
+            oos.flush();
+
         } catch (IOException e) {
             System.err.println("Login IOExecption");
             e.printStackTrace();
@@ -84,10 +84,10 @@ public class ClientConnectionTCP implements Runnable {
             if (databaseManager.insertUser( ((Register) dataReceived).getName(),
                                             ((Register) dataReceived).getUsername(),
                                             ((Register) dataReceived).getPassword())) {
-                oos.writeUnshared("Registo validado com sucesso.");
+                oos.writeObject("Registo validado com sucesso.");
                 // oos.flush();
             } else {
-                oos.writeUnshared("Registo invalido.");
+                oos.writeObject("Registo invalido.");
                 // oos.flush();
             }
         } catch (IOException e) {

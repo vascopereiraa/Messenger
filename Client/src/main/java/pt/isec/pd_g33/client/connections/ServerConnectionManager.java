@@ -21,11 +21,13 @@ public class ServerConnectionManager {
 
     // Connection status
     private boolean serverConnected;
+    private boolean userConnected;
     private UserData userData;
 
     public ServerConnectionManager(GRDSConnection grdsConnection) {
         this.grdsConnection = grdsConnection;
         this.serverConnected = false;
+        this.userConnected = false;
     }
 
     public void connectToServer() {
@@ -63,8 +65,12 @@ public class ServerConnectionManager {
         return serverConnected;
     }
 
-    public boolean isClientConnected() {
-        return userData != null;
+    public boolean isUserConnected() {
+        return userConnected;
+    }
+
+    public void setUserConnected(boolean userConnected) {
+        this.userConnected = userConnected;
     }
 
     public void setUserData(UserData userData) {
