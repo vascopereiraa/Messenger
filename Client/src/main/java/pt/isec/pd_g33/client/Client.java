@@ -1,9 +1,9 @@
 package pt.isec.pd_g33.client;
 
 import pt.isec.pd_g33.client.connections.ThreadServerConnection;
-import pt.isec.pd_g33.shared.UserData;
 import pt.isec.pd_g33.shared.ConnectionMessage;
 import pt.isec.pd_g33.shared.ConnectionType;
+import pt.isec.pd_g33.shared.UserData;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -107,8 +107,6 @@ public class Client {
         ThreadServerConnection threadServerConnection = new ThreadServerConnection(connectionMessage);
         Thread serverConnection = new Thread(threadServerConnection);
         serverConnection.start();
-
-
 
     }
 

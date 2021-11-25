@@ -3,6 +3,7 @@ package pt.isec.pd_g33.server;
 import pt.isec.pd_g33.server.connections.AcceptClientConnectionTCP;
 import pt.isec.pd_g33.server.connections.GRDSConnection;
 import pt.isec.pd_g33.server.database.DatabaseConnection;
+import pt.isec.pd_g33.server.database.DatabaseManager;
 
 import java.net.*;
 
@@ -23,9 +24,10 @@ public class Server {
 
         // Start DB connection
         DatabaseConnection databasesConnection = new DatabaseConnection(dbmsLocation);
+        DatabaseManager databaseManager = new DatabaseManager(databasesConnection.getDb());
 
         // Criar o SocketServer para ligações TCP com os Clients
-        AcceptClientConnectionTCP acceptClient = new AcceptClientConnectionTCP(databasesConnection.getDb());
+        AcceptClientConnectionTCP acceptClient = new AcceptClientConnectionTCP(databaseManager);
 
         // Regista o IP TCP no GRDS
         GRDSConnection grdsConnection = new GRDSConnection(grdsIp, grdsPort, acceptClient.getMessage());

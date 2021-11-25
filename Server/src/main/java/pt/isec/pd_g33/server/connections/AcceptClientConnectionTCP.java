@@ -13,11 +13,11 @@ import java.sql.Connection;
 public class AcceptClientConnectionTCP implements Runnable {
 
     private ServerSocket ss;
-    private Connection db;
+    private DatabaseManager databaseManager;
 
-    public AcceptClientConnectionTCP(Connection db) {
+    public AcceptClientConnectionTCP(DatabaseManager db) {
 
-        this.db = db;
+        this.databaseManager = databaseManager;
 
         try {
             ss = new ServerSocket(0);
@@ -36,7 +36,7 @@ public class AcceptClientConnectionTCP implements Runnable {
             while (true) {
                 Socket sCli = ss.accept();
 
-                ClientConnectionTCP cliConn = new ClientConnectionTCP(sCli);
+                ClientConnectionTCP cliConn = new ClientConnectionTCP(sCli,databaseManager);
                 Thread cli = new Thread(cliConn);
                 cli.start();
             }
