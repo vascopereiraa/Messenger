@@ -1,5 +1,7 @@
 package pt.isec.pd_g33.server.connections;
 
+import pt.isec.pd_g33.server.connections.ClientConnectionTCP;
+import pt.isec.pd_g33.server.database.DatabaseManager;
 import pt.isec.pd_g33.shared.ConnectionMessage;
 import pt.isec.pd_g33.shared.ConnectionType;
 

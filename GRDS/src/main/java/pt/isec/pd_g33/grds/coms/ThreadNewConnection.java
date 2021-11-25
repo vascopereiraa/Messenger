@@ -1,9 +1,9 @@
 package pt.isec.pd_g33.grds.coms;
 
+import pt.isec.pd_g33.grds.data.ServerList;
 import pt.isec.pd_g33.shared.ConnectionMessage;
 import pt.isec.pd_g33.shared.ConnectionType;
 import pt.isec.pd_g33.shared.ServerInfo;
-import pt.isec.pd_g33.grds.data.ServerList;
 
 import java.io.*;
 import java.net.DatagramPacket;

@@ -29,7 +29,7 @@ public class ClientConnectionTCP implements Runnable {
             }
 
             if(dataReceived instanceof Register){
-                //todo: codigo base dados
+                if(!registerDatabase()) return;
             }
 
             if(dataReceived instanceof Data){

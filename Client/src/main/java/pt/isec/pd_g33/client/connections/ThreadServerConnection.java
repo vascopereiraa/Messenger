@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import static pt.isec.pd_g33.client.Client.connectGRDS;
 
+
 public class ThreadServerConnection implements Runnable {
 
     private ConnectionMessage connectionMessage;
