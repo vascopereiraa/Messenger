@@ -5,9 +5,15 @@ import pt.isec.pd_g33.shared.ServerInfo;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+/*
+ * Ponto 5.
+ * Verificação se o servidor está vivo a cada 20 segundos
+ * Caso nao responda, não sao mais redirecionados clientes para este servidor
+ * Caso seja a 3a vez que nao responde é removido da lista de servidores
+ */
 public class ThreadHearthbeatManager implements Runnable {
 
-    private ArrayList<ServerInfo> serverList;
+    private final ArrayList<ServerInfo> serverList;
 
     public ThreadHearthbeatManager(ArrayList<ServerInfo> serverList){
         this.serverList = serverList;

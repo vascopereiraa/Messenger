@@ -15,11 +15,12 @@ public class ServerList {
     }
 
     public boolean addServer(ServerInfo newServer){
-        if(newServer == null) return false;
         if(serverList.contains(newServer)) {
             serverList.get(serverList.indexOf(newServer)).markAsAlive();
-            return true;
+            System.out.println("O servidor já estava registado! -> Hearthbeat a zeros");
+            return false;
         }
+        System.out.println("Novo servidor registado");
         serverList.add(newServer);
         return true;
     }
@@ -32,8 +33,14 @@ public class ServerList {
     public ServerInfo getNextServer() {
         if(serverList.size() == 0)
             return new ServerInfo(null, 0);
+
+        ServerInfo aux;
+        do {
+            aux = serverList.get(((++next) % serverList.size()));
+        } while(aux.getHearthbeatFail() != 0);
+
         // System.out.println("Server number: " + ((++next) % serverList.size()));
-        return serverList.get(((++next) % serverList.size()));
+        return aux;
     }
 
     public ArrayList<ServerInfo> getServerInfo(){

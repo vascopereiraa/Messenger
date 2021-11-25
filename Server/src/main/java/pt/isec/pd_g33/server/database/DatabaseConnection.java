@@ -3,7 +3,6 @@ package pt.isec.pd_g33.server.database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class DatabaseConnection {
 
@@ -14,8 +13,8 @@ public class DatabaseConnection {
     private Connection db;
 
     public DatabaseConnection(String bdmsLocation) {
-        System.out.println(bdmsLocation);
-        this.bdmsLocation = "jdbc:mysql://" + bdmsLocation;
+        this.bdmsLocation = "jdbc:mysql://" + bdmsLocation + "/MessengerDB?autoReconnect=true";
+        System.out.println(this.bdmsLocation);
 
         try {
             db = DriverManager.getConnection(this.bdmsLocation, username, password);

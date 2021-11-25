@@ -8,11 +8,13 @@ public class ServerInfo {
     private int port;
 
     private boolean isAlive;
+    private int hearthbeatFail;
 
     public ServerInfo(InetAddress ip, int port) {
         this.ip = ip;
         this.port = port;
         this.isAlive = true;
+        this.hearthbeatFail = 0;
     }
 
     // Server info
@@ -35,6 +37,18 @@ public class ServerInfo {
 
     public void markAsAlive() {
         isAlive = true;
+    }
+
+    public int getHearthbeatFail() {
+        return hearthbeatFail;
+    }
+
+    public void resetHearthbeatFail() {
+        hearthbeatFail = 0;
+    }
+
+    public void incHearthbeatFail() {
+        hearthbeatFail++;
     }
 
     @Override
