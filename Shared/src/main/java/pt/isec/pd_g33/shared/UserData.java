@@ -1,8 +1,13 @@
 package pt.isec.pd_g33.shared;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Date;
 
-public class UserData {
+public class UserData implements Serializable {
+
+    @Serial
+    private final static long serialVersionUID = 1L;
 
     private int userID;
     private String username;
@@ -19,6 +24,13 @@ public class UserData {
 
     // Em caso de registo
     public UserData(String username, String password, String name){
+        this.username = username;
+        this.password = password;
+        this.name = name;
+    }
+
+    public UserData(int user_id, String username, String password, String name){
+        this.userID = user_id;
         this.username = username;
         this.password = password;
         this.name = name;

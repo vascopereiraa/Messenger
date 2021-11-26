@@ -4,13 +4,12 @@ import pt.isec.pd_g33.server.database.DatabaseManager;
 import pt.isec.pd_g33.shared.Data;
 import pt.isec.pd_g33.shared.Login;
 import pt.isec.pd_g33.shared.Register;
+import pt.isec.pd_g33.shared.UserData;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.SocketException;
-import java.sql.Connection;
 
 public class ClientConnectionTCP implements Runnable {
 
@@ -53,22 +52,45 @@ public class ClientConnectionTCP implements Runnable {
                 if(!registerDatabase()) return;
             }
             if(dataReceived instanceof Data){
-                processData();
+                processData((Data)dataReceived);
             }
         }
     }
 
-    private boolean processData() {
+    private void processData(Data dataReceived) {
 
-        return true;
+        switch (dataReceived.getMenuOptionSelected()){
+            case 1-> {
+                if(databaseManager.updateUser(
+                        dataReceived.getUserData().getName(),
+                        dataReceived.getContent(),
+                        dataReceived.getUserData().getPassword(),
+                        dataReceived.getToUserId())){
+                    writeToSocket("Utilizador atualizado com sucesso !");
+                }else
+                    writeToSocket("Não foi possível atualizar o utilizador");
+            }
+            case 2-> {
+                //TODO: tratar da impressão do lado do cliente
+                writeToSocket(databaseManager.listUsers());
+            }
+            case 3->{
+                //todo: tratar da impressão do lado do cliente
+                writeToSocket(databaseManager.searchUserByName(dataReceived.getContent()));
+            }
+            default -> {
+                System.err.println("Opção invalidade de menu");
+            }
+        }
     }
 
     private boolean loginDatabase(){
         try {
-            if (databaseManager.checkUserLogin(((Login) dataReceived).getUsername(), ((Login) dataReceived).getPassword()))
-                oos.writeObject("Login validado com sucesso.");
+            UserData userData = databaseManager.checkUserLogin(((Login) dataReceived).getUsername(), ((Login) dataReceived).getPassword());
+            if (userData != null)
+                oos.writeObject(new Data("Login validado com sucesso!",userData));
             else
-                oos.writeObject("Login invalido.");
+                oos.writeObject(new Data("Login invalido."));
             oos.flush();
 
         } catch (IOException e) {
@@ -81,20 +103,30 @@ public class ClientConnectionTCP implements Runnable {
 
     private boolean registerDatabase(){
         try {
-            if (databaseManager.insertUser( ((Register) dataReceived).getName(),
-                                            ((Register) dataReceived).getUsername(),
-                                            ((Register) dataReceived).getPassword())) {
-                oos.writeObject("Registo validado com sucesso.");
-                // oos.flush();
+            UserData userData = databaseManager.insertUser( ((Register) dataReceived).getName(),
+                    ((Register) dataReceived).getUsername(),
+                    ((Register) dataReceived).getPassword());
+            if (userData != null) {
+                oos.writeObject(new Data("Registo efetuado com sucesso",userData));
             } else {
-                oos.writeObject("Registo invalido.");
-                // oos.flush();
+                oos.writeObject(new Data("Registo invalido."));
             }
+            oos.flush();
         } catch (IOException e) {
             System.err.println("Register IOExecption");
             e.printStackTrace();
             return false;
         }
         return true;
+    }
+
+    private void writeToSocket(Object o) {
+        try {
+            oos.writeObject(o);
+            oos.flush();
+        } catch (IOException e) {
+            System.err.println("IOExeption: ");
+            e.printStackTrace();
+        }
     }
 }

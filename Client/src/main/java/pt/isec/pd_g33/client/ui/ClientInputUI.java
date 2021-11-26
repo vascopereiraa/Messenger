@@ -1,8 +1,10 @@
 package pt.isec.pd_g33.client.ui;
 
 import pt.isec.pd_g33.client.connections.ServerConnectionManager;
+import pt.isec.pd_g33.shared.Data;
 import pt.isec.pd_g33.shared.Login;
 import pt.isec.pd_g33.shared.Register;
+import pt.isec.pd_g33.shared.UserData;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -13,6 +15,7 @@ public class ClientInputUI implements Runnable {
     private final ServerConnectionManager serverConnectionManager;
     private final ObjectOutputStream oos;
     private final Scanner scanner;
+    private String username, name, password;
 
     public ClientInputUI(ServerConnectionManager scm) {
         this.serverConnectionManager = scm;
@@ -36,6 +39,7 @@ public class ClientInputUI implements Runnable {
                 register();
             System.out.println();
 
+            //todo: find a way to syncronize
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -57,22 +61,25 @@ public class ClientInputUI implements Runnable {
 
     private void login() {
         System.out.println("Login");
-        System.out.print("Username: ");
-        String username = scanner.nextLine();
-        System.out.print("Password: ");
-        String password = scanner.nextLine();
+        getUserData(false);
         writeToSocket(new Login(username, password));
     }
 
     private void register() {
         System.out.println("Register");
-        System.out.print("Name: ");
-        String name = scanner.nextLine();
-        System.out.print("Username: ");
-        String username = scanner.nextLine();
-        System.out.print("Password: ");
-        String password = scanner.nextLine();
+        getUserData(true);
         writeToSocket(new Register(username, password, name));
+    }
+
+    private void getUserData(boolean registerUpdate){
+        if(registerUpdate){
+            System.out.print("Name: ");
+            name = scanner.nextLine();
+        }
+        System.out.print("Username: ");
+        username = scanner.nextLine();
+        System.out.print("Password: ");
+        password = scanner.nextLine();
     }
 
     private void menu() {
@@ -87,6 +94,40 @@ public class ClientInputUI implements Runnable {
                     6 - Criação de grupo""");
             System.out.println();
             int menuDecision = Integer.parseInt(scanner.nextLine());
+            mnDecision(menuDecision);
+        }
+    }
+
+    private void mnDecision(int menuDec){
+        switch (menuDec){
+            case 1->{
+                getUserData(true);
+                writeToSocket(new Data(1,
+                        new UserData(username,password,name),
+                        serverConnectionManager.getUserData().getUserID())); // User_id original fica no Userdata - toUserId
+            }
+            case 2->{
+                writeToSocket(new Data(2));
+            }
+            case 3->{
+                System.out.println("Indique o utilizador a pesquisar: ");
+                username = scanner.nextLine();
+                writeToSocket(new Data(3,username));
+            }
+            case 4->{
+                writeToSocket(new Data(4));
+            }
+            case 5->{
+                System.out.println("Indique o ulitizador a eliminar: ");
+                username = scanner.nextLine();
+                writeToSocket(new Data(5, username));
+            }
+            case 6->{
+                writeToSocket(new Data(6));
+            }
+            default -> {
+
+            }
         }
     }
 

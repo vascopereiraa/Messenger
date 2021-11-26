@@ -1,6 +1,7 @@
 package pt.isec.pd_g33.client.ui;
 
 import pt.isec.pd_g33.client.connections.ServerConnectionManager;
+import pt.isec.pd_g33.shared.Data;
 
 import java.io.*;
 
@@ -20,12 +21,13 @@ public class ClientOutputUI{
             try {
                 Object o = ois.readObject();
 
-                if(o instanceof String s) {
+                if(o instanceof Data data) {
                     // Login/Register success
-                    if(s.contains("validado"))
+                    if(data.getContent().contains("validado")){
                         serverConnectionManager.setUserConnected(true);
-
-                    System.out.println(s);
+                        serverConnectionManager.setUserData(data.getUserData());
+                    }
+                    System.out.println(data.getContent());
                 }
 
             } catch (IOException | ClassNotFoundException e) {

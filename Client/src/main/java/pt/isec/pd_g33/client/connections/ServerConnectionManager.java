@@ -77,6 +77,10 @@ public class ServerConnectionManager {
         this.userData = userData;
     }
 
+    public UserData getUserData() {
+        return this.userData;
+    }
+
     public ObjectOutputStream getSocketOutputStream() {
         return out;
     }

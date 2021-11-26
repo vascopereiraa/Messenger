@@ -1,5 +1,9 @@
 package pt.isec.pd_g33.server.database;
 
+import pt.isec.pd_g33.shared.Data;
+import pt.isec.pd_g33.shared.DataType;
+import pt.isec.pd_g33.shared.UserData;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,27 +21,40 @@ public class DatabaseManager {
         this.db = dbConnection.getConnection();
     }
 
-    public boolean insertUser(String name, String username, String password){
+    public UserData insertUser(String name, String username, String password){
+        UserData userData;
         try (Statement statement = db.createStatement()) {
             String sqlQuery = "INSERT INTO User(name, username, password, last_seen, status)" +
                     "VALUES('" + name + "','" + username + "','" + password + "','"
                     + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "','Online')";
             System.out.println(sqlQuery);
             statement.executeUpdate(sqlQuery);
+
+            // Para obter o id do utilizador, para ser possivel mais tarde atualizar dados do mesmo
+            String sqlQuery1 = "SELECT user_id FROM User WHERE username = '" + username + "'";
+            ResultSet resultSet =  statement.executeQuery(sqlQuery1);
+
+            if(resultSet.next()){
+                userData = new UserData(resultSet.getInt("user_id"),
+                                           username,password,name);
+            }else
+                return null;
+
         } catch(SQLException e) {
             System.err.println("SQLException: Cliente já existe com esse nome");
             e.printStackTrace();
-            return false;
+            return null;
         }
-        return true;
+        return userData;
     }
 
     //todo: check if it works
-    public boolean updateUser(String name, String username, String password){
+    public boolean updateUser(String name, String newUsername, String password, int userID){
         try (Statement statement = db.createStatement()) {
-            String sqlQuery = "UPDATE User set(name, username, password, last_seen, status)" +
-                    "VALUES('" + name + "','" + username + "','" + password + "','"
-                    + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "','Online')";
+            String sqlQuery = "UPDATE User set(name, username, password)" +
+                    "VALUES('" + name + "','" + newUsername + "','" + password +
+                    ")' WHERE user_id =" + userID + "";
+
             System.out.println(sqlQuery);
             statement.executeUpdate(sqlQuery);
         } catch(SQLException e) {
@@ -48,24 +65,27 @@ public class DatabaseManager {
         return true;
     }
 
-    public boolean checkUserLogin(String username, String password){
-        boolean userExists;
+    public UserData checkUserLogin(String username, String password){
+        UserData userData;
         try {
             Statement statement = db.createStatement();
-            String sqlQuery = "SELECT username FROM User WHERE username = '" + username + "' AND password ='" + password + "'";
+            String sqlQuery = "SELECT user_id,username,password,name FROM User WHERE username = '" + username + "' AND password ='" + password + "'";
             ResultSet resultSet = statement.executeQuery(sqlQuery);
 
             if(resultSet.next()){
-                userExists = true;
+                userData = new UserData(resultSet.getInt("user_id"),
+                        resultSet.getString("username"),
+                        resultSet.getString("password"),
+                        resultSet.getString("name"));
             } else
-                userExists = false;
+                return null;
 
             statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
-        return userExists;
+        return userData;
     }
 
     public void listUsers(){
@@ -93,6 +113,8 @@ public class DatabaseManager {
             System.err.println("SQLExeption listUsers");
             e.printStackTrace();
         }
+
+        return null;
     }
 
     public boolean deleteUser(String username){
