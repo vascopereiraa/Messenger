@@ -85,8 +85,9 @@ public class DatabaseManager {
         return userData;
     }
 
-    public Data searchUserByName(String user){
-        String sqlQuery = "SELECT name, username, status FROM User WHERE name='" + user + "'";
+    public Data searchUserByName(String user) {
+        String sqlQuery = "SELECT user_id,name, username, last_seen, " +
+                "status FROM User WHERE name LIKE '%" + user + "%'";
         return new Data(executeQuery(sqlQuery).toString());
     }
 
@@ -109,7 +110,6 @@ public class DatabaseManager {
         return true;
     }
 
-    //todo: fix this function
     public StringBuilder executeQuery(String sqlQuery){
         StringBuilder sb = new StringBuilder();
 
@@ -127,15 +127,12 @@ public class DatabaseManager {
             }
             resultSet.close();
             statement.close();
-
-            return sb;
-
         } catch (SQLException e) {
             System.err.println("SQLExeption listUsers");
             e.printStackTrace();
+            return null;
         }
-
-        return null;
+        return sb;
     }
 
 

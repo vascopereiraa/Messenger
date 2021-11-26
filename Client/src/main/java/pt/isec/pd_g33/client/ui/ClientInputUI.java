@@ -111,8 +111,8 @@ public class ClientInputUI implements Runnable {
             case 2->writeToSocket(new Data(2));
             case 3->{//working
                 System.out.println("Indique o utilizador a pesquisar: ");
-                username = scanner.nextLine();
-                writeToSocket(new Data(3,username));
+                name = scanner.nextLine();
+                writeToSocket(new Data(3,name));
             }
             case 4-> writeToSocket(new Data(4));
 

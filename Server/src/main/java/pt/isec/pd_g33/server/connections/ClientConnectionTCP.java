@@ -81,12 +81,20 @@ public class ClientConnectionTCP implements Runnable {
                     writeToSocket("Não foi possível atualizar o utilizador");
             }
             case 2-> {
-                //TODO: tratar da impressão do lado do cliente
                 writeToSocket(databaseManager.listUsers());
             }
             case 3->{
-                //todo: tratar da impressão do lado do cliente
                 writeToSocket(databaseManager.searchUserByName(dataReceived.getContent()));
+            }
+            case 4->{
+
+            }
+            case 5->{
+                if(databaseManager.deleteUser(dataReceived.getContent())) {
+                    writeToSocket("Utilizador eliminado");
+                } else {
+                    writeToSocket("Não foi possível eliminar o utilizador pretendido.");
+                }
             }
             default -> {
                 System.err.println("Opção invalidade de menu");
