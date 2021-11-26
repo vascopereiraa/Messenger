@@ -66,7 +66,7 @@ public class DatabaseManager {
         UserData userData;
         try {
             Statement statement = db.createStatement();
-            String sqlQuery = "SELECT user_id,username,password,name FROM User WHERE username = '" + username + "' AND password ='" + password + "'";
+            String sqlQuery = "SELECT user_id,username,password,name FROM User WHERE BINARY username = '" + username + "' AND BINARY password ='" + password + "'";
             ResultSet resultSet = statement.executeQuery(sqlQuery);
 
             if(resultSet.next()){
