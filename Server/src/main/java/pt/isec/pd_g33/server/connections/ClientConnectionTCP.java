@@ -22,6 +22,8 @@ public class ClientConnectionTCP implements Runnable {
     public ClientConnectionTCP(Socket scli, DatabaseManager databaseManager){
         this.sCli = scli;
         this.databaseManager = databaseManager;
+        //todo: why
+        this.databaseManager.setConnection();
 
         try {
             oos = new ObjectOutputStream(sCli.getOutputStream());

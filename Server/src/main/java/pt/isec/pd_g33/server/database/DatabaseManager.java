@@ -5,16 +5,42 @@ import pt.isec.pd_g33.shared.UserData;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 
 public class DatabaseManager {
-    private DatabaseConnection dbConnection;
-    private Connection db;
+    private final String bdmsLocation;
+    private final String username = "root";
+    private final String password = "1234";
+    private static Connection db;
 
-    public DatabaseManager(DatabaseConnection db) {
-        this.dbConnection = db;
-        this.db = dbConnection.getConnection();
+    public DatabaseManager(String bdmsLocation) {
+        this.bdmsLocation = "jdbc:mysql://" + bdmsLocation + "/MessengerDB";
+        try {
+            db = DriverManager.getConnection(this.bdmsLocation, username, password);
+        } catch (SQLException e) {
+            //todo: tratar de quando a conexão ao servidor corre mal
+            System.err.println("SQLExeption: Ocorreu um erro na conexão a base de dados");
+            e.printStackTrace();
+        }
+    }
+
+    public static void close() {
+        if(db != null) {
+            try {
+                db.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void setConnection(){
+        try {
+            db = DriverManager.getConnection(this.bdmsLocation, username, password);
+        } catch (SQLException e) {
+            System.err.println("SQLExeption: Ocorreu um erro na conexão a base de dados");
+            e.printStackTrace();
+        }
     }
 
     public UserData insertUser(String name, String username, String password) {
@@ -25,6 +51,8 @@ public class DatabaseManager {
                     + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "','Online')";
             System.out.println(sqlQuery);
             statement.executeUpdate(sqlQuery);
+
+            System.out.println("Utilizador");
 
             // Para obter o id do utilizador, para ser possivel mais tarde atualizar dados do mesmo
             String sqlQuery1 = "SELECT user_id FROM User WHERE username = '" + username + "'";

@@ -116,7 +116,7 @@ public class ClientInputUI implements Runnable {
             }
             case 4-> writeToSocket(new Data(4));
 
-            case 5->{//working
+            case 5->{//todo: not working, eliminar contacto, não qualquer user
                 System.out.println("Indique o ulitizador a eliminar: ");
                 username = scanner.nextLine();
                 writeToSocket(new Data(5, username));
