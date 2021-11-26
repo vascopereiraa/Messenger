@@ -88,6 +88,9 @@ public class DatabaseManager {
         return true;
     }
 
+    /*public boolean insertContact(int fromUserId, int toUserId, String requestState){
+
+    }*/
 
 
     public UserData checkUserLogin(String username, String password){
