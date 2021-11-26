@@ -23,7 +23,7 @@ public class ClientOutputUI{
 
                 if(o instanceof Data data) {
                     // Login/Register success
-                    if(data.getContent().contains("validado")){
+                    if(data.getContent().contains("sucesso")){
                         serverConnectionManager.setUserConnected(true);
                         serverConnectionManager.setUserData(data.getUserData());
                     }

@@ -22,9 +22,8 @@ public class ClientConnectionTCP implements Runnable {
     public ClientConnectionTCP(Socket scli, DatabaseManager databaseManager){
         this.sCli = scli;
         this.databaseManager = databaseManager;
-        //todo: why
+        //todo: porque é que a conecção com a BD se fecha ?
         this.databaseManager.setConnection();
-
         try {
             oos = new ObjectOutputStream(sCli.getOutputStream());
             ois = new ObjectInputStream(sCli.getInputStream());
@@ -35,10 +34,6 @@ public class ClientConnectionTCP implements Runnable {
 
     @Override
     public void run() {
-        //todo: Debug
-        /*System.out.println("\nVou listar os users\n");
-        databaseManager.listUsers();
-        System.out.println("\n");*/
         while(true){
 
             try {
@@ -65,14 +60,6 @@ public class ClientConnectionTCP implements Runnable {
 
         switch (dataReceived.getMenuOptionSelected()){
             case 1-> {
-
-                //todo: debug
-                System.out.println("Info user: " +
-                        dataReceived.getUserData().getName() +
-                        dataReceived.getUserData().getUsername() +
-                        dataReceived.getUserData().getPassword() +
-                        dataReceived.getToUserId());
-
                 if(databaseManager.updateUser(
                         dataReceived.getUserData().getName(),
                         dataReceived.getUserData().getUsername(),

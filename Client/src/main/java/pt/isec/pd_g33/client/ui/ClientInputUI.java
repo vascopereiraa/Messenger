@@ -8,6 +8,7 @@ import pt.isec.pd_g33.shared.UserData;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Writer;
 import java.util.Scanner;
 
 public class ClientInputUI implements Runnable {
@@ -90,8 +91,9 @@ public class ClientInputUI implements Runnable {
                     2 - Listar todos os utilizadores
                     3 - Pesquisar utilizador
                     4 - Visualizar lista de contactos
-                    5 - Eliminar contacto
-                    6 - Criação de grupo""");
+                    5 - Adicionar contacto
+                    6 - Eliminar contacto
+                    7 - Criação de grupo""");
             System.out.println();
             int menuDecision = Integer.parseInt(scanner.nextLine());
             mnDecision(menuDecision);
@@ -114,14 +116,20 @@ public class ClientInputUI implements Runnable {
                 name = scanner.nextLine();
                 writeToSocket(new Data(3,name));
             }
-            case 4-> writeToSocket(new Data(4));
+            case 4 -> writeToSocket(new Data(4));
 
-            case 5->{//todo: not working, eliminar contacto, não qualquer user
+            case 5 ->{  // Adicionar contacto
+                System.out.println("Indique o nome do contacto a adicionar: ");
+                name = scanner.nextLine();
+               // writeToSocket();
+            }
+
+            case 6->{//todo: not working, eliminar contacto, não qualquer user
                 System.out.println("Indique o ulitizador a eliminar: ");
                 username = scanner.nextLine();
                 writeToSocket(new Data(5, username));
             }
-            case 6->{
+            case 7 ->{
                 writeToSocket(new Data(6));
             }
             default -> {

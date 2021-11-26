@@ -21,8 +21,6 @@ public class ThreadNewConnection implements Runnable {
 
     @Override
     public void run() {
-        System.err.println("Thread a arrancar!");
-
         while(true){
             try{
                 DatagramPacket dp = new DatagramPacket(new byte[4096], 4096);
