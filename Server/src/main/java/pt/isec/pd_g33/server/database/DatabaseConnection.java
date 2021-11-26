@@ -19,6 +19,8 @@ public class DatabaseConnection {
         try {
             db = DriverManager.getConnection(this.bdmsLocation, username, password);
         } catch (SQLException e) {
+            //todo: tratar de quando a conexão ao servidor corre mal
+            System.err.println("SQLExeption: Ocorreu um erro na conexão ao servidor");
             e.printStackTrace();
         }
     }

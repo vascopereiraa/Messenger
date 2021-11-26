@@ -42,7 +42,9 @@ public class ClientConnectionTCP implements Runnable {
             try {
                 dataReceived = ois.readObject();
             } catch (IOException | ClassNotFoundException e) {
+                System.err.println("IOException: Cliente fechou a conexão");
                 e.printStackTrace();
+                break;
             }
 
             if(dataReceived instanceof Login) {
@@ -61,9 +63,17 @@ public class ClientConnectionTCP implements Runnable {
 
         switch (dataReceived.getMenuOptionSelected()){
             case 1-> {
+
+                //todo: debug
+                System.out.println("Info user: " +
+                        dataReceived.getUserData().getName() +
+                        dataReceived.getUserData().getUsername() +
+                        dataReceived.getUserData().getPassword() +
+                        dataReceived.getToUserId());
+
                 if(databaseManager.updateUser(
                         dataReceived.getUserData().getName(),
-                        dataReceived.getContent(),
+                        dataReceived.getUserData().getUsername(),
                         dataReceived.getUserData().getPassword(),
                         dataReceived.getToUserId())){
                     writeToSocket("Utilizador atualizado com sucesso !");

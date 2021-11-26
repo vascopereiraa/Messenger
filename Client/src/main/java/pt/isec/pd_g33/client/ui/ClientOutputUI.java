@@ -27,7 +27,7 @@ public class ClientOutputUI{
                         serverConnectionManager.setUserConnected(true);
                         serverConnectionManager.setUserData(data.getUserData());
                     }
-                    System.out.println(data.getContent());
+                    System.out.println("Recebi content: " + data.getContent());
                 }
 
             } catch (IOException | ClassNotFoundException e) {

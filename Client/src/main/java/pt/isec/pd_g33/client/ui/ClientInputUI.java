@@ -86,7 +86,7 @@ public class ClientInputUI implements Runnable {
         while(serverConnectionManager.isUserConnected() && serverConnectionManager.isServerConnected()) {
             System.out.println("""
                     Menu: 
-                    1 - Editar dados de utilizador
+                    1 - Editar dados de utilizador 
                     2 - Listar todos os utilizadores
                     3 - Pesquisar utilizador
                     4 - Visualizar lista de contactos
@@ -100,24 +100,23 @@ public class ClientInputUI implements Runnable {
 
     private void mnDecision(int menuDec){
         switch (menuDec){
-            case 1->{
+            case 1->{//working
                 getUserData(true);
+                System.out.println("Id user: " + serverConnectionManager.getUserData().getUserID());
                 writeToSocket(new Data(1,
                         new UserData(username,password,name),
                         serverConnectionManager.getUserData().getUserID())); // User_id original fica no Userdata - toUserId
             }
-            case 2->{
-                writeToSocket(new Data(2));
-            }
-            case 3->{
+            //working
+            case 2->writeToSocket(new Data(2));
+            case 3->{//working
                 System.out.println("Indique o utilizador a pesquisar: ");
                 username = scanner.nextLine();
                 writeToSocket(new Data(3,username));
             }
-            case 4->{
-                writeToSocket(new Data(4));
-            }
-            case 5->{
+            case 4-> writeToSocket(new Data(4));
+
+            case 5->{//working
                 System.out.println("Indique o ulitizador a eliminar: ");
                 username = scanner.nextLine();
                 writeToSocket(new Data(5, username));

@@ -1,13 +1,9 @@
 package pt.isec.pd_g33.server.database;
 
 import pt.isec.pd_g33.shared.Data;
-import pt.isec.pd_g33.shared.DataType;
 import pt.isec.pd_g33.shared.UserData;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,7 +17,7 @@ public class DatabaseManager {
         this.db = dbConnection.getConnection();
     }
 
-    public UserData insertUser(String name, String username, String password){
+    public UserData insertUser(String name, String username, String password) {
         UserData userData;
         try (Statement statement = db.createStatement()) {
             String sqlQuery = "INSERT INTO User(name, username, password, last_seen, status)" +
@@ -32,15 +28,15 @@ public class DatabaseManager {
 
             // Para obter o id do utilizador, para ser possivel mais tarde atualizar dados do mesmo
             String sqlQuery1 = "SELECT user_id FROM User WHERE username = '" + username + "'";
-            ResultSet resultSet =  statement.executeQuery(sqlQuery1);
+            ResultSet resultSet = statement.executeQuery(sqlQuery1);
 
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 userData = new UserData(resultSet.getInt("user_id"),
-                                           username,password,name);
-            }else
+                        username, password, name);
+            } else
                 return null;
 
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             System.err.println("SQLException: Cliente já existe com esse nome");
             e.printStackTrace();
             return null;
@@ -48,22 +44,23 @@ public class DatabaseManager {
         return userData;
     }
 
-    //todo: check if it works
-    public boolean updateUser(String name, String newUsername, String password, int userID){
-        try (Statement statement = db.createStatement()) {
-            String sqlQuery = "UPDATE User set(name, username, password)" +
-                    "VALUES('" + name + "','" + newUsername + "','" + password +
-                    ")' WHERE user_id =" + userID + "";
-
-            System.out.println(sqlQuery);
-            statement.executeUpdate(sqlQuery);
-        } catch(SQLException e) {
-            System.err.println("SQLException: Cliente já existe com esse nome");
+    public boolean updateUser(String name, String newUsername, String password, int userID) {
+        try {
+            PreparedStatement statement = db.prepareStatement("UPDATE User SET name = ?, username = ?, password =? WHERE user_id =?");
+            statement.setString(1, name);
+            statement.setString(2, newUsername);
+            statement.setString(3, password);
+            statement.setInt(4, userID);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("SQLException: Erro no update do user.");
             e.printStackTrace();
             return false;
         }
         return true;
     }
+
+
 
     public UserData checkUserLogin(String username, String password){
         UserData userData;
@@ -122,11 +119,11 @@ public class DatabaseManager {
 
             while(resultSet.next())
             {
-                int user_id = resultSet.getInt("user_id");
-                sb.append("name:" + resultSet.getString("name"));
-                sb.append("username: " + resultSet.getString("username"));
-                sb.append("last_seen: " + resultSet.getString("last_seen"));
-                sb.append("satus: " + resultSet.getString("status"));
+                sb.append("id:" + resultSet.getInt("user_id"));
+                sb.append("\tname:" + resultSet.getString("name"));
+                sb.append("\tusername:" + resultSet.getString("username"));
+                sb.append("\tlast_seen:" + resultSet.getString("last_seen"));
+                sb.append("\tsatus:" + resultSet.getString("status"));
             }
             resultSet.close();
             statement.close();

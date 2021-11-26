@@ -19,19 +19,17 @@ public class Data implements Serializable {
 
     private UserData userData;
 
-    public Data(String content, DataType dataType){
-        this.content = content;
-        this.dataType = dataType;
-    }
-
+    // Opcao menu 2 -> Listar utilizadores e +
     public Data(int menuOptionSelected){
         this.menuOptionSelected = menuOptionSelected;
     }
 
+    // Envio de mensagens informativas server -> cliente
     public Data(String content){
         this.content = content;
     }
 
+    // Usado para login e registo
     public Data(String content,UserData userData){
         this.content = content;
         this.userData = userData;

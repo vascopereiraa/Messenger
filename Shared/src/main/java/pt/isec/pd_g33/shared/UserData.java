@@ -2,6 +2,7 @@ package pt.isec.pd_g33.shared;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class UserData implements Serializable {
@@ -16,11 +17,11 @@ public class UserData implements Serializable {
     private String name;
     private Date lastSeen;
 
-    // Em caso de login
-    public UserData(String username, String password){
-        this.username = username;
-        this.password = password;
-    }
+    private ArrayList<UserData> contactos = new ArrayList<>();
+
+    private ArrayList<Data> historicoMsg;       // [SENDER]: msg - DATE -> select name, content where type = message and sender = x and receiver = y or sender = y and receiver = x
+    private ArrayList<Data> historicoFicheiro;  // new Data()
+    //private ArrayList<Groups> grupos;
 
     // Em caso de registo
     public UserData(String username, String password, String name){
