@@ -9,10 +9,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class DatabaseManager {
-
     private DatabaseConnection dbConnection;
     private Connection db;
 
@@ -88,39 +88,20 @@ public class DatabaseManager {
         return userData;
     }
 
-    public void listUsers(){
-        try {
-            Statement statement = db.createStatement();
-            String sqlQuery = "SELECT user_id, name, username, password, status, last_seen FROM User";
+    public Data searchUserByName(String user){
+        String sqlQuery = "SELECT name, username, status FROM User WHERE name='" + user + "'";
+        return new Data(executeQuery(sqlQuery).toString());
+    }
 
-            ResultSet resultSet = statement.executeQuery(sqlQuery);
-
-            while(resultSet.next())
-            {
-                int user_id = resultSet.getInt("user_id");
-                String name = resultSet.getString("name");
-                String username = resultSet.getString("username");
-                String password = resultSet.getString("password");
-                String last_seen = resultSet.getString("last_seen");
-                String status = resultSet.getString("status");
-                System.out.println("[" + user_id + "] name: " + name + " | username: "
-                        + username + " | password: " + password + " | last_seen: " + last_seen + " | status: " + status);
-            }
-            resultSet.close();
-            statement.close();
-
-        } catch (SQLException e) {
-            System.err.println("SQLExeption listUsers");
-            e.printStackTrace();
-        }
-
-        return null;
+    public Data listUsers(){
+        String sqlQuery = "SELECT * FROM User";
+        return new Data(executeQuery(sqlQuery).toString());
     }
 
     public boolean deleteUser(String username){
         try {
             Statement  statement = db.createStatement();
-            String sqlQuery = "DELETE FROM users WHERE username='" + username + "'";
+            String sqlQuery = "DELETE FROM User WHERE username='" + username + "'";
             statement.executeUpdate(sqlQuery);
             statement.close();
         } catch (SQLException e) {
@@ -129,6 +110,35 @@ public class DatabaseManager {
             return false;
         }
         return true;
+    }
+
+    //todo: fix this function
+    public StringBuilder executeQuery(String sqlQuery){
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            Statement statement = db.createStatement();
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+
+            while(resultSet.next())
+            {
+                int user_id = resultSet.getInt("user_id");
+                sb.append("name:" + resultSet.getString("name"));
+                sb.append("username: " + resultSet.getString("username"));
+                sb.append("last_seen: " + resultSet.getString("last_seen"));
+                sb.append("satus: " + resultSet.getString("status"));
+            }
+            resultSet.close();
+            statement.close();
+
+            return sb;
+
+        } catch (SQLException e) {
+            System.err.println("SQLExeption listUsers");
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 
