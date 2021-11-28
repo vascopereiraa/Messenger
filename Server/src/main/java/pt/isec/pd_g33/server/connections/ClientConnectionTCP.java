@@ -1,14 +1,21 @@
 package pt.isec.pd_g33.server.connections;
 
+import pt.isec.pd_g33.server.data.UserInfo;
 import pt.isec.pd_g33.server.database.DatabaseManager;
 import pt.isec.pd_g33.shared.Data;
+import pt.isec.pd_g33.shared.DataType;
 import pt.isec.pd_g33.shared.Login;
+import pt.isec.pd_g33.shared.Notification;
 import pt.isec.pd_g33.shared.Register;
 import pt.isec.pd_g33.shared.UserData;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 
 public class ClientConnectionTCP implements Runnable {
@@ -53,6 +60,9 @@ public class ClientConnectionTCP implements Runnable {
             if(dataReceived instanceof Data){
                 processData((Data)dataReceived);
             }
+            if(dataReceived instanceof Notification n){
+                processNotification(n);
+            }
         }
     }
 
@@ -84,6 +94,7 @@ public class ClientConnectionTCP implements Runnable {
                 } else {
                     writeToSocket("Não foi possível eliminar o utilizador pretendido.");
                 }
+
             }
             default -> {
                 System.err.println("Opção invalidade de menu");
@@ -94,10 +105,13 @@ public class ClientConnectionTCP implements Runnable {
     private boolean loginDatabase(){
         try {
             UserData userData = databaseManager.checkUserLogin(((Login) dataReceived).getUsername(), ((Login) dataReceived).getPassword());
-            if (userData != null)
-                oos.writeObject(new Data("Login validado com sucesso!",userData));
-            else
+            if (userData != null){
+                userInfo.setUsername(((Login) dataReceived).getUsername());
+                oos.writeObject(new Data("Login validado com sucesso!", userData));
+            }
+            else {
                 oos.writeObject(new Data("Login invalido."));
+            }
             oos.flush();
 
         } catch (IOException e) {

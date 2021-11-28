@@ -8,16 +8,22 @@ import pt.isec.pd_g33.shared.ConnectionType;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.List;
 
 public class AcceptClientConnectionTCP implements Runnable {
 
     private ServerSocket ss;
     private DatabaseManager databaseManager;
 
-    public AcceptClientConnectionTCP(DatabaseManager databaseManager) {
+    // Client information
+    private List<UserInfo> listUsers;
 
+    public AcceptClientConnectionTCP(DatabaseManager databaseManager, List<UserInfo> listUsers) {
+        try {
+            ss = new ServerSocket(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         this.databaseManager = databaseManager;
         try {
             ss = new ServerSocket(0);

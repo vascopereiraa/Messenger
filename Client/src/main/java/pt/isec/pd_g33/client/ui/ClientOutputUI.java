@@ -2,13 +2,14 @@ package pt.isec.pd_g33.client.ui;
 
 import pt.isec.pd_g33.client.connections.ServerConnectionManager;
 import pt.isec.pd_g33.shared.Data;
+import pt.isec.pd_g33.shared.Notification;
 
 import java.io.*;
 
 public class ClientOutputUI{
 
     private final ServerConnectionManager serverConnectionManager;
-    private final ObjectInputStream ois;
+    private ObjectInputStream ois;
 
     public ClientOutputUI(ServerConnectionManager scm) {
         this.serverConnectionManager = scm;
@@ -20,7 +21,6 @@ public class ClientOutputUI{
 
             try {
                 Object o = ois.readObject();
-
                 if(o instanceof Data data) {
                     // Login/Register success
                     if(data.getContent().contains("sucesso")){
@@ -28,6 +28,11 @@ public class ClientOutputUI{
                         serverConnectionManager.setUserData(data.getUserData());
                     }
                     System.out.println("Recebi content: " + data.getContent());
+
+                }
+                if(o instanceof Notification notification){
+                    System.out.println("Recebeu uma nova notificacao de "+ notification.getDataType().toString()
+                            +  " do cliente " + notification.getFromUsername());
                 }
 
             } catch (IOException | ClassNotFoundException e) {

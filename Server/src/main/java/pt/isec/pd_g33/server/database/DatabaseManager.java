@@ -52,18 +52,11 @@ public class DatabaseManager {
             System.out.println(sqlQuery);
             statement.executeUpdate(sqlQuery);
 
-            System.out.println("Utilizador");
-
-            // Para obter o id do utilizador, para ser possivel mais tarde atualizar dados do mesmo
-            String sqlQuery1 = "SELECT user_id FROM User WHERE username = '" + username + "'";
-            ResultSet resultSet = statement.executeQuery(sqlQuery1);
-
-            if (resultSet.next()) {
-                userData = new UserData(resultSet.getInt("user_id"),
-                        username, password, name);
-            } else
+            long user_id = getUserID(username);
+            if(user_id != -1){
+                userData = new UserData((int)user_id,username, password, name);
+            }else
                 return null;
-
         } catch (SQLException e) {
             System.err.println("SQLException: Cliente já existe com esse nome");
             e.printStackTrace();
@@ -88,9 +81,18 @@ public class DatabaseManager {
         return true;
     }
 
-    /*public boolean insertContact(int fromUserId, int toUserId, String requestState){
-
-    }*/
+    public boolean insertContact(String fromUserId, String toUserId){
+        try (Statement statement = db.createStatement()) {
+           String sqlQuery = "INSERT INTO Contact(from_user_id, to_user_id, request_state) VALUES('"+
+                   getUserID(fromUserId) + "','" + getUserID(toUserId) + "','pending')";
+            statement.executeUpdate(sqlQuery);
+            return true;
+        } catch (SQLException e) {
+            System.err.println("SQLException: Erro a inserir contacto");
+            e.printStackTrace();
+        return false;
+        }
+    }
 
 
     public UserData checkUserLogin(String username, String password){

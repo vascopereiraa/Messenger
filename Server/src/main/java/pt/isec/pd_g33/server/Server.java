@@ -5,6 +5,8 @@ import pt.isec.pd_g33.server.connections.GRDSConnection;
 import pt.isec.pd_g33.server.database.DatabaseManager;
 
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Server {
 
@@ -14,6 +16,7 @@ public class Server {
     private static InetAddress grdsIp;
     private static int grdsPort;
     private static String dbmsLocation;
+    private static final List<UserInfo> listUsers = new ArrayList<>();
 
     public static void main(String[] args) {
         System.out.println("Server");
@@ -25,7 +28,7 @@ public class Server {
         DatabaseManager databaseManager = new DatabaseManager(dbmsLocation);
 
         // Criar o SocketServer para ligações TCP com os Clients
-        AcceptClientConnectionTCP acceptClient = new AcceptClientConnectionTCP(databaseManager);
+        AcceptClientConnectionTCP acceptClient = new AcceptClientConnectionTCP(databaseManager, listUsers);
 
         // Regista o IP TCP no GRDS
         GRDSConnection grdsConnection = new GRDSConnection(grdsIp, grdsPort, acceptClient.getMessage());
