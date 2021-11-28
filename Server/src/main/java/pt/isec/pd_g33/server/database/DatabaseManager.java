@@ -65,6 +65,21 @@ public class DatabaseManager {
         return userData;
     }
 
+    public long getUserID(String username) {
+        try (Statement statement = db.createStatement()) {
+            String sqlQuery1 = "SELECT user_id FROM User WHERE BINARY username = '" + username + "'";
+            ResultSet resultSet = statement.executeQuery(sqlQuery1);
+            if (resultSet.next()) {
+               return resultSet.getLong("user_id");
+            } else
+                return -1;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return -1;
+    }
+
+
     public boolean updateUser(String name, String newUsername, String password, int userID) {
         try {
             PreparedStatement statement = db.prepareStatement("UPDATE User SET name = ?, username = ?, password =? WHERE user_id =?");

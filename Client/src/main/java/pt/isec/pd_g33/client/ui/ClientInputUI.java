@@ -2,7 +2,9 @@ package pt.isec.pd_g33.client.ui;
 
 import pt.isec.pd_g33.client.connections.ServerConnectionManager;
 import pt.isec.pd_g33.shared.Data;
+import pt.isec.pd_g33.shared.DataType;
 import pt.isec.pd_g33.shared.Login;
+import pt.isec.pd_g33.shared.Notification;
 import pt.isec.pd_g33.shared.Register;
 import pt.isec.pd_g33.shared.UserData;
 
@@ -104,7 +106,6 @@ public class ClientInputUI implements Runnable {
         switch (menuDec){
             case 1->{//working
                 getUserData(true);
-                System.out.println("Id user: " + serverConnectionManager.getUserData().getUserID());
                 writeToSocket(new Data(1,
                         new UserData(username,password,name),
                         serverConnectionManager.getUserData().getUserID())); // User_id original fica no Userdata - toUserId
@@ -120,8 +121,8 @@ public class ClientInputUI implements Runnable {
 
             case 5 ->{  // Adicionar contacto
                 System.out.println("Indique o nome do contacto a adicionar: ");
-                name = scanner.nextLine();
-               // writeToSocket();
+                username = scanner.nextLine();
+                writeToSocket(new Notification(serverConnectionManager.getUserData().getUsername(),username, DataType.Contact));
             }
 
             case 6->{//todo: not working, eliminar contacto, não qualquer user

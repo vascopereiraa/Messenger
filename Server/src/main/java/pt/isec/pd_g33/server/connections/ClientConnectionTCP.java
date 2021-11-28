@@ -25,10 +25,13 @@ public class ClientConnectionTCP implements Runnable {
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
     private Object dataReceived;
+    private final UserInfo userInfo;
 
     public ClientConnectionTCP(Socket scli, DatabaseManager databaseManager){
         this.sCli = scli;
         this.databaseManager = databaseManager;
+        this.userInfo = userInfo;
+
         //todo: porque é que a conecção com a BD se fecha ?
         this.databaseManager.setConnection();
         try {
@@ -128,6 +131,7 @@ public class ClientConnectionTCP implements Runnable {
                     ((Register) dataReceived).getUsername(),
                     ((Register) dataReceived).getPassword());
             if (userData != null) {
+                userInfo.setUsername(((Register) dataReceived).getUsername());
                 oos.writeObject(new Data("Registo efetuado com sucesso",userData));
             } else {
                 oos.writeObject(new Data("Registo invalido."));

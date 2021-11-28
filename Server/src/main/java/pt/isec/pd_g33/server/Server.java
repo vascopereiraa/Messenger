@@ -2,6 +2,8 @@ package pt.isec.pd_g33.server;
 
 import pt.isec.pd_g33.server.connections.AcceptClientConnectionTCP;
 import pt.isec.pd_g33.server.connections.GRDSConnection;
+import pt.isec.pd_g33.server.connections.ThreadMessageReflection;
+import pt.isec.pd_g33.server.data.UserInfo;
 import pt.isec.pd_g33.server.database.DatabaseManager;
 
 import java.net.*;
@@ -36,6 +38,11 @@ public class Server {
             System.out.println("Server: An error occurred when connecting to GRDS");
             return;
         }
+
+        // Cria thread de escuta de notificações do GRDS
+        ThreadMessageReflection tmr = new ThreadMessageReflection(listUsers);
+        Thread ttmr = new Thread(tmr);
+        ttmr.start();
 
         // Inicia a Thread de aceitação de novos clientes
         Thread clientAcceptionThread = new Thread(acceptClient);
