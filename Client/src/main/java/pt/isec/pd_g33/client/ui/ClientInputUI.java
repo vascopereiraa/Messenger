@@ -104,7 +104,7 @@ public class ClientInputUI implements Runnable {
 
     private void mnDecision(int menuDec){
         switch (menuDec){
-            case 1->{//working
+            case 1 -> {//working
                 getUserData(true);
                 writeToSocket(new Data(1,
                         new UserData(username,password,name),

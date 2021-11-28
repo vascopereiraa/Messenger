@@ -1,6 +1,6 @@
 package pt.isec.pd_g33.server.connections;
 
-import pt.isec.pd_g33.server.connections.ClientConnectionTCP;
+import pt.isec.pd_g33.server.data.UserInfo;
 import pt.isec.pd_g33.server.database.DatabaseManager;
 import pt.isec.pd_g33.shared.ConnectionMessage;
 import pt.isec.pd_g33.shared.ConnectionType;
@@ -25,11 +25,7 @@ public class AcceptClientConnectionTCP implements Runnable {
             e.printStackTrace();
         }
         this.databaseManager = databaseManager;
-        try {
-            ss = new ServerSocket(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.listUsers = listUsers;
     }
 
     public ConnectionMessage getMessage() {

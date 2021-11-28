@@ -8,6 +8,8 @@ import pt.isec.pd_g33.shared.Login;
 import pt.isec.pd_g33.shared.Notification;
 import pt.isec.pd_g33.shared.Register;
 import pt.isec.pd_g33.shared.UserData;
+import static pt.isec.pd_g33.server.connections.ThreadMessageReflection.REFLECTION_IP;
+import static pt.isec.pd_g33.server.connections.ThreadMessageReflection.REFLECTION_PORT;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -20,14 +22,14 @@ import java.net.Socket;
 
 public class ClientConnectionTCP implements Runnable {
 
-    private Socket sCli;
-    private DatabaseManager databaseManager;
+    private final Socket sCli;
+    private final DatabaseManager databaseManager;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
     private Object dataReceived;
     private final UserInfo userInfo;
 
-    public ClientConnectionTCP(Socket scli, DatabaseManager databaseManager){
+    public ClientConnectionTCP(Socket scli, DatabaseManager databaseManager, UserInfo userInfo){
         this.sCli = scli;
         this.databaseManager = databaseManager;
         this.userInfo = userInfo;
@@ -72,26 +74,26 @@ public class ClientConnectionTCP implements Runnable {
     private void processData(Data dataReceived) {
 
         switch (dataReceived.getMenuOptionSelected()){
-            case 1-> {
+            case 1 -> {
                 if(databaseManager.updateUser(
                         dataReceived.getUserData().getName(),
                         dataReceived.getUserData().getUsername(),
                         dataReceived.getUserData().getPassword(),
                         dataReceived.getToUserId())){
-                    writeToSocket("Utilizador atualizado com sucesso !");
-                }else
+                    writeToSocket("Utilizador atualizado com sucesso!");
+                } else
                     writeToSocket("Não foi possível atualizar o utilizador");
             }
-            case 2-> {
+            case 2 -> {
                 writeToSocket(databaseManager.listUsers());
             }
-            case 3->{
+            case 3 -> {
                 writeToSocket(databaseManager.searchUserByName(dataReceived.getContent()));
             }
-            case 4->{
+            case 4 -> {
 
             }
-            case 5->{
+            case 5 -> {
                 if(databaseManager.deleteUser(dataReceived.getContent())) {
                     writeToSocket("Utilizador eliminado");
                 } else {
@@ -145,13 +147,39 @@ public class ClientConnectionTCP implements Runnable {
         return true;
     }
 
-    private void writeToSocket(Object o) {
+    private void processNotification(Notification n) {
+
+        if(n.getDataType() == DataType.Contact)
+            databaseManager.insertContact(n.getFromUsername(),n.getToUsername());
+        else
+        {
+            //todo: insertData aqui, para msg's e notificações
+        }
+
         try {
-            oos.writeObject(o);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(n);
             oos.flush();
+
+            DatagramSocket ds = new DatagramSocket();
+            DatagramPacket dp = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length, InetAddress.getByName(REFLECTION_IP), REFLECTION_PORT);
+            ds.send(dp);
         } catch (IOException e) {
-            System.err.println("IOExeption: ");
+            System.err.println("IOException: processNotification");
             e.printStackTrace();
+        }
+    }
+
+    private void writeToSocket(Object o) {
+        synchronized (sCli) {
+            try {
+                oos.writeObject(o);
+                oos.flush();
+            } catch (IOException e) {
+                System.err.println("IOExeption: WriteToSocket ClientConnectionTCP");
+                e.printStackTrace();
+            }
         }
     }
 }
