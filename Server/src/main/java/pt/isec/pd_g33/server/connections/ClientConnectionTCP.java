@@ -8,7 +8,6 @@ import pt.isec.pd_g33.shared.Login;
 import pt.isec.pd_g33.shared.Notification;
 import pt.isec.pd_g33.shared.Register;
 import pt.isec.pd_g33.shared.UserData;
-import static pt.isec.pd_g33.server.connections.ThreadMessageReflection.REFLECTION_IP;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -178,7 +177,7 @@ public class ClientConnectionTCP implements Runnable {
             oos.flush();
 
             DatagramSocket ds = new DatagramSocket();
-            DatagramPacket dp = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length, InetAddress.getByName(REFLECTION_IP), UNICAST_NOTIFICATION_PORT);
+            DatagramPacket dp = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length, InetAddress.getByName("127.0.0.1"), UNICAST_NOTIFICATION_PORT);
             ds.send(dp);
         } catch (IOException e) {
             System.err.println("IOException: processNotification");

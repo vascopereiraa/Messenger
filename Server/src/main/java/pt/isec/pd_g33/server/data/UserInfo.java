@@ -3,6 +3,7 @@ package pt.isec.pd_g33.server.data;
 import pt.isec.pd_g33.shared.Notification;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
