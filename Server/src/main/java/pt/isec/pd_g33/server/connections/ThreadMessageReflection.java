@@ -48,9 +48,16 @@ public class ThreadMessageReflection implements Runnable {
                 ObjectInputStream ois = new ObjectInputStream(bais);
                 Notification notification = (Notification) ois.readObject();
 
+                //todo: debug
+                System.out.println("Recebi uma mensagem refletida: " + notification.getFromUsername() + " : "
+                        + notification.getToUsername() + " : " + notification.getDataType());;
+
                 // Envia notificação ao cliente correto caso ele esteja connectado a este servidor
                 listUsers.forEach(u -> {
                     if (notification.getToUsername().equals(u.getUsername())) {
+                        System.out.println("\nVou enviar a notificação ao utilizador: " + u.getUsername()
+                        + " Notificacao: " + notification.getFromUsername() + " : " + notification.getToUsername()
+                        + " : " + notification.getDataType());
                         u.writeSocket(notification);
                     }
                 });

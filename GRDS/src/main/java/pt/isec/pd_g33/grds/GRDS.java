@@ -2,6 +2,7 @@ package pt.isec.pd_g33.grds;
 
 import pt.isec.pd_g33.grds.coms.ThreadHearthbeatManager;
 import pt.isec.pd_g33.grds.coms.ThreadNewConnection;
+import pt.isec.pd_g33.grds.coms.ThreadNotificationMulticast;
 import pt.isec.pd_g33.grds.data.ServerList;
 
 import java.io.IOException;
@@ -48,6 +49,14 @@ public class GRDS {
             ThreadNewConnection multicastThreadAccept = new ThreadNewConnection(multicastSocket, serverList);
             Thread t2 = new Thread(multicastThreadAccept);
             t2.start();
+
+            //todo: check this Notification thread
+            ThreadNotificationMulticast notificationMulticast = new ThreadNotificationMulticast();
+            Thread tnm = new Thread(notificationMulticast);
+            tnm.start();
+
+            //todo: Thread que vai ler a informação a ser replicada
+
 
             // Heartbeat
             ThreadHearthbeatManager heartbeatManager = new ThreadHearthbeatManager(serverList.getServerInfo());

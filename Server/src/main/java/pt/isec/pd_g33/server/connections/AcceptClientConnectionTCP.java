@@ -40,9 +40,12 @@ public class AcceptClientConnectionTCP implements Runnable {
 
                 // Add new user to users list
                 UserInfo user = new UserInfo(sCli);
+                //todo: debug, para saber se adicionou user
                 listUsers.add(user);
 
-                ClientConnectionTCP cliConn = new ClientConnectionTCP(sCli,databaseManager, user);
+                System.out.println(listUsers.toString());
+
+                ClientConnectionTCP cliConn = new ClientConnectionTCP(sCli,databaseManager, user, listUsers);
                 Thread cli = new Thread(cliConn);
                 cli.start();
             }

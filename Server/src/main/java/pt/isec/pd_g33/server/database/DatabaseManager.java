@@ -171,7 +171,7 @@ public class DatabaseManager {
                 sb.append("\tname:" + resultSet.getString("name"));
                 sb.append("\tusername:" + resultSet.getString("username"));
                 sb.append("\tlast_seen:" + resultSet.getString("last_seen"));
-                sb.append("\tsatus:" + resultSet.getString("status"));
+                sb.append("\tsatus:" + resultSet.getString("status") + "\n");
             }
             resultSet.close();
             statement.close();

@@ -33,4 +33,6 @@ public class UserInfo {
     public void setUsername(String username) {
         this.username = username;
     }
+
+    public Socket getSocket(){ return sCli; }
 }

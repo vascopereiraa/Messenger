@@ -9,7 +9,6 @@ import pt.isec.pd_g33.shared.Notification;
 import pt.isec.pd_g33.shared.Register;
 import pt.isec.pd_g33.shared.UserData;
 import static pt.isec.pd_g33.server.connections.ThreadMessageReflection.REFLECTION_IP;
-import static pt.isec.pd_g33.server.connections.ThreadMessageReflection.REFLECTION_PORT;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,20 +18,24 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.List;
 
 public class ClientConnectionTCP implements Runnable {
 
+    private static final int UNICAST_NOTIFICATION_PORT = 2000;
     private final Socket sCli;
     private final DatabaseManager databaseManager;
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
     private Object dataReceived;
     private final UserInfo userInfo;
+    private List<UserInfo> listUsers;
 
-    public ClientConnectionTCP(Socket scli, DatabaseManager databaseManager, UserInfo userInfo){
+    public ClientConnectionTCP(Socket scli, DatabaseManager databaseManager, UserInfo userInfo, List<UserInfo> listUsers){
         this.sCli = scli;
         this.databaseManager = databaseManager;
         this.userInfo = userInfo;
+        this.listUsers = listUsers;
 
         //todo: porque é que a conecção com a BD se fecha ?
         this.databaseManager.setConnection();
@@ -66,6 +69,7 @@ public class ClientConnectionTCP implements Runnable {
                 processData((Data)dataReceived);
             }
             if(dataReceived instanceof Notification n){
+                System.out.println("ClientConnectionTCP: Recebi uma notificacao! ");
                 processNotification(n);
             }
         }
@@ -147,23 +151,35 @@ public class ClientConnectionTCP implements Runnable {
         return true;
     }
 
-    private void processNotification(Notification n) {
+    private void processNotification(Notification notification) {
 
-        if(n.getDataType() == DataType.Contact)
-            databaseManager.insertContact(n.getFromUsername(),n.getToUsername());
+        if(notification.getDataType() == DataType.Contact){
+            System.out.println("Notificação é do tipo Contact");
+            databaseManager.insertContact(notification.getFromUsername(),notification.getToUsername());
+        }
         else
         {
             //todo: insertData aqui, para msg's e notificações
         }
 
+        //todo: Verificar se cliente pertence a este servidor, caso pertença, não precisa avisar
+        listUsers.forEach(u -> {
+            if(u.getUsername() == notification.getToUsername()){
+                System.out.println("\n\nExiste o cliente no mesmo servidor");
+                u.writeSocket(notification);
+                return;
+            }
+        });
+
+
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(n);
+            oos.writeObject(notification);
             oos.flush();
 
             DatagramSocket ds = new DatagramSocket();
-            DatagramPacket dp = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length, InetAddress.getByName(REFLECTION_IP), REFLECTION_PORT);
+            DatagramPacket dp = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length, InetAddress.getByName(REFLECTION_IP), UNICAST_NOTIFICATION_PORT);
             ds.send(dp);
         } catch (IOException e) {
             System.err.println("IOException: processNotification");
