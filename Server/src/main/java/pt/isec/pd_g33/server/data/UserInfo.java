@@ -10,23 +10,23 @@ public class UserInfo {
 
     private String username;
     private final Socket sCli;
+    private ObjectOutputStream oos;
 
     public UserInfo(Socket sCli) {
         this.sCli = sCli;
+        this.oos = oos;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public void writeSocket(Notification notification) {
-        synchronized (sCli) {
-            try {
-                ObjectOutputStream oos = new ObjectOutputStream(sCli.getOutputStream());
-                oos.writeObject(notification);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    public void writeSocket(Object o) {
+        try {
+            oos.writeObject(o);
+            oos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

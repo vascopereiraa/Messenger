@@ -25,8 +25,10 @@ public class ClientConnectionTCP implements Runnable {
     private static final int UNICAST_NOTIFICATION_PORT = 2000;
     private final Socket sCli;
     private final DatabaseManager databaseManager;
+
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
+
     private Object dataReceived;
     private final UserInfo userInfo;
     private List<UserInfo> listUsers;
@@ -39,12 +41,9 @@ public class ClientConnectionTCP implements Runnable {
 
         //todo: porque é que a conecção com a BD se fecha ?
         this.databaseManager.setConnection();
-        try {
-            oos = new ObjectOutputStream(sCli.getOutputStream());
-            ois = new ObjectInputStream(sCli.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+        this.oos = oos;
+        this.ois = ois;
     }
 
     @Override
@@ -188,14 +187,6 @@ public class ClientConnectionTCP implements Runnable {
     }
 
     private void writeToSocket(Object o) {
-        synchronized (sCli) {
-            try {
-                oos.writeObject(o);
-                oos.flush();
-            } catch (IOException e) {
-                System.err.println("IOExeption: WriteToSocket ClientConnectionTCP");
-                e.printStackTrace();
-            }
-        }
+        userInfo.writeSocket(o);
     }
 }

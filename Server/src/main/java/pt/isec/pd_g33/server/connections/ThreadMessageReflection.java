@@ -29,10 +29,7 @@ public class ThreadMessageReflection implements Runnable {
         MulticastSocket multicastSocket = null;
         try {
             multicastSocket = new MulticastSocket(REFLECTION_PORT);
-            InetAddress ia = InetAddress.getByName(REFLECTION_IP);
-            InetSocketAddress addr = new InetSocketAddress(ia, REFLECTION_PORT);
-            NetworkInterface ni = NetworkInterface.getByName("en0");
-            multicastSocket.joinGroup(addr, ni);
+
         } catch (IOException e) {
             System.err.println("IOException: Multicast");
             e.printStackTrace();
