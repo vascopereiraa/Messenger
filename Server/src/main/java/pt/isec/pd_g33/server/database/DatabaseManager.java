@@ -15,13 +15,6 @@ public class DatabaseManager {
 
     public DatabaseManager(String bdmsLocation) {
         this.bdmsLocation = "jdbc:mysql://" + bdmsLocation + "/MessengerDB";
-        try {
-            db = DriverManager.getConnection(this.bdmsLocation, username, password);
-        } catch (SQLException e) {
-            //todo: tratar de quando a conexão ao servidor corre mal
-            System.err.println("SQLExeption: Ocorreu um erro na conexão a base de dados");
-            e.printStackTrace();
-        }
     }
 
     public static void close() {

@@ -10,6 +10,7 @@ public class ThreadNotificationMulticast implements Runnable {
 
     private static final int UNICAST_SEND_NOTIFICATION_PORT = 1000;
     private static final int UNICAST_RECEIVE_NOTIFICATION_PORT = 2000;
+    private static final String UNICAST_RECEIVE_NOTIFICATION_IP = "255.255.255.255";
 
     @Override
     public void run() {
@@ -33,8 +34,8 @@ public class ThreadNotificationMulticast implements Runnable {
                     ObjectOutputStream out = new ObjectOutputStream(baos);
                     out.writeUnshared(notification);
                     out.flush();
-                    dp.setData(baos.toByteArray());
-                    dp.setLength(baos.toByteArray().length);
+
+                    dp = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,InetAddress.getByName(UNICAST_RECEIVE_NOTIFICATION_IP),UNICAST_SEND_NOTIFICATION_PORT);
                     multicastSocket.send(dp);
                 }
 

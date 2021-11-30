@@ -40,14 +40,20 @@ public class AcceptClientConnectionTCP implements Runnable {
             while (true) {
                 Socket sCli = ss.accept();
 
+                ObjectOutputStream oos = null;
+                ObjectInputStream ois = null;
+                try {
+                    oos = new ObjectOutputStream(sCli.getOutputStream());
+                    ois = new ObjectInputStream(sCli.getInputStream());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
                 // Add new user to users list
-                UserInfo user = new UserInfo(sCli);
-                //todo: debug, para saber se adicionou user
+                UserInfo user = new UserInfo(sCli, oos);
                 listUsers.add(user);
 
-                System.out.println(listUsers.toString());
-
-                ClientConnectionTCP cliConn = new ClientConnectionTCP(sCli,databaseManager, user, listUsers);
+                ClientConnectionTCP cliConn = new ClientConnectionTCP(sCli,databaseManager, user, listUsers, oos, ois);
                 Thread cli = new Thread(cliConn);
                 cli.start();
             }

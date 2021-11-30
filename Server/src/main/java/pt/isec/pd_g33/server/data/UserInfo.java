@@ -1,6 +1,5 @@
 package pt.isec.pd_g33.server.data;
 
-import pt.isec.pd_g33.shared.Notification;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,7 +12,7 @@ public class UserInfo {
     private final Socket sCli;
     private ObjectOutputStream oos;
 
-    public UserInfo(Socket sCli) {
+    public UserInfo(Socket sCli, ObjectOutputStream oos) {
         this.sCli = sCli;
         this.oos = oos;
     }

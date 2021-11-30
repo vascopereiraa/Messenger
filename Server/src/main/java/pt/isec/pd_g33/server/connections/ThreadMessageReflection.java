@@ -15,7 +15,7 @@ import java.util.List;
 
 public class ThreadMessageReflection implements Runnable {
 
-    public static final String REFLECTION_IP = "230.30.30.31" ;
+    public static final String REFLECTION_IP = "255.255.255.255" ;
     public static final int REFLECTION_PORT = 1000;
 
     private static List<UserInfo> listUsers;

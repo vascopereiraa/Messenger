@@ -32,7 +32,8 @@ public class ClientConnectionTCP implements Runnable {
     private final UserInfo userInfo;
     private List<UserInfo> listUsers;
 
-    public ClientConnectionTCP(Socket scli, DatabaseManager databaseManager, UserInfo userInfo, List<UserInfo> listUsers){
+    public ClientConnectionTCP(Socket scli, DatabaseManager databaseManager, UserInfo userInfo, List<UserInfo> listUsers,
+                               ObjectOutputStream oos, ObjectInputStream ois){
         this.sCli = scli;
         this.databaseManager = databaseManager;
         this.userInfo = userInfo;
@@ -162,13 +163,12 @@ public class ClientConnectionTCP implements Runnable {
 
         //todo: Verificar se cliente pertence a este servidor, caso pertença, não precisa avisar
         listUsers.forEach(u -> {
-            if(u.getUsername() == notification.getToUsername()){
+            if(u.getUsername().equals(notification.getToUsername())){
                 System.out.println("\n\nExiste o cliente no mesmo servidor");
                 u.writeSocket(notification);
                 return;
             }
         });
-
 
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
