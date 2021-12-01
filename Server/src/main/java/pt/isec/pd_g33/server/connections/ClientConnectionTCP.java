@@ -177,6 +177,7 @@ public class ClientConnectionTCP implements Runnable {
             oos.flush();
 
             DatagramSocket ds = new DatagramSocket();
+            // todo: Acertar IPS -> dp tem de ter o IP do GRDS passado pela cmdLine
             DatagramPacket dp = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length, InetAddress.getByName("127.0.0.1"), UNICAST_NOTIFICATION_PORT);
             ds.send(dp);
         } catch (IOException e) {
