@@ -95,7 +95,9 @@ public class ClientInputUI implements Runnable {
                     4 - Visualizar lista de contactos
                     5 - Adicionar contacto
                     6 - Eliminar contacto
-                    7 - Criação de grupo""");
+                    7 - Criação de grupo
+                    8 - Pedidos de contacto pendentes
+                    10 - Enviar mensagem""");
             System.out.println();
             int menuDecision = Integer.parseInt(scanner.nextLine());
             mnDecision(menuDecision);

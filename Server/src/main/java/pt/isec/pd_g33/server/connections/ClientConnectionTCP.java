@@ -94,9 +94,9 @@ public class ClientConnectionTCP implements Runnable {
                 writeToSocket(databaseManager.searchUserByName(dataReceived.getContent()));
             }
             case 4 -> {
-
+                writeToSocket(databaseManager.listContacts((int)databaseManager.getUserID(userInfo.getUsername())));
             }
-            case 5 -> {
+            case 6 -> {
                 if(databaseManager.deleteUser(dataReceived.getContent())) {
                     writeToSocket("Utilizador eliminado");
                 } else {

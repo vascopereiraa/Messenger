@@ -106,6 +106,7 @@ public class DatabaseManager {
     public UserData checkUserLogin(String username, String password){
         UserData userData;
         try {
+
             Statement statement = db.createStatement();
             String sqlQuery = "SELECT user_id,username,password,name FROM User WHERE BINARY username = '" + username + "' AND BINARY password ='" + password + "'";
             ResultSet resultSet = statement.executeQuery(sqlQuery);
@@ -137,6 +138,123 @@ public class DatabaseManager {
         return new Data(executeQuery(sqlQuery).toString());
     }
 
+    public Data listContacts(int user_id){
+
+        StringBuilder sb = new StringBuilder();
+    try {
+
+        Statement statement = db.createStatement();
+        String sqlQuery = """
+                          SELECT u1.username
+                          FROM User u1, Contact c1
+                          WHERE c1.to_user_id = u1.user_id
+                          AND c1.from_user_id = %d
+                          UNION
+                          SELECT u2.username
+                          FROM User u2, Contact c2
+                          WHERE c2.from_user_id = u2.user_id
+                          AND c2.to_user_id = %d
+                          AND c2.request_state LIKE '%%approved%%';     
+                          """.formatted(user_id, user_id);
+        ResultSet resultSet = statement.executeQuery(sqlQuery);
+        while(resultSet.next())
+        {
+            sb.append(resultSet.getString("username"));
+        }
+        statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return new Data(sb.toString());
+    }
+
+    public boolean isGroupMember(String username_member, int group_id){
+        String sqlQuery = """
+                        SELECT user_id
+                        FROM Participate
+                        WHERE user_id = %d
+                        AND group_id = %d
+                        AND request_state LIKE '%%approved%%'
+                        """.formatted(getUserID(username_member), group_id);
+        try (Statement statement = db.createStatement();) {
+            statement.executeQuery(sqlQuery);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean isContact(String from_username, String toUsername){
+
+        Data data = listContacts((int)getUserID(from_username));
+
+
+        System.out.println("\n\nContent: " + data.getContent()); // askdasldaksdl -> joaoo
+        System.out.println("\n\nUsernamebyID: "+ toUsername);
+        System.out.println("Return:" + data.getContent().contains(toUsername));
+
+        return data.getContent().contains(toUsername);
+    }
+
+    public String getUsernameById(int user_id){
+        try (Statement statement = db.createStatement()){
+            String sqlQuery = "SELECT username FROM User WHERE user_id = '" + user_id + "'";
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if (resultSet.next()) {
+                return resultSet.getString("username");
+            } else
+                return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String getGroupnameById(int group_id){
+        try (Statement statement = db.createStatement()){
+            String sqlQuery = "SELECT group_name FROM Group WHERE group_id = '" + group_id + "'";
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if (resultSet.next()) {
+                return resultSet.getString("group_name");
+            } else
+                return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean addMessageToUser(Data data) {
+        String sqlQuery = """
+                INSERT INTO Data(read_state, sent_date, from_user_id, to_user_id, data_type, content)
+                VALUES('waiting', NOW(), %d, %d, '%s', '%s');
+                """.formatted(data.getUserData().getUserID(), getUserID(data.getToUserUsername()), data.getDataType(), data.getContent());
+        try (Statement statement = db.createStatement()) {
+            statement.executeUpdate(sqlQuery);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean addMessageToGroup(Data data) {
+        String sqlQuery = """
+                INSERT INTO Data(read_state, sent_date, from_user_id, to_group_id, data_type, content)
+                VALUES('waiting', NOW(), %d, %d, '%s', '%s');
+                """.formatted(data.getUserData().getUserID(), data.getToGroupId(), data.getDataType(), data.getContent());
+        try (Statement statement = db.createStatement()) {
+            statement.executeUpdate(sqlQuery);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public boolean deleteUser(String username){
         try {
             Statement  statement = db.createStatement();
@@ -164,7 +282,7 @@ public class DatabaseManager {
                 sb.append("\tname:" + resultSet.getString("name"));
                 sb.append("\tusername:" + resultSet.getString("username"));
                 sb.append("\tlast_seen:" + resultSet.getString("last_seen"));
-                sb.append("\tsatus:" + resultSet.getString("status") + "\n");
+                sb.append("\tstatus:" + resultSet.getString("status") + "\n");
             }
             resultSet.close();
             statement.close();
