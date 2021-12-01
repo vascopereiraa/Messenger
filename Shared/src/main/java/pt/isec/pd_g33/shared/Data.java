@@ -14,6 +14,7 @@ public class Data implements Serializable {
     private DataType dataType;
     private Date sentDate;
     private int toUserId;
+    private String toUserUsername;
     private int toGroupId;
     private int menuOptionSelected;
 
@@ -45,6 +46,24 @@ public class Data implements Serializable {
     public Data(int menuOptionSelected,String username ){
         this.menuOptionSelected = menuOptionSelected;
         this.content = username;
+    }
+
+    public Data(int menuOptionSelected,String mensagem, int toGroupID, UserData userData) {
+        this.menuOptionSelected = menuOptionSelected;
+        this.toGroupId = toGroupID;
+        this.userData = userData;
+        this.content = mensagem;
+        this.dataType = DataType.Message;
+        this.readState = "waiting";
+    }
+
+    public Data(int menuOptionSelected,String mensagem, String toUserUsername, UserData userData) {
+        this.menuOptionSelected = menuOptionSelected;
+        this.toUserUsername = toUserUsername;
+        this.userData = userData;
+        this.content = mensagem;
+        this.dataType = DataType.Message;
+        this.readState = "waiting";
     }
 
     public int getMenuOptionSelected() {
@@ -109,6 +128,10 @@ public class Data implements Serializable {
 
     public int getToGroupId() {
         return toGroupId;
+    }
+
+    public String getToUserUsername() {
+        return toUserUsername;
     }
 
     public void setToGroupId(int toGroupId) {

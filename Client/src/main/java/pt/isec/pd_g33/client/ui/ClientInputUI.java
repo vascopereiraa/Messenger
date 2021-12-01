@@ -135,6 +135,23 @@ public class ClientInputUI implements Runnable {
             case 7 ->{
                 writeToSocket(new Data(6));
             }
+            // Enviar Mensagem
+            case 10 -> {
+                int menuDecision, groupID;
+                System.out.println("1 -> Mensagem de grupo\n2-> Mensagem pessoal");
+                menuDecision = Integer.parseInt(scanner.nextLine());
+                System.out.print("Escreva a mensagem: ");
+                String mensagem = scanner.nextLine();
+                System.out.println("Indique o ID do grupo ou Username da pessoa");
+                if(menuDecision == 1){
+                    groupID = Integer.parseInt(scanner.nextLine());
+                    writeToSocket(new Data(10,mensagem,groupID,serverConnectionManager.getUserData()));
+                }
+                else{
+                    username = scanner.nextLine();
+                    writeToSocket(new Data(10,mensagem,username,serverConnectionManager.getUserData()));
+                }
+            }
             default -> {
 
             }

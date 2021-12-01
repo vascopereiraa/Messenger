@@ -10,6 +10,7 @@ public class Notification implements Serializable {
 
     private String toUsername;
     private String fromUsername;
+    private int toGroupId;
     private DataType dataType;
 
     public Notification(String fromUsername, String toUsername, DataType dataType) {

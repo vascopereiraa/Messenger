@@ -102,10 +102,37 @@ public class ClientConnectionTCP implements Runnable {
                 } else {
                     writeToSocket("Não foi possível eliminar o utilizador pretendido.");
                 }
-
+            }
+            // Enviar mensagem
+            case 10 -> {
+                //todo: verificar se o cliente tem o contacto ou pertence ao grupo
+                sendMessage(dataReceived);
             }
             default -> {
                 System.err.println("Opção invalidade de menu");
+            }
+        }
+    }
+
+    private void sendMessage(Data dataReceived) {
+        // Quer dizer que é uma mensagem para o grupo
+        if(dataReceived.getToUserId() != 0){
+            //todo: criar esta query
+            if(databaseManager.isGroupMember(dataReceived.getUserData().getUsername(),dataReceived.getToGroupId())){
+                databaseManager.addMessageToGroup(dataReceived);
+                processNotification(new Notification(dataReceived.getUserData().getUsername(),
+                        databaseManager.getGroupnameById(dataReceived.getToGroupId()), // Obter nome do grupo pelo ID
+                        dataReceived.getDataType()));
+            }else{
+                writeToSocket("O utilizador não pertence a este grupo! ");
+            }
+        }else{ // Mensagem para uma pessoa
+            //todo: criar esta query
+            if(databaseManager.isContact(dataReceived.getUserData().getUsername(),dataReceived.getToUserUsername())){
+                databaseManager.addMessageToUser(dataReceived);
+                processNotification(new Notification(dataReceived.getUserData().getUsername(),
+                        dataReceived.getToUserUsername(), // Obter username do utilizador
+                        dataReceived.getDataType()));
             }
         }
     }
@@ -156,11 +183,6 @@ public class ClientConnectionTCP implements Runnable {
             System.out.println("Notificação é do tipo Contact");
             databaseManager.insertContact(notification.getFromUsername(),notification.getToUsername());
         }
-        else
-        {
-            //todo: insertData aqui, para msg's e notificações
-        }
-
         //todo: Verificar se cliente pertence a este servidor, caso pertença, não precisa avisar
         listUsers.forEach(u -> {
             if(u.getUsername().equals(notification.getToUsername())){
