@@ -4,13 +4,14 @@ import pt.isec.pd_g33.server.connections.GRDSConnection;
 
 public class ThreadHeartbearServer implements Runnable {
 
-    private GRDSConnection grdsConnection;
+    private final GRDSConnection grdsConnection;
 
     public ThreadHeartbearServer(GRDSConnection grdsConnection){
         this.grdsConnection = grdsConnection;
     }
 
     @Override
+    @SuppressWarnings("BusyWait")
     public void run() {
 
         try {

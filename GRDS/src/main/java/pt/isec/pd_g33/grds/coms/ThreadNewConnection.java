@@ -20,6 +20,7 @@ public class ThreadNewConnection implements Runnable {
     }
 
     @Override
+    @SuppressWarnings("InfiniteLoopStatement")
     public void run() {
         while(true){
             try{

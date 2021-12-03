@@ -1,6 +1,7 @@
 package pt.isec.pd_g33.shared;
 
 import java.net.InetAddress;
+import java.util.Objects;
 
 public class ServerInfo {
 
@@ -66,7 +67,7 @@ public class ServerInfo {
         ServerInfo that = (ServerInfo) o;
 
         if (port != that.port) return false;
-        return ip != null ? ip.equals(that.ip) : that.ip == null;
+        return Objects.equals(ip, that.ip);
     }
 
     @Override
