@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class ServerList {
 
-    private ArrayList<ServerInfo> serverList;
+    private final ArrayList<ServerInfo> serverList;
     private int next;
 
     public ServerList() {
@@ -17,17 +17,12 @@ public class ServerList {
     public boolean addServer(ServerInfo newServer){
         if(serverList.contains(newServer)) {
             serverList.get(serverList.indexOf(newServer)).markAsAlive();
-            System.out.println("O servidor já estava registado! -> Hearthbeat a zeros");
+            // System.out.println("O servidor já estava registado! -> Hearthbeat a zeros");
             return false;
         }
-        System.out.println("Novo servidor registado");
+        // System.out.println("Novo servidor registado");
         serverList.add(newServer);
         return true;
-    }
-
-    public void removeServer(ServerInfo remServer){
-        if(remServer != null)
-            serverList.remove(remServer);
     }
 
     public ServerInfo getNextServer() {
@@ -49,9 +44,13 @@ public class ServerList {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        for (var x : serverList)
-            sb.append(x);
+        StringBuilder sb = new StringBuilder("Online Servers:\n");
+        ServerInfo server;
+        for (int i = 0; i < serverList.size(); ++i) {
+            server = serverList.get(i);
+            if(server.getHearthbeat())
+                sb.append("Server ").append(String.format("%4d", i)).append(": ").append(server).append("\n");
+        }
         return sb.toString();
     }
 }

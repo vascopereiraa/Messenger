@@ -4,9 +4,11 @@ import java.net.InetAddress;
 
 public class ServerInfo {
 
-    private InetAddress ip;
-    private int port;
+    // Server location
+    private final InetAddress ip;
+    private final int port;
 
+    // Hearthbeat markers
     private boolean isAlive;
     private int hearthbeatFail;
 
@@ -53,7 +55,7 @@ public class ServerInfo {
 
     @Override
     public String toString() {
-        return String.format("Server: %s:%d", ip.getHostName(), port);
+        return String.format("%s:%d", ip.getHostName(), port);
     }
 
     @Override

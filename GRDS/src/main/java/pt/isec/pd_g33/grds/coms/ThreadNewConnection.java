@@ -11,8 +11,8 @@ import java.net.DatagramSocket;
 
 public class ThreadNewConnection implements Runnable {
 
-    private DatagramSocket ds;
-    private ServerList serverList;
+    private final DatagramSocket ds;
+    private final ServerList serverList;
 
     public ThreadNewConnection(DatagramSocket ds, ServerList serverList) {
         this.ds = ds;
@@ -29,19 +29,18 @@ public class ThreadNewConnection implements Runnable {
                 ByteArrayInputStream bais = new ByteArrayInputStream(dp.getData());
                 ObjectInputStream ois = new ObjectInputStream(bais);
                 ConnectionMessage connectionMessage = (ConnectionMessage) ois.readObject();
-                System.out.println("GRDS received: " + connectionMessage.getIp() + ":" + connectionMessage.getPort());
 
                 // Message Processing
                 if(connectionMessage.getConnectionType() == ConnectionType.Server) {
-                    if(serverList.addServer(new ServerInfo(connectionMessage.getIp(),connectionMessage.getPort()))){
+                    if(serverList.addServer(new ServerInfo(dp.getAddress(), connectionMessage.getPort()))) {
                         connectionMessage.setMessage("Server Registered");
-                        System.out.println("New server info: " + connectionMessage.getIp() + " : " + connectionMessage.getPort());
+                        // System.out.println("New server info: " + dp.getAddress().getHostAddress() + " : " + connectionMessage.getPort());
                         System.out.println(serverList);
                     }
                 }
                 else {
                     connectionMessage.insertServerInfo(serverList.getNextServer());
-                    System.out.println("New client info: " + connectionMessage.getIp() + " : " + connectionMessage.getPort());
+                    // System.out.println("New client info: " + connectionMessage.getIp() + " : " + connectionMessage.getPort());
                 }
 
                 // Envio de mensagem de volta ao cliente(informa de server a conectar) e servidor

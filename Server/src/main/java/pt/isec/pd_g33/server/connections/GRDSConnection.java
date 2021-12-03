@@ -7,8 +7,8 @@ import java.net.*;
 
 public class GRDSConnection {
 
-    private InetAddress grdsIp;
-    private int grdsPort;
+    private final InetAddress grdsIp;
+    private final int grdsPort;
     private ConnectionMessage connectionMessage;
     private boolean grdsConnection;
 

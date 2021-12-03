@@ -14,12 +14,13 @@ public class ConnectionMessage implements Serializable {
     private String message;
     private ConnectionType connectionType;
 
+    // Client Constructor
     public ConnectionMessage(ConnectionType connectionType) {
         this.connectionType = connectionType;
     }
 
-    public ConnectionMessage(InetAddress ip, int port, ConnectionType connectionType) {
-        this.ip = ip;
+    // Server Constructor
+    public ConnectionMessage(int port, ConnectionType connectionType) {
         this.port = port;
         this.connectionType = connectionType;
     }
@@ -44,9 +45,6 @@ public class ConnectionMessage implements Serializable {
         this.message = message;
     }
 
-    public void setConnectionType(ConnectionType connectionType) {
-        this.connectionType = connectionType;
-    }
     
     public void insertServerInfo(ServerInfo serverInfo) {
         ip = serverInfo.getIp();

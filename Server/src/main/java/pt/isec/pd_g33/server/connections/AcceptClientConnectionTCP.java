@@ -31,7 +31,8 @@ public class AcceptClientConnectionTCP implements Runnable {
     }
 
     public ConnectionMessage getMessage() {
-        return new ConnectionMessage(ss.getInetAddress(), ss.getLocalPort(), ConnectionType.Server);
+        System.out.println(ss.getInetAddress().getHostAddress() + ":" + ss.getLocalPort());
+        return new ConnectionMessage(ss.getLocalPort(), ConnectionType.Server);
     }
 
     @Override
