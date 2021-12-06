@@ -34,6 +34,9 @@ public class ClientOutputUI{
                     System.out.println("Recebeu uma nova notificacao de "+ notification.getDataType().toString()
                             +  " do cliente " + notification.getFromUsername());
                 }
+                if(o instanceof  String){
+                    System.out.println(o);
+                }
 
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();

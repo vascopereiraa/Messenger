@@ -96,12 +96,9 @@ public class ClientConnectionTCP implements Runnable {
             case 4 -> {
                 writeToSocket(databaseManager.listContacts((int)databaseManager.getUserID(userInfo.getUsername())));
             }
+            //TODO: eliminar contacto
             case 6 -> {
-                if(databaseManager.deleteUser(dataReceived.getContent())) {
-                    writeToSocket("Utilizador eliminado");
-                } else {
-                    writeToSocket("Não foi possível eliminar o utilizador pretendido.");
-                }
+                writeToSocket(databaseManager.deleteContact(dataReceived.getUserData().getUsername(), dataReceived.getToUserUsername()));
             }
             // lista contactos pendentes
             case 7 -> writeToSocket(databaseManager.pendConact(dataReceived.getContent()));

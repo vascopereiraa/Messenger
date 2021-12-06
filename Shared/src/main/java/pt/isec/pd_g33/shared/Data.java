@@ -48,6 +48,12 @@ public class Data implements Serializable {
         this.content = username;
     }
 
+    public Data(int menuOptionSelected, UserData userData, String contactUsername){
+        this.menuOptionSelected = menuOptionSelected;
+        this.userData = userData;
+        this.toUserUsername = contactUsername;
+    }
+
     public Data(int menuOptionSelected,String mensagem, int toGroupID, UserData userData) {
         this.menuOptionSelected = menuOptionSelected;
         this.toGroupId = toGroupID;

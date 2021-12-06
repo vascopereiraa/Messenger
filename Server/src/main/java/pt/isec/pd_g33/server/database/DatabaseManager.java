@@ -371,7 +371,7 @@ public class DatabaseManager {
         }
     }
 
-    public boolean deleteUser(String username){
+    /*public boolean deleteUser(String username){
         try {
             Statement  statement = db.createStatement();
             String sqlQuery = "DELETE FROM User WHERE username='" + username + "'";
@@ -383,6 +383,50 @@ public class DatabaseManager {
             return false;
         }
         return true;
+    }*/
+
+    public String deleteContact(String from_username, String toUsername) {
+        if (isContact(from_username, toUsername)) {
+            try {
+                Statement statement = db.createStatement();
+                String sqlQuery = """
+                        DELETE FROM Contact
+                        WHERE to_user_id = %d OR from_user_id = %d
+                        AND from_user_id = %d OR to_user_id = %d
+                        AND request_state LIKE '%%approved%%'
+                        """.formatted(getUserID(from_username), getUserID(from_username), getUserID(toUsername), getUserID(toUsername));
+                if (statement.executeUpdate(sqlQuery) == 2) {
+
+                    statement.close();
+                    return "Não foi possivel eliminar o contacto " + toUsername;
+                }
+            } catch (SQLException e) {
+                System.err.println("SQLExeption deleteContact");
+                e.printStackTrace();
+                return "SQLExeption deleteContact";
+            }
+            deleteMsgsAndFiles(getUserID(from_username), getUserID(toUsername));
+            return "Contacto Eliminado com sucesso! ";
+        }
+        return "Esse contacto não existe! Tem a certeza que tem amigos ? ";
+    }
+
+    public void deleteMsgsAndFiles(long from_UserID, long to_UserID){
+        try {
+            Statement statement = db.createStatement();
+            String sqlQuery = """
+                        DELETE FROM Data
+                        WHERE to_user_id = %d OR from_user_id = %d
+                        AND from_user_id = %d OR to_user_id = %d
+                        AND data_type LIKE '%%Message%%' 
+                        OR data_type LIKE '%%File%%' 
+                        """.formatted(from_UserID, from_UserID, to_UserID, to_UserID);
+            statement.executeUpdate(sqlQuery);
+            statement.close();
+        } catch (SQLException e) {
+            System.err.println("SQLExeption deleteContact");
+            e.printStackTrace();
+        }
     }
 
     public StringBuilder executeQuery(String sqlQuery){
