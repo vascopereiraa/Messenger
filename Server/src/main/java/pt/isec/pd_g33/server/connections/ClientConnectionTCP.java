@@ -103,7 +103,13 @@ public class ClientConnectionTCP implements Runnable {
                     writeToSocket("Não foi possível eliminar o utilizador pretendido.");
                 }
             }
-            // Enviar mensagem
+            // lista contactos pendentes
+            case 7 -> writeToSocket(databaseManager.pendConact(dataReceived.getContent()));
+            // Aceitar contacto pendente
+            case 8 -> writeToSocket(databaseManager.acceptRejectContact(dataReceived.getToUserUsername(),dataReceived.getContent(),"accept"));
+            // Eliminar contacto pendente
+            case 9 -> writeToSocket(databaseManager.acceptRejectContact(dataReceived.getToUserUsername(),dataReceived.getContent(),"reject"));
+            //todo: Enviar mensagens. A funcionar com clientes
             case 10 -> {
                 //todo: verificar se o cliente tem o contacto ou pertence ao grupo
                 sendMessage(dataReceived);

@@ -10,7 +10,7 @@ import pt.isec.pd_g33.shared.UserData;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.io.Writer;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class ClientInputUI implements Runnable {
@@ -28,19 +28,18 @@ public class ClientInputUI implements Runnable {
 
     @Override
     public void run() {
-        int loginDecision;
         do {
-            System.out.println("""
-                    MENU:
-                    1 - Login
-                    2 - Registo""");
-            System.out.print(" > ");
-            loginDecision = Integer.parseInt(scanner.nextLine());
-            if (loginDecision == 1)
-                login();
-            if (loginDecision == 2)
-                register();
-            System.out.println();
+            String[] command = scanner.nextLine().split("\\s");
+            switch (command[0]) {
+                case "login" -> writeToSocket(new Login(command[1], command[2]));
+                case "register" -> {
+                    StringBuilder sb = new StringBuilder();
+                    for(int i = 1; i < command.length - 2; ++i)
+                        sb.append(command[i]).append(" ");
+                    writeToSocket(new Register(command[command.length - 2],
+                            command[command.length - 1], sb.toString()));
+                }
+            }
 
             //todo: find a way to syncronize
             try {
@@ -48,9 +47,11 @@ public class ClientInputUI implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        } while(loginDecision < 1 || loginDecision > 2 || !serverConnectionManager.isUserConnected());
 
-        menu();
+//            System.out.println(serverConnectionManager.isServerConnected() + "" + serverConnectionManager.isUserConnected());
+        } while (!serverConnectionManager.isServerConnected() || !serverConnectionManager.isUserConnected());
+        // Caso tenha login ou registo feito, pode fazer comandos
+        cmdDecision();
     }
 
     private void writeToSocket(Object o) {
@@ -86,76 +87,74 @@ public class ClientInputUI implements Runnable {
     }
 
     private void menu() {
-        while(serverConnectionManager.isUserConnected() && serverConnectionManager.isServerConnected()) {
+        while (serverConnectionManager.isUserConnected() && serverConnectionManager.isServerConnected()) {
             System.out.println("""
-                    Menu: 
-                    1 - Editar dados de utilizador 
-                    2 - Listar todos os utilizadores
-                    3 - Pesquisar utilizador
-                    4 - Visualizar lista de contactos
-                    5 - Adicionar contacto
-                    6 - Eliminar contacto
-                    7 - Criação de grupo
-                    8 - Pedidos de contacto pendentes
-                    10 - Enviar mensagem""");
+                    Comandos disponiveis: 
+                    1 - Editar dados de utilizador .: edit "new name" "new username" "new password"
+                    2 - Listar todos os utilizadores .: listall 
+                    3 - Pesquisar utilizador .: search "username"
+                    4 - Visualizar lista de contactos .:  listcontact
+                    5 - Adicionar contacto .: addc "username"
+                    6 - Eliminar contacto .:delc "username"
+                    7 - Pedidos de contacto pendentes .: pendcontact
+                    8 - Aceitar pedido de contacto .: accept "username" 
+                    10 - Enviar mensagem .: send "pers or group" "group id or person username" "message to send"
+                    11 - Criar novo grupo .: create "groupName"
+                    """);
             System.out.println();
-            int menuDecision = Integer.parseInt(scanner.nextLine());
-            mnDecision(menuDecision);
         }
     }
 
-    private void mnDecision(int menuDec){
-        switch (menuDec){
-            case 1 -> {//working
-                getUserData(true);
-                writeToSocket(new Data(1,
-                        new UserData(username,password,name),
+    private void cmdDecision() {
+        String command;
+        do {
+            System.out.println("Insira o comando");
+            command = scanner.nextLine();
+            String[] comParts = command.split("\\s");
+
+            switch (comParts[0]) {
+                //1-> ok
+                case "edit" -> writeToSocket(new Data(1,
+                        new UserData(comParts[2], comParts[3], comParts[1]),
                         serverConnectionManager.getUserData().getUserID())); // User_id original fica no Userdata - toUserId
-            }
-            //working
-            case 2->writeToSocket(new Data(2));
-            case 3->{//working
-                System.out.println("Indique o utilizador a pesquisar: ");
-                name = scanner.nextLine();
-                writeToSocket(new Data(3,name));
-            }
-            case 4 -> writeToSocket(new Data(4));
+                //2-> ok
+                case "listall" -> writeToSocket(new Data(2));
+                //3-> ok
+                case "search" -> writeToSocket(new Data(3, comParts[1]));
+                //4-> ok
+                case "listcontact" -> writeToSocket(new Data(4));
+                //5-> ok
+                case "addc" -> writeToSocket(new Notification(serverConnectionManager.getUserData().getUsername(), comParts[1], DataType.Contact));
+                //todo: 6-> eliminar contacto
+                case "delc" -> writeToSocket(new Data(6, serverConnectionManager.getUserData(),comParts[1]));
+                //7 -> ok
+                case "pendc" -> writeToSocket(new Data(7, serverConnectionManager.getUserData().getUsername()));
+                //todo: 8-> accept "contact"
+                case "accept" -> writeToSocket(new Data(8,serverConnectionManager.getUserData().getUsername(),comParts[1]));
+                //todo: 9 -> reject "contact"
+                case "reject" -> writeToSocket(new Data(9,serverConnectionManager.getUserData().getUsername(),comParts[1]));
+                //todo: 10-> testar grupo
+                case "send" -> {
+                    int persGroup = comParts[1].equalsIgnoreCase("pers") ? 1 : 2;
+                    String usernameGroupID = comParts[2];
 
-            case 5 ->{  // Adicionar contacto
-                System.out.println("Indique o nome do contacto a adicionar: ");
-                username = scanner.nextLine();
-                writeToSocket(new Notification(serverConnectionManager.getUserData().getUsername(),username, DataType.Contact));
-            }
+                    System.out.println(persGroup + " " + usernameGroupID);
 
-            case 6->{//todo: not working, eliminar contacto, não qualquer user
-                System.out.println("Indique o ulitizador a eliminar: ");
-                username = scanner.nextLine();
-                writeToSocket(new Data(5, username));
-            }
-            case 7 ->{
-                writeToSocket(new Data(6));
-            }
-            // Enviar Mensagem
-            case 10 -> {
-                int menuDecision, groupID;
-                System.out.println("1 -> Mensagem de grupo\n2-> Mensagem pessoal");
-                menuDecision = Integer.parseInt(scanner.nextLine());
-                System.out.print("Escreva a mensagem: ");
-                String mensagem = scanner.nextLine();
-                System.out.println("Indique o ID do grupo ou Username da pessoa");
-                if(menuDecision == 1){
-                    groupID = Integer.parseInt(scanner.nextLine());
-                    writeToSocket(new Data(10,mensagem,groupID,serverConnectionManager.getUserData()));
+                    String mensagem = String.join(" ", Arrays.copyOfRange(comParts, 3, (comParts.length )));
+                    if (persGroup == 2)
+                        writeToSocket(new Data(10, mensagem, Integer.parseInt(usernameGroupID), serverConnectionManager.getUserData()));
+                    else
+                        writeToSocket(new Data(10, mensagem, usernameGroupID, serverConnectionManager.getUserData()));
                 }
-                else{
-                    username = scanner.nextLine();
-                    writeToSocket(new Data(10,mensagem,username,serverConnectionManager.getUserData()));
+                case "create"->{
+
+                }
+                default -> {
+
                 }
             }
-            default -> {
+        } while (!command.equalsIgnoreCase("sair"));
 
-            }
-        }
+        writeToSocket(new Data(-1, serverConnectionManager.getUserData(), serverConnectionManager.getUserData().getUserID()));
     }
-
 }

@@ -34,5 +34,8 @@ public class UserInfo {
         this.username = username;
     }
 
-    public Socket getSocket(){ return sCli; }
+    @Override
+    public String toString() {
+        return "UserInfo .: username=" + username + "\n";
+    }
 }

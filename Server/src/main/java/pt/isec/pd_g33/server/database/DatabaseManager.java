@@ -3,6 +3,7 @@ package pt.isec.pd_g33.server.database;
 import pt.isec.pd_g33.shared.Data;
 import pt.isec.pd_g33.shared.UserData;
 
+import javax.xml.transform.Result;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -81,6 +82,7 @@ public class DatabaseManager {
             statement.setString(3, password);
             statement.setInt(4, userID);
             statement.executeUpdate();
+            statement.close();
         } catch (SQLException e) {
             System.err.println("SQLException: Erro no update do user.");
             e.printStackTrace();
@@ -127,47 +129,89 @@ public class DatabaseManager {
         return userData;
     }
 
-    public Data searchUserByName(String user) {
-        String sqlQuery = "SELECT user_id,name, username, last_seen, " +
-                "status FROM User WHERE name LIKE '%" + user + "%'";
-        return new Data(executeQuery(sqlQuery).toString());
+    public String searchUserByName(String user) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            Statement statement = db.createStatement();
+            String sqlQuery = "SELECT user_id,name, username, last_seen, " +
+                    "status FROM User WHERE name LIKE '%" + user + "%'";
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if (!resultSet.next()) {
+                return "Não existe esse nome ! Você levou catfish :(";
+            } else {
+                sb.append("Encontrou os seguintes users: \n");
+                do {
+                    sb.append("Nome: ").append(resultSet.getString("name"))
+                      .append("\tUsername:").append(resultSet.getString("username"))
+                      .append("\tStatus: ").append(resultSet.getString("status")).append("\n");
+                } while (resultSet.next());
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return sb.toString();
     }
 
-    public Data listUsers(){
-        String sqlQuery = "SELECT * FROM User";
-        return new Data(executeQuery(sqlQuery).toString());
+    public String listUsers() {
+        StringBuilder sb = new StringBuilder();
+        try {
+            Statement statement = db.createStatement();
+            String sqlQuery = "SELECT * FROM User";
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+
+            if (!resultSet.next()) {
+                return "Não tem contactos! Faça amigos novos!";
+            } else {
+                do {
+                    sb.append("Utilizador: Nome:").append(resultSet.getString("name"))
+                      .append("\tUsername: ").append(resultSet.getString("username"))
+                      .append("\tStatus: ").append(resultSet.getString("status"))
+                      .append("\tLast seen: ").append(resultSet.getString("last_seen")).append("\n");
+
+                } while (resultSet.next());
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return sb.toString();
     }
 
-    public Data listContacts(int user_id){
+    public String listContacts(int user_id){
 
         StringBuilder sb = new StringBuilder();
     try {
 
         Statement statement = db.createStatement();
         String sqlQuery = """
-                          SELECT u1.username
+                          SELECT u1.username,u1.name,u1.status,u1.last_seen
                           FROM User u1, Contact c1
                           WHERE c1.to_user_id = u1.user_id
                           AND c1.from_user_id = %d
                           UNION
-                          SELECT u2.username
+                          SELECT u2.username,u2.name,u2.status,u2.last_seen
                           FROM User u2, Contact c2
                           WHERE c2.from_user_id = u2.user_id
                           AND c2.to_user_id = %d
                           AND c2.request_state LIKE '%%approved%%';     
                           """.formatted(user_id, user_id);
         ResultSet resultSet = statement.executeQuery(sqlQuery);
-        while(resultSet.next())
-        {
-            sb.append(resultSet.getString("username"));
+        if(!resultSet.next()){
+            return "Não tem contactos! Faça amigos novos!";
+        }else{
+            do{
+                sb.append("Utilizador: Nome:").append(resultSet.getString("name"))
+                        .append("\tUsername: ").append(resultSet.getString("username"))
+                        .append("\tStatus: ").append(resultSet.getString("status"))
+                        .append("\tLast seen: ").append(resultSet.getString("last_seen")).append("\n");
+            }while(resultSet.next());
         }
         statement.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            return null;
+            return "SQLExeption: listContacts";
         }
-
-        return new Data(sb.toString());
+        return sb.toString();
     }
 
     public boolean isGroupMember(String username_member, int group_id){
@@ -188,15 +232,8 @@ public class DatabaseManager {
     }
 
     public boolean isContact(String from_username, String toUsername){
-
-        Data data = listContacts((int)getUserID(from_username));
-
-
-        System.out.println("\n\nContent: " + data.getContent()); // askdasldaksdl -> joaoo
-        System.out.println("\n\nUsernamebyID: "+ toUsername);
-        System.out.println("Return:" + data.getContent().contains(toUsername));
-
-        return data.getContent().contains(toUsername);
+        String data = listContacts((int)getUserID(from_username));
+        return data.contains(toUsername);
     }
 
     public String getUsernameById(int user_id){
@@ -255,6 +292,85 @@ public class DatabaseManager {
         }
     }
 
+    public String pendConact(String username){
+        StringBuilder sb = new StringBuilder();
+        try {
+            Statement statement = db.createStatement();
+            String sqlQuery = """
+                        SELECT *
+                        FROM Contact
+                        WHERE to_user_id = %d
+                        AND request_state LIKE '%%pending%%'
+                        """.formatted(getUserID(username));
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if(!resultSet.next())
+                return "Não tem pedidos de contacto pendente";
+            else {
+                do {
+                    sb.append("Request from ").append(getUsernameById(resultSet.getInt("from_user_id"))).append(" is still pending.\n");
+                } while (resultSet.next());
+            }
+            statement.close();
+        } catch (SQLException e) {
+            System.err.println("SQLExeption pendContact");
+            e.printStackTrace();
+            return "SQLException: pendContact";
+        }
+        return sb.toString();
+    }
+
+    public String acceptRejectContact(String fromUsername, String toUsername,String acceptReject) {
+        try {
+            Statement statement = db.createStatement();
+            String sqlQuery = """
+                        SELECT *
+                        FROM Contact
+                        WHERE to_user_id = %d
+                        AND from_user_id = %d
+                        AND request_state LIKE '%%pending%%'
+                        """.formatted(getUserID(toUsername),getUserID(fromUsername));
+            System.out.println("toUsername: " + getUserID(toUsername) +" fromUsername: " + getUserID(fromUsername));
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if(!resultSet.next())
+                return "Não tem nenhum pedido de contacto pendendo do " + fromUsername;
+            else {
+                // Caso exista o pedido, vai ser aceite ou eliminado
+                acceptOrRejectUpdate(fromUsername, toUsername, acceptReject);
+            }
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "SQLException: acceptRejectContact";
+        }
+        return "Contacto aceite com sucesso. " + fromUsername + " pertence agora a sua lista de contactos.";
+    }
+
+    public void acceptOrRejectUpdate(String fromUsername, String toUsername,String acceptReject){
+        try {
+            if (acceptReject.equalsIgnoreCase("accept")) {
+                PreparedStatement prepStatement = null;
+                prepStatement = db.prepareStatement("UPDATE Contact SET request_state = ? WHERE to_user_id =? AND from_user_id =?");
+                prepStatement.setString(1, "approved");
+                prepStatement.setInt(2, (int) getUserID(toUsername));
+                prepStatement.setInt(3, (int) getUserID(fromUsername));
+                prepStatement.executeUpdate();
+                prepStatement.close();
+            } else { // Caso contrario, o pedido vai ser eliminado da BD
+                Statement statement = db.createStatement();
+                String sqlQuery = """
+                        DELETE FROM Contact
+                        WHERE to_user_id = %d OR from_user_id = %d
+                        AND request_state LIKE '%%pending%%'
+                        """.formatted(getUserID(toUsername), getUserID(fromUsername));
+                statement.executeUpdate(sqlQuery);
+                statement.close();
+            }
+        } catch (SQLException e) {
+            System.err.println("SQLException: acceptOrRejectUpdate");
+            e.printStackTrace();
+        }
+    }
+
     public boolean deleteUser(String username){
         try {
             Statement  statement = db.createStatement();
@@ -293,6 +409,4 @@ public class DatabaseManager {
         }
         return sb;
     }
-
-
 }

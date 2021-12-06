@@ -2,7 +2,6 @@ package pt.isec.pd_g33.client;
 
 import pt.isec.pd_g33.client.connections.GRDSConnection;
 import pt.isec.pd_g33.client.connections.ServerConnectionManager;
-import pt.isec.pd_g33.client.ui.ClientInputUI;
 
 import java.net.*;
 

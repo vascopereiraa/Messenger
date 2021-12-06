@@ -7,10 +7,17 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="GRDS" />
-        <module name="Client" />
         <module name="Server" />
         <module name="Shared" />
+        <module name="Client" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="Client" target="16" />
+      <module name="GRDS" target="16" />
+      <module name="Messenger" target="16" />
+      <module name="Server" target="16" />
+      <module name="Shared" target="16" />
+    </bytecodeTargetLevel>
   </component>
 </project>

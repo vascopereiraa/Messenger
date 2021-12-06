@@ -20,7 +20,7 @@ public class Data implements Serializable {
 
     private UserData userData;
 
-    // Opcao menu 2 -> Listar utilizadores e +
+    // Opcao menu 2 -> Listar utilizadores
     public Data(int menuOptionSelected){
         this.menuOptionSelected = menuOptionSelected;
     }
@@ -42,7 +42,7 @@ public class Data implements Serializable {
         this.toUserId = userID;
     }
 
-    //Opcao menu 3 -> Pesquisar utilizador
+    //Opcao menu 3 -> Pesquisar utilizador, 7 -> pendContact
     public Data(int menuOptionSelected,String username ){
         this.menuOptionSelected = menuOptionSelected;
         this.content = username;
@@ -66,10 +66,16 @@ public class Data implements Serializable {
         this.readState = "waiting";
     }
 
+    public Data(int menuOptionSelected,String from_username, String to_username) {
+        this.menuOptionSelected = menuOptionSelected;
+        this.toUserUsername = to_username;
+        this.content = from_username;
+    }
+
     public int getMenuOptionSelected() {
         return menuOptionSelected;
     }
-
+    
     public void setMenuOptionSelected(int menuOptionSelected) {
         this.menuOptionSelected = menuOptionSelected;
     }
