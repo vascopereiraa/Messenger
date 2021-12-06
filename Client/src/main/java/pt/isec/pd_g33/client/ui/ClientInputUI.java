@@ -18,7 +18,6 @@ public class ClientInputUI implements Runnable {
     private final ServerConnectionManager serverConnectionManager;
     private final ObjectOutputStream oos;
     private final Scanner scanner;
-    private String username, name, password;
 
     public ClientInputUI(ServerConnectionManager scm) {
         this.serverConnectionManager = scm;
@@ -61,29 +60,6 @@ public class ClientInputUI implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void login() {
-        System.out.println("Login");
-        getUserData(false);
-        writeToSocket(new Login(username, password));
-    }
-
-    private void register() {
-        System.out.println("Register");
-        getUserData(true);
-        writeToSocket(new Register(username, password, name));
-    }
-
-    private void getUserData(boolean registerUpdate){
-        if(registerUpdate){
-            System.out.print("Name: ");
-            name = scanner.nextLine();
-        }
-        System.out.print("Username: ");
-        username = scanner.nextLine();
-        System.out.print("Password: ");
-        password = scanner.nextLine();
     }
 
     private void menu() {

@@ -37,6 +37,7 @@ public class ServerConnectionManager {
             out = new ObjectOutputStream(socket.getOutputStream());
         } catch (IOException e) {
             e.printStackTrace();
+            serverConnected = false;
             grdsConnection.connectGRDS();
             connectToServer();
         }

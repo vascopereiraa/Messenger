@@ -76,7 +76,9 @@ public class ClientConnectionTCP implements Runnable {
 
     private void processData(Data dataReceived) {
 
-        switch (dataReceived.getMenuOptionSelected()){
+        switch (dataReceived.getMenuOptionSelected()) {
+            case -1 -> changeUserStatus(dataReceived.getToUserId());
+
             case 1 -> {
                 if(databaseManager.updateUser(
                         dataReceived.getUserData().getName(),
@@ -144,6 +146,7 @@ public class ClientConnectionTCP implements Runnable {
         try {
             UserData userData = databaseManager.checkUserLogin(((Login) dataReceived).getUsername(), ((Login) dataReceived).getPassword());
             if (userData != null){
+                changeUserStatus(userData.getUserID());
                 userInfo.setUsername(((Login) dataReceived).getUsername());
                 oos.writeObject(new Data("Login validado com sucesso!", userData));
             }
@@ -213,5 +216,9 @@ public class ClientConnectionTCP implements Runnable {
 
     private void writeToSocket(Object o) {
         userInfo.writeSocket(o);
+    }
+
+    private void changeUserStatus(int userId) {
+        databaseManager.changeUserStatus(userId);
     }
 }

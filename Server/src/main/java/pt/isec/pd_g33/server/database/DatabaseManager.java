@@ -129,6 +129,36 @@ public class DatabaseManager {
         return userData;
     }
 
+    public boolean changeUserStatus(int userId) {
+        try {
+            String status = null;
+            String sqlQuery = """
+                SELECT status
+                FROM User
+                WHERE user_id = %d
+                """.formatted(userId);
+            Statement statement = db.createStatement();
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if(resultSet.next()) {
+                status = resultSet.getString("status");
+            }
+
+            System.out.println(status);
+            assert status != null;
+            status = status.equalsIgnoreCase("online") ? "Offline" : "Online";
+            sqlQuery = """
+                    UPDATE User
+                    Set status = '%s'
+                    WHERE user_id = %d
+                    """.formatted(status, userId);
+            statement.executeUpdate(sqlQuery);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public String searchUserByName(String user) {
         StringBuilder sb = new StringBuilder();
         try {
@@ -188,6 +218,7 @@ public class DatabaseManager {
                           FROM User u1, Contact c1
                           WHERE c1.to_user_id = u1.user_id
                           AND c1.from_user_id = %d
+                          AND c1.request_state LIKE '%%approved%%'
                           UNION
                           SELECT u2.username,u2.name,u2.status,u2.last_seen
                           FROM User u2, Contact c2
