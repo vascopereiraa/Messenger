@@ -73,7 +73,6 @@ public class DatabaseManager {
         return -1;
     }
 
-
     public boolean updateUser(String name, String newUsername, String password, int userID) {
         try {
             PreparedStatement statement = db.prepareStatement("UPDATE User SET name = ?, username = ?, password =? WHERE user_id =?");
@@ -103,7 +102,6 @@ public class DatabaseManager {
         return false;
         }
     }
-
 
     public UserData checkUserLogin(String username, String password){
         UserData userData;
@@ -190,7 +188,7 @@ public class DatabaseManager {
             ResultSet resultSet = statement.executeQuery(sqlQuery);
 
             if (!resultSet.next()) {
-                return "Não tem contactos! Faça amigos novos!";
+                return "Não existem utilizadores";
             } else {
                 do {
                     sb.append("Utilizador: Nome:").append(resultSet.getString("name"))
@@ -201,8 +199,8 @@ public class DatabaseManager {
                 } while (resultSet.next());
             }
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return sb.toString();
     }
@@ -281,7 +279,7 @@ public class DatabaseManager {
         return null;
     }
 
-    public String getGroupnameById(int group_id){
+    public String getGroupNameById(int group_id){
         try (Statement statement = db.createStatement()){
             String sqlQuery = "SELECT group_name FROM Group WHERE group_id = '" + group_id + "'";
             ResultSet resultSet = statement.executeQuery(sqlQuery);
@@ -416,16 +414,81 @@ public class DatabaseManager {
         return true;
     }*/
 
-    public String deleteContact(String from_username, String toUsername) {
-        if (isContact(from_username, toUsername)) {
+    public String addNewGroup(String groupName, int adminUserId){
+        String sqlQuery = """
+                INSERT INTO `Group` (group_name, admin_user_id)
+                VALUES('%s', %d);
+                """.formatted(groupName, adminUserId);
+        try (Statement statement = db.createStatement()) {
+            statement.executeUpdate(sqlQuery);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return "Ocorreu um erro. Não foi possível criar um novo grupo";
+        }
+        return "Novo grupo " + groupName + " criado";
+    }
+
+    public int getGroupIdByName(String groupName){
+        try (Statement statement = db.createStatement()) {
+            String sqlQuery1 = "SELECT group_id FROM `Group` WHERE BINARY group_name LIKE '%%" + groupName + "%%'";
+            ResultSet resultSet = statement.executeQuery(sqlQuery1);
+            if (resultSet.next()) {
+                return resultSet.getInt("group_id");
+            } else
+                return -1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public boolean joinGroup(int userId, String groupName, String membershipState){
+        int groupId = getGroupIdByName(groupName);
+        if(groupId != -1) {
+            String sqlQuery = """
+                    INSERT INTO Participate(user_id, group_id, membership_state)
+                    VALUES(%d, %d, '%s');
+                    """.formatted(userId, groupId, membershipState);
+            try (Statement statement = db.createStatement()) {
+                statement.executeUpdate(sqlQuery);
+                return true;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public String getGroupAdmin(String groupName){
+        try (Statement statement = db.createStatement()){
+            String sqlQuery = """ 
+                                  SELECT u.username
+                                  FROM User u, `Group` g
+                                  WHERE u.user_id = g.admin_user_id
+                                  AND g.group_name LIKE '%s';
+                                  """.formatted(groupName);
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if (resultSet.next()) {
+                return resultSet.getString("username");
+            } else
+                return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public String deleteContact(String fromUsername, String toUsername) {
+        if (isContact(fromUsername, toUsername)) {
             try {
                 Statement statement = db.createStatement();
-                String sqlQuery = """
+                String sqlQuery = """ 
                         DELETE FROM Contact
                         WHERE to_user_id = %d OR from_user_id = %d
                         AND from_user_id = %d OR to_user_id = %d
                         AND request_state LIKE '%%approved%%'
-                        """.formatted(getUserID(from_username), getUserID(from_username), getUserID(toUsername), getUserID(toUsername));
+                        """.formatted(getUserID(fromUsername), getUserID(fromUsername), getUserID(toUsername), getUserID(toUsername));
                 if (statement.executeUpdate(sqlQuery) == 2) {
 
                     statement.close();
@@ -436,13 +499,13 @@ public class DatabaseManager {
                 e.printStackTrace();
                 return "SQLExeption deleteContact";
             }
-            deleteMsgsAndFiles(getUserID(from_username), getUserID(toUsername));
+            deleteMsgsAndFiles(getUserID(fromUsername), getUserID(toUsername));
             return "Contacto Eliminado com sucesso! ";
         }
         return "Esse contacto não existe! Tem a certeza que tem amigos ? ";
     }
 
-    public void deleteMsgsAndFiles(long from_UserID, long to_UserID){
+    public void deleteMsgsAndFiles(long fromUserId, long toUserId){
         try {
             Statement statement = db.createStatement();
             String sqlQuery = """
@@ -451,7 +514,7 @@ public class DatabaseManager {
                         AND from_user_id = %d OR to_user_id = %d
                         AND data_type LIKE '%%Message%%' 
                         OR data_type LIKE '%%File%%' 
-                        """.formatted(from_UserID, from_UserID, to_UserID, to_UserID);
+                        """.formatted(fromUserId, fromUserId, toUserId, toUserId);
             statement.executeUpdate(sqlQuery);
             statement.close();
         } catch (SQLException e) {

@@ -14,8 +14,8 @@ public class Notification implements Serializable {
     private DataType dataType;
 
     public Notification(String fromUsername, String toUsername, DataType dataType) {
-        this.toUsername = toUsername;
         this.fromUsername = fromUsername;
+        this.toUsername = toUsername;
         this.dataType = dataType;
     }
 

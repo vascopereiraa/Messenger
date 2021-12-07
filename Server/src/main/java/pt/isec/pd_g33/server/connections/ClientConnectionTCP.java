@@ -98,7 +98,6 @@ public class ClientConnectionTCP implements Runnable {
             case 4 -> {
                 writeToSocket(databaseManager.listContacts((int)databaseManager.getUserID(userInfo.getUsername())));
             }
-            //TODO: eliminar contacto
             case 6 -> {
                 writeToSocket(databaseManager.deleteContact(dataReceived.getUserData().getUsername(), dataReceived.getToUserUsername()));
             }
@@ -113,6 +112,19 @@ public class ClientConnectionTCP implements Runnable {
                 //todo: verificar se o cliente tem o contacto ou pertence ao grupo
                 sendMessage(dataReceived);
             }
+            // Criar grupo
+            case 11 -> {
+                writeToSocket(databaseManager.addNewGroup(dataReceived.getContent(), dataReceived.getUserData().getUserID()));
+                databaseManager.joinGroup(dataReceived.getUserData().getUserID(), dataReceived.getContent(), "approved");
+            }
+            case 12 -> {
+                if(databaseManager.joinGroup(dataReceived.getUserData().getUserID(), dataReceived.getContent(), "pending")) {
+                    writeToSocket("Foi enviado um pedido de adesão ao administrador do grupo");
+                    processNotification(new Notification(dataReceived.getUserData().getUsername(), databaseManager.getGroupAdmin(dataReceived.getContent()), DataType.JoinGroup));
+                }else{
+                    writeToSocket("Ocorreu um erro. Não foi possível aderir a grupo");
+                }
+            }
             default -> {
                 System.err.println("Opção invalidade de menu");
             }
@@ -126,7 +138,7 @@ public class ClientConnectionTCP implements Runnable {
             if(databaseManager.isGroupMember(dataReceived.getUserData().getUsername(),dataReceived.getToGroupId())){
                 databaseManager.addMessageToGroup(dataReceived);
                 processNotification(new Notification(dataReceived.getUserData().getUsername(),
-                        databaseManager.getGroupnameById(dataReceived.getToGroupId()), // Obter nome do grupo pelo ID
+                        databaseManager.getGroupNameById(dataReceived.getToGroupId()), // Obter nome do grupo pelo ID
                         dataReceived.getDataType()));
             }else{
                 writeToSocket("O utilizador não pertence a este grupo! ");
@@ -189,6 +201,7 @@ public class ClientConnectionTCP implements Runnable {
             System.out.println("Notificação é do tipo Contact");
             databaseManager.insertContact(notification.getFromUsername(),notification.getToUsername());
         }
+
         //todo: Verificar se cliente pertence a este servidor, caso pertença, não precisa avisar
         listUsers.forEach(u -> {
             if(u.getUsername().equals(notification.getToUsername())){

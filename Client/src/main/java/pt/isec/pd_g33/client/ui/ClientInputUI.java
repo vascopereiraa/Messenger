@@ -76,6 +76,7 @@ public class ClientInputUI implements Runnable {
                     8 - Aceitar pedido de contacto .: accept "username" 
                     10 - Enviar mensagem .: send "pers or group" "group id or person username" "message to send"
                     11 - Criar novo grupo .: create "groupName"
+                    12 - Aderir a um grupo .: join "groupName"
                     """);
             System.out.println();
         }
@@ -122,9 +123,8 @@ public class ClientInputUI implements Runnable {
                     else
                         writeToSocket(new Data(10, mensagem, usernameGroupID, serverConnectionManager.getUserData()));
                 }
-                case "create"->{
-
-                }
+                case "create"->{writeToSocket(new Data(11, serverConnectionManager.getUserData(), comParts[1]));}
+                case "join" ->{writeToSocket(new Data(12, serverConnectionManager.getUserData(),comParts[1]));}
                 default -> {
 
                 }
