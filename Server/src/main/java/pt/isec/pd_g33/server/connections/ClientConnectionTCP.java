@@ -27,9 +27,9 @@ public class ClientConnectionTCP implements Runnable {
     private final UserInfo userInfo;
     private List<UserInfo> listUsers;
 
-    public ClientConnectionTCP(Socket scli, DatabaseManager databaseManager, UserInfo userInfo, List<UserInfo> listUsers,
+    public ClientConnectionTCP(Socket sCli, DatabaseManager databaseManager, UserInfo userInfo, List<UserInfo> listUsers,
                                ObjectOutputStream oos, ObjectInputStream ois){
-        this.sCli = scli;
+        this.sCli = sCli;
         this.databaseManager = databaseManager;
         this.userInfo = userInfo;
         this.listUsers = listUsers;
@@ -53,24 +53,23 @@ public class ClientConnectionTCP implements Runnable {
                 break;
             }
 
-            if(dataReceived instanceof Login) {
-                if(!loginDatabase()) return;
+            if(dataReceived instanceof Login login) {
+                if(!loginDatabase(login)) return;
             }
-            if(dataReceived instanceof Register){
-                if(!registerDatabase()) return;
+            if(dataReceived instanceof Register register){
+                if(!registerDatabase(register)) return;
             }
-            if(dataReceived instanceof Data){
-                processData((Data)dataReceived);
+            if(dataReceived instanceof Data data){
+                processData(data);
             }
-            if(dataReceived instanceof Notification n){
+            if(dataReceived instanceof Notification notification){
                 System.out.println("ClientConnectionTCP: Recebi uma notificacao! ");
-                processNotification(n);
+                processNotification(notification);
             }
         }
     }
 
     private void processData(Data dataReceived) {
-
         switch (dataReceived.getMenuOptionSelected()) {
             // User
             case EDIT_USER -> {
@@ -158,45 +157,40 @@ public class ClientConnectionTCP implements Runnable {
         }
     }
 
-    private boolean loginDatabase(){
+    private boolean loginDatabase(Login login){
         try {
-            UserData userData = databaseManager.checkUserLogin(((Login) dataReceived).getUsername(), ((Login) dataReceived).getPassword());
-            if (userData != null){
+            UserData userData = databaseManager.checkUserLogin(login.getUsername(), login.getPassword());
+            if (userData != null) {
                 changeUserStatus(userData.getUserID());
-                userInfo.setUsername(((Login) dataReceived).getUsername());
+                userInfo.setUsername(login.getUsername());
                 oos.writeObject(new Data("Login validado com sucesso!", userData));
             }
-            else {
-                oos.writeObject(new Data("Login invalido."));
-            }
+            else
+                oos.writeObject(new Data("Login invalido!"));
             oos.flush();
-
+            return true;
         } catch (IOException e) {
-            System.err.println("Login IOExecption");
+            System.err.println("Login IOException");
             e.printStackTrace();
             return false;
         }
-        return true;
     }
 
-    private boolean registerDatabase(){
+    private boolean registerDatabase(Register register){
         try {
-            UserData userData = databaseManager.insertUser( ((Register) dataReceived).getName(),
-                    ((Register) dataReceived).getUsername(),
-                    ((Register) dataReceived).getPassword());
+            UserData userData = databaseManager.insertUser(register.getName(), register.getUsername(), register.getPassword());
             if (userData != null) {
-                userInfo.setUsername(((Register) dataReceived).getUsername());
+                userInfo.setUsername(register.getUsername());
                 oos.writeObject(new Data("Registo efetuado com sucesso",userData));
-            } else {
+            } else
                 oos.writeObject(new Data("Registo invalido."));
-            }
             oos.flush();
+            return true;
         } catch (IOException e) {
-            System.err.println("Register IOExecption");
+            System.err.println("Register IOException");
             e.printStackTrace();
             return false;
         }
-        return true;
     }
 
     private void processNotification(Notification notification) {

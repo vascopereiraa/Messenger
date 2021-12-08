@@ -24,6 +24,9 @@ public class ServerConnectionManager {
     private boolean userConnected;
     private UserData userData;
 
+    // Sync object
+    private Boolean exited = false;
+
     public ServerConnectionManager(GRDSConnection grdsConnection) {
         this.grdsConnection = grdsConnection;
         this.serverConnected = false;
@@ -88,5 +91,14 @@ public class ServerConnectionManager {
 
     public ObjectInputStream getSocketInputStream() {
         return in;
+    }
+
+    // Disconnect Client
+    public void disconnectClient() {
+        exited = true;
+    }
+
+    public boolean getExited() {
+        return exited;
     }
 }

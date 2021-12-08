@@ -133,7 +133,7 @@ public class DatabaseManager {
             String sqlQuery = """
                 SELECT status
                 FROM User
-                WHERE user_id = %d
+                WHERE user_id = %d;
                 """.formatted(userId);
             Statement statement = db.createStatement();
             ResultSet resultSet = statement.executeQuery(sqlQuery);
@@ -181,28 +181,30 @@ public class DatabaseManager {
     }
 
     public String listUsers() {
-        StringBuilder sb = new StringBuilder();
-        try {
-            Statement statement = db.createStatement();
-            String sqlQuery = "SELECT * FROM User";
+        try (Statement statement = db.createStatement()) {
+            String sqlQuery = """
+                SELECT name, username, status, last_seen
+                FROM `User`;
+                """;
             ResultSet resultSet = statement.executeQuery(sqlQuery);
-
-            if (!resultSet.next()) {
-                return "Não existem utilizadores";
-            } else {
-                do {
-                    sb.append("Utilizador: Nome:").append(resultSet.getString("name"))
-                      .append("\tUsername: ").append(resultSet.getString("username"))
-                      .append("\tStatus: ").append(resultSet.getString("status"))
-                      .append("\tLast seen: ").append(resultSet.getString("last_seen")).append("\n");
-
-                } while (resultSet.next());
+            StringBuilder sb = new StringBuilder();
+            while(resultSet.next()) {
+                sb.append("| %-50s | %-30s | %-10s | %-30s |%n".formatted(
+                        resultSet.getString("name"),
+                        resultSet.getString("username"),
+                        resultSet.getString("status"),
+                        resultSet.getString("last_seen")));
             }
-
+            if(sb.isEmpty())
+                return "[ATTENTION] There is no users registered to list\n";
+            String header = "| %-50s | %-30s | %-10s | %-30s |%n".formatted(
+                    "Name", "Username", "Status", "Last Seen");
+            header = header + "| " + "-".repeat(50) + " | " + "-".repeat(30) + " | " + "-".repeat(10) + " | " + "-".repeat(30) + " |\n";
+            return header + sb;
         } catch (SQLException e) {
             e.printStackTrace();
+            return null;
         }
-        return sb.toString();
     }
 
     public String listContacts(int user_id) {
@@ -325,7 +327,11 @@ public class DatabaseManager {
         }
     }
 
-    public String pendConact(String username){
+    public String pendingContact(String username) {
+
+        System.out.println("PENDING CONTACT USERNAME: " + username);
+        System.out.println("PENDING CONTACT USERNAME ID: " + getUserID(username));
+
         StringBuilder sb = new StringBuilder();
         try {
             Statement statement = db.createStatement();
@@ -345,7 +351,7 @@ public class DatabaseManager {
             }
             statement.close();
         } catch (SQLException e) {
-            System.err.println("SQLExeption pendContact");
+            System.err.println("SQLException pendContact");
             e.printStackTrace();
             return "SQLException: pendContact";
         }
@@ -378,7 +384,7 @@ public class DatabaseManager {
         return "Contacto aceite com sucesso. " + fromUsername + " pertence agora a sua lista de contactos.";
     }
 
-    public void acceptOrRejectUpdate(String fromUsername, String toUsername,String acceptReject){
+    public void acceptOrRejectUpdate(String fromUsername, String toUsername, String acceptReject){
         try {
             if (acceptReject.equalsIgnoreCase("accept")) {
                 PreparedStatement prepStatement = db.prepareStatement(

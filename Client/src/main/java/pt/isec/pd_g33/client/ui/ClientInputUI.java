@@ -23,65 +23,134 @@ public class ClientInputUI implements Runnable {
 
     @Override
     public void run() {
+        // Login or Register users
+        if(!executeLogin()) {
+            serverConnectionManager.disconnectClient();
+            return;
+        }
+
+        // After user logged in has access to remaining functions
+        cmdDecision();
+    }
+
+    private boolean executeLogin() {
         do {
+            System.out.print("$> ");
             String[] command = scanner.nextLine().split("\\s");
             switch (command[0]) {
+                case "commands" -> showLoginCommands();
                 case "login" -> writeToSocket(new Login(command[1], command[2]));
                 case "register" -> {
-                    StringBuilder sb = new StringBuilder();
-                    for(int i = 1; i < command.length - 2; ++i)
-                        sb.append(command[i]).append(" ");
-                    writeToSocket(new Register(command[command.length - 2],
-                            command[command.length - 1], sb.toString()));
+                    String name = String.join(" ", Arrays.copyOfRange(command, 3, command.length));
+                    if(name.length() > 50 || command[1].length() > 30 || command[2].length() > 30) {
+                        System.out.println("""
+                            [ERROR] Input too long:
+                            \t-> Name should have less than 50 characters
+                            \t-> Username and Password should have less than 30 characters each
+                            """);
+                        break;
+                    }
+                    writeToSocket(new Register(command[1].toLowerCase(), command[2], name));
                 }
+                case "exit" -> { return false; }
             }
 
-            //todo: find a way to syncronize
+            //todo: SEARCH FOR A BETTER METHOD
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-//            System.out.println(serverConnectionManager.isServerConnected() + "" + serverConnectionManager.isUserConnected());
         } while (!serverConnectionManager.isServerConnected() || !serverConnectionManager.isUserConnected());
-        // Caso tenha login ou registo feito, pode fazer comandos
-        cmdDecision();
+        return true;
     }
 
-    private void writeToSocket(Object o) {
-        try {
-            oos.writeObject(o);
-            oos.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void showLoginCommands() {
+        System.out.printf("""
+                Available Commands:
+                
+                Login:
+                %-35s  %-100s
+                %-35s  %-100s
+                
+                %-35s  %-100s
+                %n""",
+                "-> Login", "login <username> <password>",
+                "-> Sign in", "register <username> <password> <name>",
+                "-> Exit client", "exit");
     }
 
-    private void menu() {
-        while (serverConnectionManager.isUserConnected() && serverConnectionManager.isServerConnected()) {
-            System.out.println("""
-                    Comandos disponiveis: 
-                    1 - Editar dados de utilizador .: edit "new name" "new username" "new password"
-                    2 - Listar todos os utilizadores .: listall 
-                    3 - Pesquisar utilizador .: search "username"
-                    4 - Visualizar lista de contactos .:  listcontact
-                    5 - Adicionar contacto .: addc "username"
-                    6 - Eliminar contacto .:delc "username"
-                    7 - Pedidos de contacto pendentes .: pendcontact
-                    8 - Aceitar pedido de contacto .: accept "username" 
-                    10 - Enviar mensagem .: send "pers or group" "group id or person username" "message to send"
-                    11 - Criar novo grupo .: create "groupName"
-                    12 - Aderir a um grupo .: join "groupName"
-                    """);
-            System.out.println();
-        }
+    private void showMainCommands() {
+        System.out.printf("""
+                Available Commands:
+                        
+                User:
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                        
+                Group:
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                        
+                Contacts:
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                        
+                Messages:
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                
+                %-35s  %-100s
+                %n""",
+                "-> Edit user data", "edit <new_name> <new_username> <new_password>",
+                "-> List all users", "listall",
+                "-> Search for user", "search <username>",
+
+                "-> Create group", "create <group_name>",
+                "-> List all groups", "listgroup",
+                "-> Join group", "join <group_id>",
+                "-> Accept new group members", "memberaccept <group_id> <username>",
+                "-> Remove group member", "memberrm <group_id> <username>",
+                "-> Change group name", "rename <group_id> <new_groupname>",
+                "-> Delete group", "del <group_id>",
+                "-> Leave group", "leave <group_id>",
+
+                "-> Show contact list", "listcontact",
+                "-> Show pending contact requests", "pendcontact",
+                "-> Add contact", "addc <username>",
+                "-> Delete contact", "delc <username>",
+                "-> Accept contact request", "accept <username>",
+                "-> Reject contact request", "reject <username>",
+
+                "-> Send message to group", "send group <group_id> <...message...>",
+                "-> Send message to contact", "send contact <username> <...message...>",
+                "-> List messages to contact", "listmsg contact <username>",
+                "-> List messages to group", "listmsg group <group_id>",
+                "-> List unseen messages", "listunseen",
+                "-> Delete message from/to contact/group", "delmsg <message id from group or contact>",
+
+                "-> Exit client", "exit");
     }
 
     private void cmdDecision() {
         String command;
         do {
-            System.out.println("Insira o comando");
+            System.out.print("$> ");
             command = scanner.nextLine();
             String[] comParts = command.split("\\s");
 
@@ -130,9 +199,19 @@ public class ClientInputUI implements Runnable {
                 }
                 case "delmsg" -> writeToSocket(new Data(MenuOption.DELETE_MESSAGE,serverConnectionManager.getUserData().getUsername() , Integer.parseInt(comParts[1])));
             }
-        } while (!command.equalsIgnoreCase("sair"));
+
+        } while (!command.equalsIgnoreCase("exit"));
 
         writeToSocket(new Data(MenuOption.EXIT, serverConnectionManager.getUserData(), serverConnectionManager.getUserData().getUserID()));
         serverConnectionManager.disconnectClient();
+    }
+
+    private void writeToSocket(Object o) {
+        try {
+            oos.writeUnshared(o);
+            oos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

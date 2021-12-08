@@ -17,7 +17,7 @@ public class ClientOutputUI{
     }
 
     public void begin() {
-        while(true) {
+        while(!serverConnectionManager.getExited()) {
 
             try {
                 Object o = ois.readObject();
@@ -34,8 +34,8 @@ public class ClientOutputUI{
                     System.out.println("Recebeu uma nova notificacao de "+ notification.getDataType().toString()
                             +  " do cliente " + notification.getFromUsername());
                 }
-                if(o instanceof  String){
-                    System.out.println(o);
+                if(o instanceof String s){
+                    System.out.println("\n" + s);
                 }
 
             } catch (IOException | ClassNotFoundException e) {
