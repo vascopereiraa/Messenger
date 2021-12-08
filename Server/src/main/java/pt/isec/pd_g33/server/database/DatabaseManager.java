@@ -434,32 +434,68 @@ public class DatabaseManager {
         return -1;
     }
 
-    public boolean joinGroup(int userId, String groupName, String membershipState){
-        int groupId = getGroupIdByName(groupName);
-        if(groupId != -1) {
-            String sqlQuery = """
-                    INSERT INTO Participate(user_id, group_id, membership_state)
-                    VALUES(%d, %d, '%s');
-                    """.formatted(userId, groupId, membershipState);
-            try (Statement statement = db.createStatement()) {
-                statement.executeUpdate(sqlQuery);
-                return true;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
-            }
+    public boolean joinGroup(int userId, int groupId){
+        String sqlQuery = """
+                   INSERT INTO Participate(user_id, group_id, membership_state)
+                   VALUES(%d, %d, '%s');
+                   """.formatted(userId, groupId, "pending");
+        try (Statement statement = db.createStatement()) {
+            statement.executeUpdate(sqlQuery);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
-        return false;
     }
 
-    public String getGroupAdmin(String groupName){
+    public boolean acceptOrRejectGroupMember(int groupId, String memberUsername, String acceptReject){
+        try {
+            PreparedStatement prepStatement = null;
+            if (acceptReject.equalsIgnoreCase("accept")) {
+                prepStatement = db.prepareStatement("UPDATE Participate SET membership_state = ? WHERE user_id =? AND group_id =?");
+                prepStatement.setString(1, "approved");
+                prepStatement.setInt(2, (int) getUserID(memberUsername));
+                prepStatement.setInt(3, groupId);
+
+            } else {
+                prepStatement = db.prepareStatement("DELETE FROM Participate WHERE user_id = ? AND group_id = ? AND membership_state like '%%pending%%'");
+                prepStatement.setInt(1, (int) getUserID(memberUsername));
+                prepStatement.setInt(2, groupId);
+            }
+            prepStatement.executeUpdate();
+            prepStatement.close();
+            return true;
+        } catch (SQLException e) {
+            System.err.println("SQLException: acceptOrRejectGroupMember");
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public String updateGroupName(String groupName, int groupId){
+        try {
+            PreparedStatement prepStatement = null;
+            prepStatement = db.prepareStatement("UPDATE `Group` SET group_name = ? WHERE group_id = ?");
+            prepStatement.setInt(1, (int) getUserID(groupName));
+            prepStatement.setInt(2, groupId);
+            prepStatement.executeUpdate();
+            prepStatement.close();
+            return "Nome do grupo atualizado";
+        } catch (SQLException e) {
+            System.err.println("SQLException: acceptOrRejectGroupMember");
+            e.printStackTrace();
+            return "Ocorreu um erro. Não foi possível atualizar o nome do grupo";
+        }
+    }
+
+    public String getGroupAdmin(int groupId){
         try (Statement statement = db.createStatement()){
             String sqlQuery = """ 
                                   SELECT u.username
                                   FROM User u, `Group` g
                                   WHERE u.user_id = g.admin_user_id
-                                  AND g.group_name LIKE '%s';
-                                  """.formatted(groupName);
+                                  AND g.group_id = %d;
+                                  """.formatted(groupId);
             ResultSet resultSet = statement.executeQuery(sqlQuery);
             if (resultSet.next()) {
                 return resultSet.getString("username");

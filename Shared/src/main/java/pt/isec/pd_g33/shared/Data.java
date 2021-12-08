@@ -79,6 +79,12 @@ public class Data implements Serializable {
         this.content = from_username;
         this.toUserUsername = to_username;
     }
+    
+    public Data(MenuOption menuOptionSelected, int toGroupId){
+        this.menuOptionSelected = menuOptionSelected;
+        this.toGroupId = toGroupId;
+    }
+    
 
     // listar historico de msg com grupo
     public Data(MenuOption menuOptionSelected, String from_username, int toGroupId) {

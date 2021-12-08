@@ -3,6 +3,7 @@ package pt.isec.pd_g33.client.ui;
 import pt.isec.pd_g33.client.connections.ServerConnectionManager;
 import pt.isec.pd_g33.shared.*;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
