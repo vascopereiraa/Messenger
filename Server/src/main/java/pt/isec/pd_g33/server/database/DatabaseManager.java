@@ -3,7 +3,6 @@ package pt.isec.pd_g33.server.database;
 import pt.isec.pd_g33.shared.Data;
 import pt.isec.pd_g33.shared.UserData;
 
-import javax.xml.transform.Result;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -514,6 +513,7 @@ public class DatabaseManager {
             e.printStackTrace();
             return false;
         }
+        return false;
     }
 
     public String updateGroupName(String groupName, int groupId, String groupAdmin){
@@ -551,6 +551,32 @@ public class DatabaseManager {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public String leaveGroup(UserData member, int groupId, String membershipState){
+        if(getGroupAdmin(groupId) == member.getUsername()){
+            return deleteGroup(member.getUsername(), groupId);
+        }
+        if(deleteParticipateMember((int)member.getUserID(), groupId, "approved")){
+            return "Deixou de fazer parte do grupo";
+        }
+        return "Ocorreu um erro! Não é possível abandonar o grupo. Gostam demasiado de si!!! Não faça isso!!!";
+    }
+
+    public boolean deleteParticipateMember(int userId, int groupId, String membershipState){
+        try {
+            PreparedStatement prepStatement = db.prepareStatement("DELETE FROM Participate WHERE user_id = ? AND group_id = ?  AND membership_state = ?");
+            prepStatement.setInt(1, userId);
+            prepStatement.setInt(2, groupId);
+            prepStatement.setString(3,membershipState);
+            prepStatement.executeUpdate();
+            prepStatement.close();
+            return true;
+        } catch (SQLException e) {
+            System.err.println("SQLException: updateReadState");
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public String deleteContact(String fromUsername, String toUsername) {
@@ -819,7 +845,7 @@ public class DatabaseManager {
         return "O grupo " + groupName + " foi eliminado com sucesso, os seus membros removidos bem todas as mensagens!\n";
     }
 
-    public boolean deleteGroupMembers(int groupID){
+    public boolean deleteAllGroupMembers(int groupID){
         try {
             Statement statement = db.createStatement();
             String sqlQuery = """ 
