@@ -108,7 +108,7 @@ public class ClientConnectionTCP implements Runnable {
             }
             case RENAME_GROUP -> writeToSocket(databaseManager.updateGroupName(dataReceived.getContent(), dataReceived.getToGroupId(),dataReceived.getUserData().getUsername()));
             case DELETE_GROUP -> writeToSocket(databaseManager.deleteGroup(dataReceived.getContent(), dataReceived.getToGroupId()));
-            case LEAVE_GROUP -> writeToSocket(databaseManager.leaveGroup(dataReceived.getUserData(), dataReceived.getToGroupId(), "approved"));
+            case LEAVE_GROUP -> writeToSocket(databaseManager.leaveGroup(dataReceived.getUserData(), dataReceived.getToUserId(), "approved"));
 
             // Contacts
             case LIST_CONTACTS -> writeToSocket(databaseManager.listContacts((int) databaseManager.getUserID(userInfo.getUsername())));

@@ -554,13 +554,15 @@ public class DatabaseManager {
     }
 
     public String leaveGroup(UserData member, int groupId, String membershipState){
-        if(getGroupAdmin(groupId) == member.getUsername()){
+        System.out.println(getGroupAdmin(groupId));
+        System.out.println(member.getUsername());
+        if(getGroupAdmin(groupId).equals(member.getUsername())){
             return deleteGroup(member.getUsername(), groupId);
         }
         if(deleteParticipateMember((int)member.getUserID(), groupId, "approved")){
             return "Deixou de fazer parte do grupo";
         }
-        return "Ocorreu um erro! Não é possível abandonar o grupo. Gostam demasiado de si!!! Não faça isso!!!";
+        return "Não é possível abandonar o grupo. Gostam demasiado de ti!!! Não faça isto!!!";
     }
 
     public boolean deleteParticipateMember(int userId, int groupId, String membershipState){
@@ -569,14 +571,16 @@ public class DatabaseManager {
             prepStatement.setInt(1, userId);
             prepStatement.setInt(2, groupId);
             prepStatement.setString(3,membershipState);
-            prepStatement.executeUpdate();
+            if(prepStatement.executeUpdate() == 1){
+                return true;
+            }
             prepStatement.close();
-            return true;
         } catch (SQLException e) {
-            System.err.println("SQLException: updateReadState");
+            System.err.println("SQLException: deleteParticipateMember");
             e.printStackTrace();
             return false;
         }
+        return false;
     }
 
     public String deleteContact(String fromUsername, String toUsername) {
@@ -867,11 +871,11 @@ public class DatabaseManager {
             }
             statement.close();
         } catch (SQLException e) {
-            System.err.println("SQLExeption deleteContact");
+            System.err.println("SQLExeption deleteGroup");
             e.printStackTrace();
             return "SQLExeption deleteGroup";
         }
-        return "O grupo " + groupName + " foi eliminado com sucesso, os seus membros removidos bem todas as mensagens!\n";
+        return "O grupo " + groupName + " foi eliminado com sucesso, os seus membros removidos bem como o seu histórico de mensagens!\n";
     }
 
     public boolean deleteAllGroupMembers(int groupID){
