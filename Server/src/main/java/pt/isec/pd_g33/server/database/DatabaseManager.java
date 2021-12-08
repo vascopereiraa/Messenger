@@ -715,10 +715,39 @@ public class DatabaseManager {
         try (Statement statement = db.createStatement()) {
             ResultSet resultSet = statement.executeQuery(sqlQuery);
             StringBuilder sb = new StringBuilder();
-            while(resultSet.next())
-                sb.append(resultSet.getString("group_id"))
-                        .append(" ").append("group_name").append(" ").append("username");
-            return sb.toString();
+            while(resultSet.next()) {
+                int group_id = resultSet.getInt("group_id");
+                sb.append("| %-5s | %-30s | %-30s | %-50s | %-30s | %-10s |%n".formatted(
+                        group_id,
+                        resultSet.getString("group_name"),
+                        resultSet.getString("username"),
+                        " " ,
+                        " ",
+                        " "));
+
+                String memberQuery = """
+                        SELECT u.name, u.username, u.status
+                        FROM User u, Participate p
+                        WHERE u.user_id = p.user_id
+                        AND p.group_id = %d;""".formatted(group_id);
+                Statement newQuery = db.createStatement();
+                ResultSet membersList = newQuery.executeQuery(memberQuery);
+                while(membersList.next())
+                    sb.append("| %-5s | %-30s | %-30s | %-50s | %-30s | %-10s |%n".formatted(
+                            " ",
+                            " ",
+                            " ",
+                            membersList.getString("name"),
+                            membersList.getString("username"),
+                            membersList.getString("status")
+                    ));
+                newQuery.close();
+            }
+            String header = "| %-5s | %-30s | %-30s | %-50s | %-30s | %-10s |%n".formatted(
+                    "ID", "Group Name", "Admin", "Members: Name", "Username", "Status");
+            header = header + "| " + "-".repeat(5) + " | " + "-".repeat(30) + " | " + "-".repeat(30) + " | "
+                    + "-".repeat(50) + " | " + "-".repeat(30) + " | " + "-".repeat(10) + " |\n";
+            return header + sb;
         } catch (SQLException e) {
             e.printStackTrace();
             return null;

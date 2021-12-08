@@ -61,16 +61,23 @@ public class Data implements Serializable {
         this.toGroupId = toGroupID;
         this.userData = userData;
         this.content = mensagem;
-        this.dataType = DataType.Message;
+    }
+
+    public Data(MenuOption menuOptionSelected,String mensagem, int toGroupID, UserData userData, DataType dataType) {
+        this.menuOptionSelected = menuOptionSelected;
+        this.toGroupId = toGroupID;
+        this.userData = userData;
+        this.content = mensagem;
+        this.dataType = dataType;
         this.readState = "waiting";
     }
 
-    public Data(MenuOption menuOptionSelected,String mensagem, String toUserUsername, UserData userData) {
+    public Data(MenuOption menuOptionSelected,String mensagem, String toUserUsername, UserData userData, DataType dataType) {
         this.menuOptionSelected = menuOptionSelected;
         this.toUserUsername = toUserUsername;
         this.userData = userData;
         this.content = mensagem;
-        this.dataType = DataType.Message;
+        this.dataType = dataType;
         this.readState = "waiting";
     }
 

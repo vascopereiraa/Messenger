@@ -181,11 +181,12 @@ public class ClientInputUI implements Runnable {
                 case "reject" -> writeToSocket(new Data(MenuOption.REJECT_CONTACT,serverConnectionManager.getUserData().getUsername(),comParts[1])); // ok
 
                 // Messages
-                // todo: Finish send with correct verifications
-                case "send" -> {
-                    MenuOption contactOrGroup = comParts[1].equalsIgnoreCase("contact") ? MenuOption.SEND_MSG_TO_CONTACT : MenuOption.SEND_MSG_TO_GROUP;
+                case "send" -> { // ok
                     String message = String.join(" ", Arrays.copyOfRange(comParts, 3, (comParts.length )));
-                    writeToSocket(new Data(contactOrGroup, message, Integer.parseInt(comParts[2]), serverConnectionManager.getUserData()));
+                    if(comParts[1].equalsIgnoreCase("contact"))
+                        writeToSocket(new Data(MenuOption.SEND_MSG_TO_CONTACT, message, comParts[2], serverConnectionManager.getUserData(), DataType.Message));
+                    else
+                        writeToSocket(new Data(MenuOption.SEND_MSG_TO_GROUP, message, Integer.parseInt(comParts[2]), serverConnectionManager.getUserData(), DataType.Message));
                 }
                 case "listmsg" -> {
                     MenuOption contactOrGroup = comParts[1].equalsIgnoreCase("contact") ? MenuOption.LIST_MSG_CONTACT : MenuOption.LIST_MSG_GROUP;

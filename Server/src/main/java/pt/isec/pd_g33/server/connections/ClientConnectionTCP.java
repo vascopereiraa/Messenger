@@ -121,9 +121,22 @@ public class ClientConnectionTCP implements Runnable {
                 processNotification(new Notification(dataReceived.getContent(),dataReceived.getToUserUsername(),DataType.Contact));
             }
             // Messages
-            case SEND_MSG_TO_GROUP, SEND_MSG_TO_CONTACT -> {
-                //todo: verificar se o cliente tem o contacto ou pertence ao grupo
-                sendMessage(dataReceived);
+            case SEND_MSG_TO_CONTACT -> {
+                if (databaseManager.addMessageToUser(dataReceived)) {
+                    writeToSocket("[SUCCESS] Message sent successfully to " + dataReceived.getToUserUsername());
+                    processNotification(new Notification(dataReceived.getUserData().getUsername(),
+                            dataReceived.getToUserUsername(), dataReceived.getDataType()));
+                }else
+                    writeToSocket("[WARNING] " + dataReceived.getToUserUsername() + " does not make part of your contacts list");
+            }
+            case SEND_MSG_TO_GROUP -> {
+                if(databaseManager.addMessageToGroup(dataReceived)) {
+                    writeToSocket("[SUCCESS] Message sent successfully to " + databaseManager.getGroupNameById(dataReceived.getToGroupId()));
+                    processNotification(new Notification(dataReceived.getUserData().getUsername(),
+                            databaseManager.getGroupNameById(dataReceived.getToGroupId()), // Obter nome do grupo pelo ID
+                            dataReceived.getDataType()));
+                } else
+                    writeToSocket("[WARNING] You are not a member of this group!");
             }
             case LIST_MSG_CONTACT -> writeToSocket(databaseManager.listUserMsg(dataReceived.getContent(),dataReceived.getToUserUsername()));
             case LIST_MSG_GROUP -> writeToSocket(databaseManager.listGroupMsg(dataReceived.getContent(),Integer.parseInt(dataReceived.getToUserUsername())));
@@ -131,7 +144,10 @@ public class ClientConnectionTCP implements Runnable {
             case DELETE_MESSAGE -> writeToSocket(databaseManager.deleteMsg(dataReceived.getContent(),dataReceived.getToGroupId() /* groupid == MSG id */));
 
             // Exit
-            case EXIT -> changeUserStatus(dataReceived.getToUserId());
+            case EXIT -> {
+                changeUserStatus(dataReceived.getToUserId());
+                writeToSocket("[GOODBYE] Client Disconnected!");
+            }
         }
     }
 
