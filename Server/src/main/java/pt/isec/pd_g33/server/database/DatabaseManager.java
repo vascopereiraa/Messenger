@@ -73,7 +73,10 @@ public class DatabaseManager {
         return -1;
     }
 
-    public boolean updateUser(String name, String newUsername, String password, int userID) {
+    public String updateUser(String name, String newUsername, String password, int userID) {
+        //todo: verificar se ja existe um username igual
+        if(getUserID(newUsername) != -1)
+            return "Já existe um username com esse nome, coloque outro.";
         try {
             PreparedStatement statement = db.prepareStatement("UPDATE User SET name = ?, username = ?, password =? WHERE user_id =?");
             statement.setString(1, name);
@@ -85,22 +88,23 @@ public class DatabaseManager {
         } catch (SQLException e) {
             System.err.println("SQLException: Erro no update do user.");
             e.printStackTrace();
-            return false;
+            return "Ocorreu um erro a atualizar o utilizador";
         }
-        return true;
+        return "Utilizador atualizado com sucesso";
     }
 
-    public boolean insertContact(String fromUserId, String toUserId){
+    public String insertContact(String fromUserId, String toUserId){
         try (Statement statement = db.createStatement()) {
            String sqlQuery = "INSERT INTO Contact(from_user_id, to_user_id, request_state) VALUES('"+
                    getUserID(fromUserId) + "','" + getUserID(toUserId) + "','pending')";
             statement.executeUpdate(sqlQuery);
-            return true;
+            statement.close();
+            return "Pedido de contacto enviado com sucesso\n";
         } catch (SQLException e) {
             System.err.println("SQLException: Erro a inserir contacto");
             e.printStackTrace();
-        return false;
         }
+        return "Ocorreu um erro a enviar pedido de contacto! Certifique-se que o utilizador e existe e é um novo pedido!\n";
     }
 
     public UserData checkUserLogin(String username, String password){
@@ -165,7 +169,7 @@ public class DatabaseManager {
                     "status FROM User WHERE name LIKE '%" + user + "%'";
             ResultSet resultSet = statement.executeQuery(sqlQuery);
             if (!resultSet.next()) {
-                return "Não existe esse nome ! Você levou catfish :(";
+                return "Não existe esse nome!";
             } else {
                 sb.append("Encontrou os seguintes users: \n");
                 do {
@@ -251,20 +255,24 @@ public class DatabaseManager {
                         FROM Participate
                         WHERE user_id = %d
                         AND group_id = %d
-                        AND request_state LIKE '%%approved%%'
+                        AND membership_state LIKE '%%approved%%'
                         """.formatted(getUserID(username_member), group_id);
-        try (Statement statement = db.createStatement();) {
-            statement.executeQuery(sqlQuery);
-            return true;
+        try (Statement statement = db.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if (resultSet.next())
+                return true;
+            return false;
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
 
     public boolean isContact(String from_username, String toUsername){
         String data = listContacts((int)getUserID(from_username));
-        return data.contains(toUsername);
+        if(data.contains(toUsername))
+            return true;
+        return false;
     }
 
     public String getUsernameById(int user_id){
@@ -300,6 +308,8 @@ public class DatabaseManager {
     }
 
     public boolean addMessageToUser(Data data) {
+        if(!isContact(data.getToUserUsername(),data.getUserData().getUsername()))
+            return false;
         String sqlQuery = """
                 INSERT INTO Data(read_state, sent_date, from_user_id, to_user_id, data_type, content)
                 VALUES('pending', NOW(), %d, %d, '%s', '%s');
@@ -314,6 +324,10 @@ public class DatabaseManager {
     }
 
     public boolean addMessageToGroup(Data data) {
+        if(!isGroupMember(data.getUserData().getUsername(),data.getToGroupId())){
+            System.out.println("Não é membro do grupo: " + data.getUserData().getUsername()+" : " +data.getToGroupId());
+            return false;
+        }
         String sqlQuery = """
                 INSERT INTO Data(read_state, sent_date, from_user_id, to_group_id, data_type, content)
                 VALUES('pending', NOW(), %d, %d, '%s', '%s');
@@ -411,12 +425,15 @@ public class DatabaseManager {
     }
 
     public String addNewGroup(String groupName, int adminUserId){
+        // Verificar se o utilizador ja tem um grupo com o mesmo nome
+        if(!adminHasGroupname(groupName,adminUserId))
+            return "O utilizador já administrador de um grupo com o mesmo nome! Escolha outro nome.\n";
         String sqlQuery = """
                 INSERT INTO `Group` (group_name, admin_user_id)
                 VALUES('%s', %d);
                 """.formatted(groupName, adminUserId);
-        // TODO: Apos criação do grupo, fazer joinGroup (reformular query)
-        //joinGroup(adminUserId,,"approved");
+        // Juntar logo ao grupo o criador
+        joinGroup(adminUserId,getGroupIdByNameAndAdminID(groupName,adminUserId),"approved");
         try (Statement statement = db.createStatement()) {
             statement.executeUpdate(sqlQuery);
         } catch (SQLException e) {
@@ -426,25 +443,47 @@ public class DatabaseManager {
         return "Novo grupo " + groupName + " criado";
     }
 
-    public int getGroupIdByName(String groupName){
+    public boolean adminHasGroupname(String groupName, int adminUserId){
         try (Statement statement = db.createStatement()) {
-            String sqlQuery1 = "SELECT group_id FROM `Group` WHERE BINARY group_name LIKE '%%" + groupName + "%%'";
-            ResultSet resultSet = statement.executeQuery(sqlQuery1);
-            if (resultSet.next()) {
+            String sqlQuery = """
+                        SELECT *
+                        FROM `Group`
+                        WHERE BINARY group_name = '%s'
+                        AND admin_user_id = %d
+                        """.formatted(groupName,adminUserId);
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if (resultSet.next())
+                return false;
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public int getGroupIdByNameAndAdminID(String groupName,int adminID){
+        try (Statement statement = db.createStatement()) {
+            String sqlQuery = """
+                        SELECT group_id
+                        FROM `Group`
+                        WHERE BINARY group_name = '%s'
+                        AND admin_user_id = %d
+                        """.formatted(groupName,adminID);
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if (resultSet.next())
                 return resultSet.getInt("group_id");
-            } else
-                return -1;
+            return -1;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return -1;
     }
 
-    public boolean joinGroup(int userId, int groupId){
+    public boolean joinGroup(int userId, int groupId, String status){
         String sqlQuery = """
                    INSERT INTO Participate(user_id, group_id, membership_state)
                    VALUES(%d, %d, '%s');
-                   """.formatted(userId, groupId, "pending");
+                   """.formatted(userId, groupId, status);
         try (Statement statement = db.createStatement()) {
             statement.executeUpdate(sqlQuery);
             return true;
@@ -454,7 +493,10 @@ public class DatabaseManager {
         }
     }
 
-    public boolean acceptOrRejectGroupMember(int groupId, String memberUsername, String acceptReject){
+    public boolean acceptOrRejectGroupMember(int groupId, String memberUsername, String acceptReject,String groupAdmin){
+        if(!getGroupAdmin(groupId).equals(groupAdmin))
+            return false;
+
         try {
             PreparedStatement prepStatement = null;
             if (acceptReject.equalsIgnoreCase("accept")) {
@@ -462,15 +504,11 @@ public class DatabaseManager {
                 prepStatement.setString(1, "approved");
                 prepStatement.setInt(2, (int) getUserID(memberUsername));
                 prepStatement.setInt(3, groupId);
-
-            } else {
-                prepStatement = db.prepareStatement("DELETE FROM Participate WHERE user_id = ? AND group_id = ? AND membership_state like '%%pending%%'");
-                prepStatement.setInt(1, (int) getUserID(memberUsername));
-                prepStatement.setInt(2, groupId);
+                prepStatement.executeUpdate();
+                prepStatement.close();
+                return true;
             }
-            prepStatement.executeUpdate();
-            prepStatement.close();
-            return true;
+            else if(deleteParticipateMember((int)getUserID(memberUsername), groupId, "pending")) return true;
         } catch (SQLException e) {
             System.err.println("SQLException: acceptOrRejectGroupMember");
             e.printStackTrace();
@@ -478,19 +516,21 @@ public class DatabaseManager {
         }
     }
 
-    public String updateGroupName(String groupName, int groupId){
-        try {
-            PreparedStatement prepStatement = null;
-            prepStatement = db.prepareStatement("UPDATE `Group` SET group_name = ? WHERE group_id = ?");
-            prepStatement.setInt(1, (int) getUserID(groupName));
-            prepStatement.setInt(2, groupId);
-            prepStatement.executeUpdate();
-            prepStatement.close();
-            return "Nome do grupo atualizado";
+    public String updateGroupName(String groupName, int groupId, String groupAdmin){
+        if(!getGroupAdmin(groupId).equals(groupAdmin))
+            return "Indique por favor um grupo em que seja administrador.";
+        String sqlQuery = """
+                    UPDATE `Group`
+                    Set group_name = '%s'
+                    WHERE group_id = %d
+                    """.formatted(groupName, groupId);
+        try (Statement statement = db.createStatement()) {
+            statement.executeUpdate(sqlQuery);
+            statement.close();
+            return "Nome do grupo atualizado\n";
         } catch (SQLException e) {
-            System.err.println("SQLException: acceptOrRejectGroupMember");
             e.printStackTrace();
-            return "Ocorreu um erro. Não foi possível atualizar o nome do grupo";
+            return "Ocorreu um erro. Não foi possível atualizar o nome do grupo\n";
         }
     }
 
@@ -536,7 +576,7 @@ public class DatabaseManager {
             deleteMsgsAndFiles(getUserID(fromUsername), getUserID(toUsername));
             return "Contacto Eliminado com sucesso! ";
         }
-        return "Esse contacto não existe! Tem a certeza que tem amigos ? ";
+        return "Esse contacto não existe na sua lista de contactos!\n";
     }
 
     public void deleteMsgsAndFiles(long fromUserId, long toUserId){
@@ -562,10 +602,15 @@ public class DatabaseManager {
         try {
             Statement statement = db.createStatement();
             String sqlQuery = """
-                    SELECT from_user_id,to_user_id, content, read_state
-                    FROM Data 
-                    WHERE to_user_id = %d OR from_user_id = %d
-                    """.formatted(getUserID(fromUsername), getUserID(toUserName));
+                    SELECT d1.from_user_id,d1.to_user_id, d1.content, d1.read_state
+                    FROM `Data` d1
+                    WHERE d1.to_user_id = %d AND d1.from_user_id = %d
+                    UNION
+                    SELECT d2.from_user_id,d2.to_user_id, d2.content, d2.read_state
+                    FROM `Data` d2
+                    WHERE d2.from_user_id = %d AND d2.to_user_id = %d;
+                    """.formatted(getUserID(toUserName), getUserID(fromUsername),
+                                  getUserID(fromUsername), getUserID(toUserName));
             ResultSet resultSet = statement.executeQuery(sqlQuery);
             if (!resultSet.next()) {
                 return "Não tem mensagens com o " + toUserName;
@@ -605,8 +650,6 @@ public class DatabaseManager {
     }
 
     public String listGroupMsg(String fromUsername, int groupId){
-
-        System.out.println(fromUsername + ":" + groupId);
         if(!belongsToGroup(fromUsername,groupId))
             return "Indique por favor um grupo a que pertença.";
 
@@ -750,9 +793,14 @@ public class DatabaseManager {
     }
 
     public String deleteGroup(String username, int groupID) {
+        String groupName =  getGroupNameById(groupID);
         if(!getGroupAdmin(groupID).equals(username))
-            return "Tem que ser administrador do grupo para o poder eliminar!\n\n";
+            return "Tem que ser administrador do grupo para o poder eliminar!\n";
         try {
+            if(!deleteAllGroupMembers(groupID))
+                return "Ocorreu um erro a eliminar os membros do grupo excluido " + getGroupNameById(groupID) +"\n";
+            if(!deleteGroupMsgs(groupID))
+                return "Ocorreu um erro a eliminar todas as mensagens referente ao grupo\n";
             Statement statement = db.createStatement();
             String sqlQuery = """ 
                         DELETE FROM `Group`
@@ -762,14 +810,13 @@ public class DatabaseManager {
                 statement.close();
                 return "Não foi possivel eliminar o grupo " + getGroupNameById(groupID);
             }
-            if(!deleteGroupMembers(groupID))
-                return "Ocorreu um erro a eliminar os membros do grupo excluido " + getGroupNameById(groupID);
+            statement.close();
         } catch (SQLException e) {
             System.err.println("SQLExeption deleteContact");
             e.printStackTrace();
-            return "SQLExeption deleteContact";
+            return "SQLExeption deleteGroup";
         }
-        return "O grupo " + getGroupNameById(groupID) + " foi eliminado com sucesso, e os seus membros removidos!\n\n";
+        return "O grupo " + groupName + " foi eliminado com sucesso, os seus membros removidos bem todas as mensagens!\n";
     }
 
     public boolean deleteGroupMembers(int groupID){
@@ -784,11 +831,28 @@ public class DatabaseManager {
                 return false;
             }
         } catch (SQLException e) {
-            System.err.println("SQLExeption deleteContact");
+            System.err.println("SQLExeption deleteGroupMembers");
             e.printStackTrace();
             return false;
         }
         return true;
+    }
+
+    public boolean deleteGroupMsgs(int groupID) {
+        try {
+            Statement statement = db.createStatement();
+            String sqlQuery = """
+                        DELETE FROM `Data`
+                        WHERE to_group_id = %d
+                        """.formatted(groupID);
+            statement.executeUpdate(sqlQuery);
+            statement.close();
+            return true;
+        } catch (SQLException e) {
+            System.err.println("SQLException: deleteContact");
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }

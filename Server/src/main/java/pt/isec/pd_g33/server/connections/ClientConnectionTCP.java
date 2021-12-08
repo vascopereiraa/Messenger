@@ -73,14 +73,11 @@ public class ClientConnectionTCP implements Runnable {
         switch (dataReceived.getMenuOptionSelected()) {
             // User
             case EDIT_USER -> {
-                if(databaseManager.updateUser(
+                writeToSocket(databaseManager.updateUser(
                         dataReceived.getUserData().getName(),
                         dataReceived.getUserData().getUsername(),
                         dataReceived.getUserData().getPassword(),
-                        dataReceived.getToUserId())){
-                    writeToSocket("Utilizador atualizado com sucesso!");
-                } else
-                    writeToSocket("Não foi possível atualizar o utilizador");
+                        dataReceived.getToUserId()));
             }
             case LIST_USERS -> writeToSocket(databaseManager.listUsers());
             case SEARCH_USER -> writeToSocket(databaseManager.searchUserByName(dataReceived.getContent()));
@@ -89,37 +86,40 @@ public class ClientConnectionTCP implements Runnable {
             case CREATE_GROUP -> writeToSocket(databaseManager.addNewGroup(dataReceived.getContent(), dataReceived.getUserData().getUserID()));
             case LIST_GROUPS -> writeToSocket(databaseManager.listGroups());
             case JOIN_GROUP -> {
-                if(databaseManager.joinGroup(dataReceived.getUserData().getUserID(), dataReceived.getToUserId())) {
+                if(databaseManager.joinGroup(dataReceived.getUserData().getUserID(), dataReceived.getToUserId(),"pending")) {
                     writeToSocket("Foi enviado um pedido de adesão ao administrador do grupo");
                     processNotification(new Notification(dataReceived.getUserData().getUsername(), databaseManager.getGroupAdmin(dataReceived.getToUserId()), DataType.JoinGroup));
                 } else
-                    writeToSocket("Ocorreu um erro. Não foi possível aderir a grupo");
+                    writeToSocket("Ocorreu um erro. Não foi possível aderir a grupo. Certifique-se que o grupo existe e que já não pertence a ele.");
             }
             case MEMBER_ACCEPT -> {
-                if(databaseManager.acceptOrRejectGroupMember(dataReceived.getToGroupId(), dataReceived.getContent(),"accept")) {
+                if(databaseManager.acceptOrRejectGroupMember(dataReceived.getToGroupId(), dataReceived.getContent(),"accept",dataReceived.getUserData().getUsername())) {
                     writeToSocket(dataReceived.getContent().trim() + " foi adicionado ao grupo");
                     processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getContent(), DataType.Message));
                 } else
-                    writeToSocket("Ocorreu um erro. Não foi possível aceitar um novo membro no grupo");
+                    writeToSocket("Ocorreu um erro. Não foi possível aceitar um novo membro no grupo! Certifique-se que tem os dados corretos e é administrador!");
             }
             case MEMBER_REMOVE -> {
-                if(databaseManager.acceptOrRejectGroupMember(dataReceived.getToGroupId(), dataReceived.getContent(),"reject")) {
+                if(databaseManager.acceptOrRejectGroupMember(dataReceived.getToGroupId(), dataReceived.getContent(),"reject",dataReceived.getUserData().getUsername())) {
                     writeToSocket(dataReceived.getContent().trim() + " foi removido");
                     processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getContent(), DataType.Message));
                 } else
-                    writeToSocket("Ocorreu um erro. Não foi possível aceitar um novo membro no grupo");
+                    writeToSocket("Ocorreu um erro. Não foi possível aceitar um novo membro no grupo! Certifique-se que tem os dados corretos e é administrador!");
             }
-            case RENAME_GROUP -> writeToSocket(databaseManager.updateGroupName(dataReceived.getContent(), dataReceived.getToGroupId()));
+            case RENAME_GROUP -> writeToSocket(databaseManager.updateGroupName(dataReceived.getContent(), dataReceived.getToGroupId(),dataReceived.getUserData().getUsername()));
             case DELETE_GROUP -> writeToSocket(databaseManager.deleteGroup(dataReceived.getContent(), dataReceived.getToGroupId()));
             case LEAVE_GROUP -> {}
 
             // Contacts
             case LIST_CONTACTS -> writeToSocket(databaseManager.listContacts((int) databaseManager.getUserID(userInfo.getUsername())));
             case PENDING_CONTACT -> writeToSocket(databaseManager.pendingContact(dataReceived.getContent()));
-            case DELETE_CONTACT -> writeToSocket(databaseManager.deleteContact(dataReceived.getUserData().getUsername(), dataReceived.getToUserUsername()));
+            case DELETE_CONTACT -> writeToSocket(databaseManager.deleteContact(dataReceived.getUserData().getUsername(), dataReceived.getContent()));
             case ACCEPT_CONTACT -> writeToSocket(databaseManager.acceptRejectContact(dataReceived.getToUserUsername(),dataReceived.getContent(),"accept"));
             case REJECT_CONTACT -> writeToSocket(databaseManager.acceptRejectContact(dataReceived.getToUserUsername(),dataReceived.getContent(),"reject"));
-
+            case ADD_CONTACT -> {
+                writeToSocket(databaseManager.insertContact(dataReceived.getContent(),dataReceived.getToUserUsername()));
+                processNotification(new Notification(dataReceived.getContent(),dataReceived.getToUserUsername(),DataType.Contact));
+            }
             // Messages
             case SEND_MSG_TO_GROUP, SEND_MSG_TO_CONTACT -> {
                 //todo: verificar se o cliente tem o contacto ou pertence ao grupo
@@ -132,28 +132,6 @@ public class ClientConnectionTCP implements Runnable {
 
             // Exit
             case EXIT -> changeUserStatus(dataReceived.getToUserId());
-        }
-    }
-
-    private void sendMessage(Data dataReceived) {
-        // Quer dizer que é uma mensagem para o grupo
-        if(dataReceived.getMenuOptionSelected() == MenuOption.SEND_MSG_TO_GROUP) {
-            if(databaseManager.isGroupMember(dataReceived.getUserData().getUsername(),dataReceived.getToGroupId())) {
-                databaseManager.addMessageToGroup(dataReceived);
-                processNotification(new Notification(dataReceived.getUserData().getUsername(),
-                        databaseManager.getGroupNameById(dataReceived.getToGroupId()), // Obter nome do grupo pelo ID
-                        dataReceived.getDataType()));
-            } else
-                writeToSocket("O utilizador não pertence a este grupo! ");
-        }
-        // Mensagem para uma pessoa
-        if(dataReceived.getMenuOptionSelected() == MenuOption.SEND_MSG_TO_CONTACT) {
-            if(databaseManager.isContact(dataReceived.getUserData().getUsername(),dataReceived.getToUserUsername())) {
-                databaseManager.addMessageToUser(dataReceived);
-                processNotification(new Notification(dataReceived.getUserData().getUsername(),
-                        dataReceived.getToUserUsername(), // Obter username do utilizador
-                        dataReceived.getDataType()));
-            }
         }
     }
 
@@ -194,13 +172,7 @@ public class ClientConnectionTCP implements Runnable {
     }
 
     private void processNotification(Notification notification) {
-
-        if(notification.getDataType() == DataType.Contact){
-            System.out.println("Notificação é do tipo Contact");
-            databaseManager.insertContact(notification.getFromUsername(),notification.getToUsername());
-        }
-
-        //todo: Verificar se cliente pertence a este servidor, caso pertença, não precisa avisar
+        //todo: Verificar se cliente pertence a este servidor, caso pertença, não precisa avisar outros servidores
         listUsers.forEach(u -> {
             if(u.getUsername().equals(notification.getToUsername())){
                 System.out.println("\n\nExiste o cliente no mesmo servidor");
