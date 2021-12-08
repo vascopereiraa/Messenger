@@ -1,12 +1,7 @@
 package pt.isec.pd_g33.client.ui;
 
 import pt.isec.pd_g33.client.connections.ServerConnectionManager;
-import pt.isec.pd_g33.shared.Data;
-import pt.isec.pd_g33.shared.DataType;
-import pt.isec.pd_g33.shared.Login;
-import pt.isec.pd_g33.shared.Notification;
-import pt.isec.pd_g33.shared.Register;
-import pt.isec.pd_g33.shared.UserData;
+import pt.isec.pd_g33.shared.*;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -90,47 +85,53 @@ public class ClientInputUI implements Runnable {
             String[] comParts = command.split("\\s");
 
             switch (comParts[0]) {
-                //1-> ok
-                case "edit" -> writeToSocket(new Data(1,
+                case "commands" -> showMainCommands();
+
+                // User
+                case "edit" -> writeToSocket(new Data(MenuOption.EDIT_USER,
                         new UserData(comParts[2], comParts[3], comParts[1]),
                         serverConnectionManager.getUserData().getUserID())); // User_id original fica no Userdata - toUserId
-                //2-> ok
-                case "listall" -> writeToSocket(new Data(2));
-                //3-> ok
-                case "search" -> writeToSocket(new Data(3, comParts[1]));
-                //4-> ok
-                case "listcontact" -> writeToSocket(new Data(4));
-                //5-> ok
+                case "listall" -> writeToSocket(new Data(MenuOption.LIST_USERS));
+                case "search" -> writeToSocket(new Data(MenuOption.SEARCH_USER, comParts[1]));
+
+                // Groups
+                case "create" -> writeToSocket(new Data(MenuOption.CREATE_GROUP, serverConnectionManager.getUserData(), comParts[1]));
+                case "listgroup" -> writeToSocket(new Data(MenuOption.LIST_GROUPS));
+                case "join" -> writeToSocket(new Data(MenuOption.JOIN_GROUP, serverConnectionManager.getUserData(),Integer.parseInt(comParts[1])));
+                case "memberaccept" -> writeToSocket(new Data(MenuOption.MEMBER_ACCEPT,comParts[2],Integer.parseInt(comParts[1]), serverConnectionManager.getUserData()));
+                case "memberrm" -> writeToSocket(new Data(MenuOption.MEMBER_REMOVE, comParts[2], Integer.parseInt(comParts[1]), serverConnectionManager.getUserData()));
+                case "rename" -> writeToSocket(new Data(MenuOption.RENAME_GROUP, comParts[2], Integer.parseInt(comParts[1])));
+                case "del" -> writeToSocket(new Data(MenuOption.DELETE_GROUP, serverConnectionManager.getUserData().getUsername() ,Integer.parseInt(comParts[1])));
+                // todo: Leave Group
+                case "leave" ->writeToSocket(new Data(MenuOption.LEAVE_GROUP, Integer.parseInt(comParts[1])));
+
+                // Contacts
+                case "listcontact" -> writeToSocket(new Data(MenuOption.LIST_CONTACTS));
+                case "pendcontact" -> writeToSocket(new Data(MenuOption.PENDING_CONTACT, serverConnectionManager.getUserData().getUsername()));
                 case "addc" -> writeToSocket(new Notification(serverConnectionManager.getUserData().getUsername(), comParts[1], DataType.Contact));
-                //todo: 6-> eliminar contacto
-                case "delc" -> writeToSocket(new Data(6, serverConnectionManager.getUserData(),comParts[1]));
-                //7 -> ok
-                case "pendc" -> writeToSocket(new Data(7, serverConnectionManager.getUserData().getUsername()));
-                //todo: 8-> accept "contact"
-                case "accept" -> writeToSocket(new Data(8,serverConnectionManager.getUserData().getUsername(),comParts[1]));
-                //todo: 9 -> reject "contact"
-                case "reject" -> writeToSocket(new Data(9,serverConnectionManager.getUserData().getUsername(),comParts[1]));
-                //todo: 10-> testar grupo
+                case "delc" -> writeToSocket(new Data(MenuOption.DELETE_CONTACT, serverConnectionManager.getUserData(),comParts[1]));
+                case "accept" -> writeToSocket(new Data(MenuOption.ACCEPT_CONTACT,serverConnectionManager.getUserData().getUsername(),comParts[1]));
+                case "reject" -> writeToSocket(new Data(MenuOption.REJECT_CONTACT,serverConnectionManager.getUserData().getUsername(),comParts[1]));
+
+                // Messages
+                // todo: Finish send with correct verifications
                 case "send" -> {
-                    int persGroup = comParts[1].equalsIgnoreCase("pers") ? 1 : 2;
-                    String usernameGroupID = comParts[2];
-
-                    System.out.println(persGroup + " " + usernameGroupID);
-
-                    String mensagem = String.join(" ", Arrays.copyOfRange(comParts, 3, (comParts.length )));
-                    if (persGroup == 2)
-                        writeToSocket(new Data(10, mensagem, Integer.parseInt(usernameGroupID), serverConnectionManager.getUserData()));
-                    else
-                        writeToSocket(new Data(10, mensagem, usernameGroupID, serverConnectionManager.getUserData()));
+                    MenuOption contactOrGroup = comParts[1].equalsIgnoreCase("contact") ? MenuOption.SEND_MSG_TO_CONTACT : MenuOption.SEND_MSG_TO_GROUP;
+                    String message = String.join(" ", Arrays.copyOfRange(comParts, 3, (comParts.length )));
+                    writeToSocket(new Data(contactOrGroup, message, Integer.parseInt(comParts[2]), serverConnectionManager.getUserData()));
                 }
-                case "create"->{writeToSocket(new Data(11, serverConnectionManager.getUserData(), comParts[1]));}
-                case "join" ->{writeToSocket(new Data(12, serverConnectionManager.getUserData(),comParts[1]));}
-                default -> {
-
+                case "listmsg" -> {
+                    MenuOption contactOrGroup = comParts[1].equalsIgnoreCase("contact") ? MenuOption.LIST_MSG_CONTACT : MenuOption.LIST_MSG_GROUP;
+                    writeToSocket(new Data(contactOrGroup,serverConnectionManager.getUserData().getUsername(),comParts[2]));
                 }
+                case "listunseen" -> {
+                    writeToSocket(new Data(MenuOption.LIST_UNSEEN,serverConnectionManager.getUserData().getUsername()));
+                }
+                case "delmsg" -> writeToSocket(new Data(MenuOption.DELETE_MESSAGE,serverConnectionManager.getUserData().getUsername() , Integer.parseInt(comParts[1])));
             }
         } while (!command.equalsIgnoreCase("sair"));
 
-        writeToSocket(new Data(-1, serverConnectionManager.getUserData(), serverConnectionManager.getUserData().getUserID()));
+        writeToSocket(new Data(MenuOption.EXIT, serverConnectionManager.getUserData(), serverConnectionManager.getUserData().getUserID()));
+        serverConnectionManager.disconnectClient();
     }
 }

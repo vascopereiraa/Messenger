@@ -12,6 +12,8 @@ public class Notification implements Serializable {
     private String fromUsername;
     private int toGroupId;
     private DataType dataType;
+    private String content;
+
 
     public Notification(String fromUsername, String toUsername, DataType dataType) {
         this.fromUsername = fromUsername;
@@ -29,6 +31,10 @@ public class Notification implements Serializable {
 
     public DataType getDataType() {
         return dataType;
+    }
+
+    public String getContent() {
+        return content;
     }
 }
 

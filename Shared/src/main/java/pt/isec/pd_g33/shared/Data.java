@@ -1,5 +1,6 @@
 package pt.isec.pd_g33.shared;
 
+import java.awt.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
@@ -16,12 +17,12 @@ public class Data implements Serializable {
     private int toUserId;
     private String toUserUsername;
     private int toGroupId;
-    private int menuOptionSelected;
+    private MenuOption menuOptionSelected;
 
     private UserData userData;
 
     // Opcao menu 2 -> Listar utilizadores
-    public Data(int menuOptionSelected){
+    public Data(MenuOption menuOptionSelected){
         this.menuOptionSelected = menuOptionSelected;
     }
 
@@ -36,26 +37,26 @@ public class Data implements Serializable {
         this.userData = userData;
     }
     // Opcao menu 1 -> Alterar dados
-    public Data(int menuOptionSelected, UserData userData, int userID){
+    public Data(MenuOption menuOptionSelected, UserData userData, int userID){
         this.menuOptionSelected = menuOptionSelected;
         this.userData = userData;
         this.toUserId = userID;
     }
 
     //Opcao menu 3 -> Pesquisar utilizador, 7 -> pendContact
-    public Data(int menuOptionSelected,String username ){
+    public Data(MenuOption menuOptionSelected,String username){
         this.menuOptionSelected = menuOptionSelected;
         this.content = username;
     }
 
-    //Opcao menu 6 -> Delete Contact, 11 -> Create Group, 12 -> Join Group
-    public Data(int menuOptionSelected, UserData userData, String name){
+    //Opcao menu 6 -> Delete Contact, 11 -> Create Group
+    public Data(MenuOption menuOptionSelected, UserData userData, String name){
         this.menuOptionSelected = menuOptionSelected;
         this.userData = userData;
         this.content = name;
     }
 
-    public Data(int menuOptionSelected,String mensagem, int toGroupID, UserData userData) {
+    public Data(MenuOption menuOptionSelected,String mensagem, int toGroupID, UserData userData) {
         this.menuOptionSelected = menuOptionSelected;
         this.toGroupId = toGroupID;
         this.userData = userData;
@@ -64,7 +65,7 @@ public class Data implements Serializable {
         this.readState = "waiting";
     }
 
-    public Data(int menuOptionSelected,String mensagem, String toUserUsername, UserData userData) {
+    public Data(MenuOption menuOptionSelected,String mensagem, String toUserUsername, UserData userData) {
         this.menuOptionSelected = menuOptionSelected;
         this.toUserUsername = toUserUsername;
         this.userData = userData;
@@ -73,17 +74,24 @@ public class Data implements Serializable {
         this.readState = "waiting";
     }
 
-    public Data(int menuOptionSelected,String from_username, String to_username) {
+    public Data(MenuOption menuOptionSelected,String from_username, String to_username) {
         this.menuOptionSelected = menuOptionSelected;
-        this.toUserUsername = to_username;
         this.content = from_username;
+        this.toUserUsername = to_username;
     }
 
-    public int getMenuOptionSelected() {
+    // listar historico de msg com grupo
+    public Data(MenuOption menuOptionSelected, String from_username, int toGroupId) {
+        this.menuOptionSelected = menuOptionSelected;
+        this.content = from_username;
+        this.toGroupId = toGroupId;
+    }
+
+    public MenuOption getMenuOptionSelected() {
         return menuOptionSelected;
     }
     
-    public void setMenuOptionSelected(int menuOptionSelected) {
+    public void setMenuOptionSelected(MenuOption menuOptionSelected) {
         this.menuOptionSelected = menuOptionSelected;
     }
 
