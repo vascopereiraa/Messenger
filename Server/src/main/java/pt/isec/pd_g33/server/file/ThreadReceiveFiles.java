@@ -23,26 +23,25 @@ public class ThreadReceiveFiles implements Runnable {
     @Override
     public void run() {
             try {
-                System.out.println("\nSOU O PORTO DO RECEIVE: Ip: " + ip + "Porto: " + port);
+                // System.out.println("\nSOU O PORTO DO RECEIVE: Ip: " + ip + "Porto: " + port);
                 Socket socket = new Socket(ip, port);
-                ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                InputStream in = socket.getInputStream();
+
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                out.writeObject(filename);
-                out.flush();
+                out.writeUnshared(filename);
 
                 FileOutputStream fileOutputStream = new FileOutputStream(Paths.get(path + filename).toString());
-                byte[] bytesRead = new byte[DATA_SIZE];
+                byte[] buf = new byte[DATA_SIZE];
                 int nBytes;
-                while(true) {
-                    nBytes = in.read(bytesRead);
-                    if(nBytes == -1)
-                        break;
+                while((nBytes = in.read(buf)) != -1) {
                     System.out.println("Li: " + nBytes);
-                    fileOutputStream.write(bytesRead, 0, nBytes);
-                    bytesRead = new byte[DATA_SIZE];
+                    fileOutputStream.write(buf, 0, nBytes);
+                    buf = new byte[DATA_SIZE];
                 }
 
                 System.out.println("Received file '" + filename + "' from " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
+
+                out.writeUnshared("done");
 
                 fileOutputStream.close();
                 in.close();

@@ -162,8 +162,8 @@ public class ClientConnectionTCP implements Runnable {
                     }
 
                     writeToSocket("[SUCCESS] File sent successfully to " + dataReceived.getToUserUsername());
-                    processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getToUserUsername(),
-                                            DataType.File,dataReceived.getContent(),ipToReceiveFiles,portToReceiveFiles));
+                    /*processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getToUserUsername(),
+                                            DataType.File,dataReceived.getContent(),ipToReceiveFiles,portToReceiveFiles));*/
                 }else{
                     writeToSocket("[WARNING] " + dataReceived.getToUserUsername() + " does not make part of your contacts list");
                 }

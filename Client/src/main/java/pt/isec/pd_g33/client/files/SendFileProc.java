@@ -1,8 +1,6 @@
 package pt.isec.pd_g33.client.files;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
@@ -36,24 +34,33 @@ public class SendFileProc implements Runnable {
 
     @Override
     public void run() {
-        try {
-            Socket sCli = serverSocket.accept();
-            ObjectOutputStream oos = new ObjectOutputStream(sCli.getOutputStream());
+        try (Socket sCli = serverSocket.accept()) {
+
+            OutputStream out = sCli.getOutputStream();
+            ObjectInputStream ois = new ObjectInputStream(sCli.getInputStream());
 
             System.out.println("Vou enviar o ficheiro: [" + filename + "] para o socket: " + getSendFileSocketIp() + ":" + getSendFileSocketPort());
-            FileInputStream fis = new FileInputStream(Paths.get(path, filename).toString());
-            while(fis.available() > 0){
-                byte[] fileChunck = new byte[DATA_SIZE];
-                int nBytes = fis.read(fileChunck);
-                oos.write(fileChunck,0,nBytes);
-                oos.flush();
+
+            FileInputStream fis = new FileInputStream(new File(path + File.separator + filename).toString());
+            // int fileSize = 0;
+            int lidos;
+            while(fis.available() != 0){
+                byte[] fileChunk = new byte[DATA_SIZE];
+                lidos = fis.read(fileChunk);
+                out.write(fileChunk, 0, lidos);
+                // fileSize += lidos;
             }
-            /*fis.close();
-            oos.close();
-            sCli.close();*/
-            //todo: debug
-            System.out.println("Mensagem enviada com sucesso!");
-        } catch (IOException e) {
+
+            String s = (String) ois.readUnshared();
+            System.out.println(s);
+
+            fis.close();
+            out.close();
+            ois.close();
+            serverSocket.close();
+
+            System.out.println("Mensagem enviada com sucesso! "/* + fileSize*/);
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
             System.err.println("IOException: run");
         }
