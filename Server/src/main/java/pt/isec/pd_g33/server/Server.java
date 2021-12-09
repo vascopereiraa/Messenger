@@ -3,6 +3,7 @@ package pt.isec.pd_g33.server;
 import pt.isec.pd_g33.server.connections.AcceptClientConnectionTCP;
 import pt.isec.pd_g33.server.connections.GRDSConnection;
 import pt.isec.pd_g33.server.connections.ThreadMessageReflection;
+import pt.isec.pd_g33.server.file.ThreadSendFiles;
 import pt.isec.pd_g33.server.data.UserInfo;
 import pt.isec.pd_g33.server.database.DatabaseManager;
 
@@ -29,8 +30,13 @@ public class Server {
         // Start DB connection
         DatabaseManager databaseManager = new DatabaseManager(dbmsLocation);
 
+        // Thread receive Files
+        ThreadSendFiles tsf = new ThreadSendFiles(databaseManager);
+        Thread ttrf = new Thread(tsf);
+        ttrf.start();
+
         // Criar o SocketServer para ligações TCP com os Clients
-        AcceptClientConnectionTCP acceptClient = new AcceptClientConnectionTCP(databaseManager, listUsers);
+        AcceptClientConnectionTCP acceptClient = new AcceptClientConnectionTCP(databaseManager, listUsers,tsf.getPortToReceiveFiles(),tsf.getIpToReceiveFiles());
 
         // Regista o IP TCP no GRDS
         GRDSConnection grdsConnection = new GRDSConnection(grdsIp, grdsPort, acceptClient.getMessage());

@@ -16,11 +16,13 @@ public class AcceptClientConnectionTCP implements Runnable {
 
     private ServerSocket ss;
     private DatabaseManager databaseManager;
+    private int portToReceiveFiles;
+    private String ipToReceiveFiles;
 
     // Client information
     private List<UserInfo> listUsers;
 
-    public AcceptClientConnectionTCP(DatabaseManager databaseManager, List<UserInfo> listUsers) {
+    public AcceptClientConnectionTCP(DatabaseManager databaseManager, List<UserInfo> listUsers, int portToReceiveFiles, String ipToReceiveFiles) {
         try {
             ss = new ServerSocket(0);
         } catch (IOException e) {
@@ -28,6 +30,8 @@ public class AcceptClientConnectionTCP implements Runnable {
         }
         this.databaseManager = databaseManager;
         this.listUsers = listUsers;
+        this.portToReceiveFiles = portToReceiveFiles;
+        this.ipToReceiveFiles = ipToReceiveFiles;
     }
 
     public ConnectionMessage getMessage() {
@@ -54,7 +58,8 @@ public class AcceptClientConnectionTCP implements Runnable {
                 UserInfo user = new UserInfo(sCli, oos);
                 listUsers.add(user);
 
-                ClientConnectionTCP cliConn = new ClientConnectionTCP(sCli,databaseManager, user, listUsers, oos, ois);
+                ClientConnectionTCP cliConn = new ClientConnectionTCP(databaseManager, user, listUsers, oos, ois,
+                        portToReceiveFiles, ipToReceiveFiles, folderPath);
                 Thread cli = new Thread(cliConn);
                 cli.start();
             }

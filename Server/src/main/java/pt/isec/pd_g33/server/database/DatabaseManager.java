@@ -802,9 +802,14 @@ public class DatabaseManager {
     public String listUnseen(String username) {
         StringBuilder sb = new StringBuilder("Listagem de todas as mensagens não vistas:\n\n");
         String sqlQuery = """
-                SELECT data_id,from_user_id,from_user_id, content
+                SELECT data_id,from_user_id,from_user_id, content, to_group_id
                 FROM `Data`
-                WHERE to_user_id = %d OR to_group_id IS NULL
+                WHERE to_user_id = %d
+                AND read_state LIKE '%%unseen%%'
+                UNION
+                SELECT data_id,from_user_id,from_user_id, content, to_group_id
+                FROM `Data`
+                WHERE to_group_id IS NOT NULL
                 AND read_state LIKE '%%unseen%%'
                 """.formatted(getUserID(username));
         try (Statement statement = db.createStatement()) {
@@ -826,7 +831,8 @@ public class DatabaseManager {
                         if(!updateReadState(resultSet.getInt("data_id")))
                             return "Ocorreu um erro a atualizar o estado de leitura";
                     }
-                    sb.append("\n\tMensagem .: ").append(resultSet.getString("content")).append("\n\n");
+                    sb.append("\tData id: ").append(resultSet.getInt("data_id"));
+                    sb.append("\n\tMensagem .: ").append(resultSet.getString("content")).append("\n");
                 } while (resultSet.next());
             }
         } catch (SQLException e) {

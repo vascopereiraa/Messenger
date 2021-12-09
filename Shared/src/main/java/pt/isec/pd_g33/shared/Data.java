@@ -86,11 +86,28 @@ public class Data implements Serializable {
         this.content = from_username;
         this.toUserUsername = to_username;
     }
-    
-    public Data(MenuOption menuOptionSelected, int toGroupId){
+
+    // Ficheiros contactos
+    public Data(MenuOption menuOptionSelected, String content, String toUserUsername, String IP, int toUserId, UserData userData){
         this.menuOptionSelected = menuOptionSelected;
-        this.toGroupId = toGroupId;
+        this.content = content; // filename
+        this.toUserUsername = toUserUsername; // Utilizador Destino
+        this.toUserId = toUserId; // Porto
+        this.readState = IP; // IP
+        this.userData = userData; // Dados do user de origem
     }
+
+    // Ficheiros grupos
+    public Data(MenuOption menuOptionSelected, String content, int toGroupId, String IP, int toUserId, UserData userData){
+        this.menuOptionSelected = menuOptionSelected;
+        this.content = content; // filename
+        this.toGroupId = toGroupId; // Grupo Destino
+        this.toUserId = toUserId; // Porto
+        this.readState = IP; // IP
+        this.userData = userData; // Dados do user de origem
+    }
+
+
     
 
     // listar historico de msg com grupo

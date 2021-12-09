@@ -17,28 +17,32 @@ import java.util.List;
 public class ClientConnectionTCP implements Runnable {
 
     private static final int UNICAST_NOTIFICATION_PORT = 2000;
-    private final Socket sCli;
     private final DatabaseManager databaseManager;
 
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
+    private int portToReceiveFiles;
+    private String ipToReceiveFiles;
 
     private Object dataReceived;
     private final UserInfo userInfo;
     private List<UserInfo> listUsers;
 
-    public ClientConnectionTCP(Socket sCli, DatabaseManager databaseManager, UserInfo userInfo, List<UserInfo> listUsers,
-                               ObjectOutputStream oos, ObjectInputStream ois){
-        this.sCli = sCli;
+    public ClientConnectionTCP(DatabaseManager databaseManager, UserInfo userInfo, List<UserInfo> listUsers,
+                               ObjectOutputStream oos, ObjectInputStream ois, int portToReceiveFiles,
+                               String ipToReceiveFiles, String folderPath) {
         this.databaseManager = databaseManager;
         this.userInfo = userInfo;
         this.listUsers = listUsers;
 
-        //todo: porque é que a conecção com a BD se fecha ?
         this.databaseManager.setConnection();
 
         this.oos = oos;
         this.ois = ois;
+        this.portToReceiveFiles = portToReceiveFiles;
+        this.ipToReceiveFiles = ipToReceiveFiles;
+
+        this.folderPath = folderPath;
     }
 
     @Override
@@ -142,6 +146,26 @@ public class ClientConnectionTCP implements Runnable {
             case LIST_MSG_GROUP -> writeToSocket(databaseManager.listGroupMsg(dataReceived.getContent(),Integer.parseInt(dataReceived.getToUserUsername())));
             case LIST_UNSEEN -> writeToSocket(databaseManager.listUnseen(dataReceived.getContent()));
             case DELETE_MESSAGE -> writeToSocket(databaseManager.deleteMsg(dataReceived.getContent(),dataReceived.getToGroupId() /* groupid == MSG id */));
+
+            // Files
+            case SEND_FILE_TO_CONTACT -> {
+                ThreadReceiveFiles threadReceiveFiles = new ThreadReceiveFiles(dataReceived.getReadState(),dataReceived.getToUserId(),folderPath,dataReceived.getContent());
+                Thread received = new Thread(threadReceiveFiles);
+                if(databaseManager.addMsgAndFilesUsers(dataReceived)) {
+                    received.start();
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    writeToSocket("[SUCCESS] File sent successfully to " + dataReceived.getToUserUsername());
+                    processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getToUserUsername(),
+                                            DataType.File,dataReceived.getContent(),ipToReceiveFiles,portToReceiveFiles));
+                }else{
+                    writeToSocket("[WARNING] " + dataReceived.getToUserUsername() + " does not make part of your contacts list");
+                }
+            }
 
             // Exit
             case EXIT -> {

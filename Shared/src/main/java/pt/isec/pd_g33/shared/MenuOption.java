@@ -29,6 +29,10 @@ public enum MenuOption {
     MEMBER_REMOVE,
     LEAVE_GROUP,
 
+    // Files
+    SEND_FILE_TO_CONTACT,
+    SEND_FILE_TO_GROUP,
+
 
     EXIT
 }

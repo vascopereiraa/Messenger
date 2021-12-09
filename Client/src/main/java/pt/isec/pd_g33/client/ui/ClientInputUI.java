@@ -192,10 +192,23 @@ public class ClientInputUI implements Runnable {
                     MenuOption contactOrGroup = comParts[1].equalsIgnoreCase("contact") ? MenuOption.LIST_MSG_CONTACT : MenuOption.LIST_MSG_GROUP;
                     writeToSocket(new Data(contactOrGroup,serverConnectionManager.getUserData().getUsername(),comParts[2]));
                 }
-                case "listunseen" -> {
+                case "listunseen" -> { // ok
                     writeToSocket(new Data(MenuOption.LIST_UNSEEN,serverConnectionManager.getUserData().getUsername()));
                 }
                 case "delmsg" -> writeToSocket(new Data(MenuOption.DELETE_MESSAGE,serverConnectionManager.getUserData().getUsername() , Integer.parseInt(comParts[1])));
+
+                // Files
+                case "sendfile" -> {
+                    SendFileProc sendFileProc = new SendFileProc(comParts[3], comParts[4]);
+                    Thread tsfp = new Thread(sendFileProc);
+                    tsfp.start();
+                    // sendfile group <group_id> <...path...> <...file...>
+                    if(comParts[1].equalsIgnoreCase("contact"))
+                        writeToSocket(new Data(MenuOption.SEND_FILE_TO_CONTACT, comParts[4], comParts[2] ,sendFileProc.getSendFileSocketIp(),sendFileProc.getSendFileSocketPort(),serverConnectionManager.getUserData()));
+                    else
+                        writeToSocket(new Data(MenuOption.SEND_FILE_TO_GROUP, comParts[4], Integer.parseInt(comParts[2]) ,sendFileProc.getSendFileSocketIp(),sendFileProc.getSendFileSocketPort(),serverConnectionManager.getUserData()));
+                }
+
                 default -> System.out.println("Indique um comando válido");
             }
 

@@ -1,6 +1,8 @@
 package pt.isec.pd_g33.server.connections;
 
 import pt.isec.pd_g33.server.data.UserInfo;
+import pt.isec.pd_g33.server.file.ThreadReceiveFiles;
+import pt.isec.pd_g33.shared.DataType;
 import pt.isec.pd_g33.shared.Notification;
 
 import java.io.ByteArrayInputStream;
@@ -47,7 +49,14 @@ public class ThreadMessageReflection implements Runnable {
 
                 //todo: debug
                 System.out.println("Recebi uma mensagem refletida: " + notification.getFromUsername() + " : "
-                        + notification.getToUsername() + " : " + notification.getDataType());;
+                        + notification.getToUsername() + " : " + notification.getDataType());
+
+                if(notification.getDataType() == DataType.File){
+                    ThreadReceiveFiles trf = new ThreadReceiveFiles(notification.getIp(),notification.getPorto(),
+                            folderPath, notification.getContent());
+                    Thread ttrf = new Thread(trf);
+                    ttrf.start();
+                }
 
                 // Envia notificação ao cliente correto caso ele esteja connectado a este servidor
                 listUsers.forEach(u -> {
