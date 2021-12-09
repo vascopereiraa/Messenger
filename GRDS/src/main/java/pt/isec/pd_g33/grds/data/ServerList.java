@@ -8,10 +8,12 @@ public class ServerList {
 
     private final ArrayList<ServerInfo> serverList;
     private int next;
+    private int index;
 
     public ServerList() {
         serverList = new ArrayList<>();
         next = 0;
+        index = 0;
     }
 
     public boolean addServer(ServerInfo newServer){
@@ -42,6 +44,8 @@ public class ServerList {
         return serverList;
     }
 
+    public int getNextIndex() { return index++;}
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("Online Servers:\n");
@@ -49,7 +53,7 @@ public class ServerList {
         for (int i = 0; i < serverList.size(); ++i) {
             server = serverList.get(i);
             if(server.getHearthbeat())
-                sb.append("Server ").append(String.format("%4d", i)).append(": ").append(server).append("\n");
+                sb.append("Server ").append(String.format("%04d", i)).append(": ").append(server).append("\n");
         }
         return sb.toString();
     }

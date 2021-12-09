@@ -7,11 +7,14 @@ import pt.isec.pd_g33.server.file.ThreadSendFiles;
 import pt.isec.pd_g33.server.data.UserInfo;
 import pt.isec.pd_g33.server.database.DatabaseManager;
 
+import java.io.File;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Server {
+
+    private static final String MAIN_SERVER_FOLDER = "./ServerFiles/";
 
     private static final String MULTICAST_GRDS_IP = "230.30.30.30" ;
     private static final int MULTICAST_GRDS_PORT = 3030;
@@ -45,8 +48,14 @@ public class Server {
             return;
         }
 
+        String folderPath = MAIN_SERVER_FOLDER + grdsConnection.getServerName() + "/";
+        File serverFolder = new File(folderPath);
+        if(serverFolder.mkdirs()) System.out.println("Folder Created: " + folderPath);
+        acceptClient.setServerFolderPath(folderPath);
+        tsf.setFolderPath(folderPath);
+
         // Cria thread de escuta de notificações do GRDS
-        ThreadMessageReflection tmr = new ThreadMessageReflection(listUsers);
+        ThreadMessageReflection tmr = new ThreadMessageReflection(listUsers, folderPath);
         Thread ttmr = new Thread(tmr);
         ttmr.start();
 

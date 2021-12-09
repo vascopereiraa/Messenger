@@ -11,6 +11,7 @@ public class GRDSConnection {
     private final int grdsPort;
     private ConnectionMessage connectionMessage;
     private boolean grdsConnection;
+    private String serverName;
 
     public GRDSConnection(InetAddress grdsIp, int grdsPort, ConnectionMessage connectionMessage) {
         this.grdsIp = grdsIp;
@@ -47,7 +48,7 @@ public class GRDSConnection {
                 connectionMessage = (ConnectionMessage) ois.readObject();
 
                 // System.out.println("Server IP: " + connectionMessage.getIp() + ":" + connectionMessage.getPort());
-                System.out.println(connectionMessage.getMessage());
+                serverName = connectionMessage.getMessage();
                 ds.close();
                 //Caso corra tudo bem, termina tentativa de ligação ao GRDS
                 grdsConnection = true;
@@ -80,5 +81,9 @@ public class GRDSConnection {
 
     public boolean getGrdsConnection(){
         return grdsConnection;
+    }
+
+    public String getServerName() {
+        return serverName;
     }
 }

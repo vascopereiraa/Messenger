@@ -20,10 +20,12 @@ public class ThreadMessageReflection implements Runnable {
     public static final String REFLECTION_IP = "255.255.255.255" ;
     public static final int REFLECTION_PORT = 1000;
 
-    private static List<UserInfo> listUsers;
+    private final List<UserInfo> listUsers;
+    private final String folderPath;
 
-    public ThreadMessageReflection(List<UserInfo> listUsers){
+    public ThreadMessageReflection(List<UserInfo> listUsers, String folderPath){
         this.listUsers = listUsers;
+        this.folderPath = folderPath;
     }
 
     @Override

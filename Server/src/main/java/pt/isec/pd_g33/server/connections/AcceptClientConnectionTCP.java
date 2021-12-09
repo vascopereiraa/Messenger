@@ -21,6 +21,7 @@ public class AcceptClientConnectionTCP implements Runnable {
 
     // Client information
     private List<UserInfo> listUsers;
+    private String folderPath;
 
     public AcceptClientConnectionTCP(DatabaseManager databaseManager, List<UserInfo> listUsers, int portToReceiveFiles, String ipToReceiveFiles) {
         try {
@@ -67,5 +68,9 @@ public class AcceptClientConnectionTCP implements Runnable {
             e.printStackTrace();
         }
 
+    }
+
+    public void setServerFolderPath(String folderPath) {
+        this.folderPath = folderPath;
     }
 }

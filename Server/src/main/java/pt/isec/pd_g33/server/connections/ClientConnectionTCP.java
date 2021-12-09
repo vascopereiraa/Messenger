@@ -28,6 +28,8 @@ public class ClientConnectionTCP implements Runnable {
     private final UserInfo userInfo;
     private List<UserInfo> listUsers;
 
+    private String folderPath;
+
     public ClientConnectionTCP(DatabaseManager databaseManager, UserInfo userInfo, List<UserInfo> listUsers,
                                ObjectOutputStream oos, ObjectInputStream ois, int portToReceiveFiles,
                                String ipToReceiveFiles, String folderPath) {

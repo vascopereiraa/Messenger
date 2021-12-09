@@ -1,6 +1,7 @@
 package pt.isec.pd_g33.client.ui;
 
 import pt.isec.pd_g33.client.connections.ServerConnectionManager;
+import pt.isec.pd_g33.client.files.SendFileProc;
 import pt.isec.pd_g33.shared.*;
 
 import java.awt.*;
@@ -114,6 +115,9 @@ public class ClientInputUI implements Runnable {
                 %-35s  %-100s
                 %-35s  %-100s
                 %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
                 
                 %-35s  %-100s
                 %n""",
@@ -137,8 +141,10 @@ public class ClientInputUI implements Runnable {
                 "-> Accept contact request", "accept <username>",
                 "-> Reject contact request", "reject <username>",
 
-                "-> Send message to group", "send group <group_id> <...message...>",
-                "-> Send message to contact", "send contact <username> <...message...>",
+                "-> Send message to group", "sendmsg group <group_id> <...message...>",
+                "-> Send message to contact", "sendmsg contact <username> <...message...>",
+                "-> Send file to group", "sendfile group <group_id> <...path...> <...file...>",
+                "-> Send file to contact", "sendfile contact <username> <...path...> <...file...>",
                 "-> List messages to contact", "listmsg contact <username>",
                 "-> List messages to group", "listmsg group <group_id>",
                 "-> List unseen messages", "listunseen",
@@ -181,7 +187,7 @@ public class ClientInputUI implements Runnable {
                 case "reject" -> writeToSocket(new Data(MenuOption.REJECT_CONTACT,serverConnectionManager.getUserData().getUsername(),comParts[1])); // ok
 
                 // Messages
-                case "send" -> { // ok
+                case "sendmsg" -> { // ok
                     String message = String.join(" ", Arrays.copyOfRange(comParts, 3, (comParts.length )));
                     if(comParts[1].equalsIgnoreCase("contact"))
                         writeToSocket(new Data(MenuOption.SEND_MSG_TO_CONTACT, message, comParts[2], serverConnectionManager.getUserData(), DataType.Message));
@@ -227,3 +233,4 @@ public class ClientInputUI implements Runnable {
         }
     }
 }
+
