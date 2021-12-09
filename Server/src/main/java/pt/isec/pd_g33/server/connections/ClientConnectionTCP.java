@@ -2,6 +2,7 @@ package pt.isec.pd_g33.server.connections;
 
 import pt.isec.pd_g33.server.data.UserInfo;
 import pt.isec.pd_g33.server.database.DatabaseManager;
+import pt.isec.pd_g33.server.file.ThreadReceiveFiles;
 import pt.isec.pd_g33.shared.*;
 
 import java.io.ByteArrayOutputStream;
@@ -11,7 +12,6 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.util.List;
 
 public class ClientConnectionTCP implements Runnable {
@@ -126,7 +126,7 @@ public class ClientConnectionTCP implements Runnable {
             }
             // Messages
             case SEND_MSG_TO_CONTACT -> {
-                if (databaseManager.addMessageToUser(dataReceived)) {
+                if (databaseManager.addMsgAndFilesUsers(dataReceived)) {
                     writeToSocket("[SUCCESS] Message sent successfully to " + dataReceived.getToUserUsername());
                     processNotification(new Notification(dataReceived.getUserData().getUsername(),
                             dataReceived.getToUserUsername(), dataReceived.getDataType()));
@@ -134,7 +134,7 @@ public class ClientConnectionTCP implements Runnable {
                     writeToSocket("[WARNING] " + dataReceived.getToUserUsername() + " does not make part of your contacts list");
             }
             case SEND_MSG_TO_GROUP -> {
-                if(databaseManager.addMessageToGroup(dataReceived)) {
+                if(databaseManager.addMsgAndFilesGroups(dataReceived)) {
                     writeToSocket("[SUCCESS] Message sent successfully to " + databaseManager.getGroupNameById(dataReceived.getToGroupId()));
                     processNotification(new Notification(dataReceived.getUserData().getUsername(),
                             databaseManager.getGroupNameById(dataReceived.getToGroupId()), // Obter nome do grupo pelo ID

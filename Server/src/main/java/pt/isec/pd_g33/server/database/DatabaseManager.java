@@ -306,7 +306,7 @@ public class DatabaseManager {
         return null;
     }
 
-    public boolean addMessageToUser(Data data) {
+    public boolean addMsgAndFilesUsers(Data data) {
         if(!isContact(data.getToUserUsername(),data.getUserData().getUsername()))
             return false;
         String sqlQuery = """
@@ -322,7 +322,7 @@ public class DatabaseManager {
         }
     }
 
-    public boolean addMessageToGroup(Data data) {
+    public boolean addMsgAndFilesGroups(Data data) {
         if(!isGroupMember(data.getUserData().getUsername(),data.getToGroupId())){
             System.out.println("Não é membro do grupo: " + data.getUserData().getUsername()+" : " +data.getToGroupId());
             return false;
@@ -919,5 +919,4 @@ public class DatabaseManager {
             return false;
         }
     }
-
 }
