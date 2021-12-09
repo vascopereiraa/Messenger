@@ -61,7 +61,7 @@ class SendFilesProcedure implements Runnable {
     private static final int DATA_SIZE = 4000;
 
     private Socket sCli;
-    private ObjectOutputStream oos;
+    private OutputStream oos;
     private ObjectInputStream ois;
     private final String folderPath;
 
@@ -69,7 +69,7 @@ class SendFilesProcedure implements Runnable {
         this.sCli = sCli;
         this.folderPath = folderPath;
         try {
-            this.oos = new ObjectOutputStream(sCli.getOutputStream());
+            this.oos = sCli.getOutputStream();
             this.ois = new ObjectInputStream(sCli.getInputStream());
         } catch (IOException ignored) {
             System.err.println("IOException: SendFilesProcedure");
