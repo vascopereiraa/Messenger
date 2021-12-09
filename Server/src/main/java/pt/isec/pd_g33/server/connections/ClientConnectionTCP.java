@@ -155,15 +155,16 @@ public class ClientConnectionTCP implements Runnable {
                 Thread received = new Thread(threadReceiveFiles);
                 if(databaseManager.addMsgAndFilesUsers(dataReceived)) {
                     received.start();
+
                     try {
-                        Thread.sleep(3000);
+                        received.join();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
 
                     writeToSocket("[SUCCESS] File sent successfully to " + dataReceived.getToUserUsername());
-                    /*processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getToUserUsername(),
-                                            DataType.File,dataReceived.getContent(),ipToReceiveFiles,portToReceiveFiles));*/
+                    processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getToUserUsername(),
+                                            DataType.File,dataReceived.getContent(),ipToReceiveFiles,portToReceiveFiles));
                 }else{
                     writeToSocket("[WARNING] " + dataReceived.getToUserUsername() + " does not make part of your contacts list");
                 }
@@ -214,14 +215,27 @@ public class ClientConnectionTCP implements Runnable {
     }
 
     private void processNotification(Notification notification) {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         //todo: Verificar se cliente pertence a este servidor, caso pertença, não precisa avisar outros servidores
-        listUsers.forEach(u -> {
+        /*for(UserInfo u : listUsers) {
+            if(u.getUsername().equals(notification.getToUsername())) {
+                u.writeSocket(notification);
+                return;
+            }
+        }*/
+
+        /*listUsers.forEach(u -> {
             if(u.getUsername().equals(notification.getToUsername())){
                 System.out.println("\n\nExiste o cliente no mesmo servidor");
                 u.writeSocket(notification);
                 return;
             }
-        });
+        });*/
 
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();

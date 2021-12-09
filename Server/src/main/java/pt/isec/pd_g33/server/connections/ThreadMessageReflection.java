@@ -22,10 +22,12 @@ public class ThreadMessageReflection implements Runnable {
 
     private final List<UserInfo> listUsers;
     private final String folderPath;
+    private final int sendFilesPort;
 
-    public ThreadMessageReflection(List<UserInfo> listUsers, String folderPath){
+    public ThreadMessageReflection(List<UserInfo> listUsers, String folderPath, int sendFilesPort) {
         this.listUsers = listUsers;
         this.folderPath = folderPath;
+        this.sendFilesPort = sendFilesPort;
     }
 
     @Override
@@ -53,7 +55,7 @@ public class ThreadMessageReflection implements Runnable {
                 System.out.println("Recebi uma mensagem refletida: " + notification.getFromUsername() + " : "
                         + notification.getToUsername() + " : " + notification.getDataType());
 
-                if(notification.getDataType() == DataType.File){
+                if(notification.getDataType() == DataType.File && notification.getPorto() != sendFilesPort) {
                     ThreadReceiveFiles trf = new ThreadReceiveFiles(notification.getIp(),notification.getPorto(),
                             folderPath, notification.getContent());
                     Thread ttrf = new Thread(trf);

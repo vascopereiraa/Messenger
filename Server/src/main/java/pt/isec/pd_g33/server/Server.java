@@ -39,7 +39,7 @@ public class Server {
         ttrf.start();
 
         // Criar o SocketServer para ligações TCP com os Clients
-        AcceptClientConnectionTCP acceptClient = new AcceptClientConnectionTCP(databaseManager, listUsers,tsf.getPortToReceiveFiles(),tsf.getIpToReceiveFiles());
+        AcceptClientConnectionTCP acceptClient = new AcceptClientConnectionTCP(databaseManager, listUsers, tsf.getPortToReceiveFiles(), tsf.getIpToReceiveFiles());
 
         // Regista o IP TCP no GRDS
         GRDSConnection grdsConnection = new GRDSConnection(grdsIp, grdsPort, acceptClient.getMessage());
@@ -48,14 +48,15 @@ public class Server {
             return;
         }
 
-        String folderPath = MAIN_SERVER_FOLDER + grdsConnection.getServerName() + "/";
+        String serverName = grdsConnection.getServerName();
+        String folderPath = MAIN_SERVER_FOLDER +  serverName + "/";
         File serverFolder = new File(folderPath);
         if(serverFolder.mkdirs()) System.out.println("Folder Created: " + folderPath);
         acceptClient.setServerFolderPath(folderPath);
         tsf.setFolderPath(folderPath);
 
         // Cria thread de escuta de notificações do GRDS
-        ThreadMessageReflection tmr = new ThreadMessageReflection(listUsers, folderPath);
+        ThreadMessageReflection tmr = new ThreadMessageReflection(listUsers, folderPath, tsf.getPortToReceiveFiles());
         Thread ttmr = new Thread(tmr);
         ttmr.start();
 

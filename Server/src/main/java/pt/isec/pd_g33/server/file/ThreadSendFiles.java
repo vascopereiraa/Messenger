@@ -29,7 +29,7 @@ public class ThreadSendFiles implements Runnable {
     public int getPortToReceiveFiles() { return ss.getLocalPort(); }
 
     public String getIpToReceiveFiles() {
-        System.err.println("File Receive ServerSocket:" + ss.getInetAddress().getHostAddress());
+        System.err.println("File Receive ServerSocket:" + ss.getInetAddress().getHostAddress() + ":" + ss.getLocalPort());
         return ss.getInetAddress().getHostAddress();
     }
 
@@ -79,15 +79,17 @@ class SendFilesProcedure implements Runnable {
     @Override
     public void run() {
         try {
-            String filename = (String) ois.readObject();
+            String filename = (String) ois.readUnshared();
             System.out.println("Vou enviar o ficheiro: [" + filename + "] para o socket: " + sCli.getInetAddress().getHostAddress() + " : " + sCli.getPort());
 
-            FileInputStream fis = new FileInputStream(Paths.get(folderPath, filename).toString());
-            while(fis.available() > 0){
+            FileInputStream fis = new FileInputStream(new File(folderPath + File.separator + filename).toString());
+            int nBytes;
+            while(fis.available() != 0){
                 byte[] fileChunck = new byte[DATA_SIZE];
-                fis.read(fileChunck);
-                oos.write(fileChunck);
-                oos.flush();
+                nBytes = fis.read(fileChunck);
+                oos.write(fileChunck,0,nBytes);
+                //oos.flush();
+                System.out.println("Sent " + nBytes);
             }
             //todo: debug
             System.out.println("Mensagem recebida com sucesso!");

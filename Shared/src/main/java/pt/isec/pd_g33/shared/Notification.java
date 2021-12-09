@@ -16,7 +16,6 @@ public class Notification implements Serializable {
     private String ip;
     private int porto;
 
-
     public Notification(String fromUsername, String toUsername, DataType dataType) {
         this.fromUsername = fromUsername;
         this.toUsername = toUsername;
