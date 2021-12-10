@@ -145,8 +145,8 @@ public class ClientInputUI implements Runnable {
                 "-> Send message to contact", "sendmsg contact <username> <...message...>",
                 "-> Send file to group", "sendfile group <group_id> <...path...> <...file...>",
                 "-> Send file to contact", "sendfile contact <username> <...path...> <...file...>",
-                "-> List messages to contact", "listmsg contact <username>",
-                "-> List messages to group", "listmsg group <group_id>",
+                "-> List messages/files to contact", "list contact <username>",
+                "-> List messages/files to group", "list group <group_id>",
                 "-> List unseen messages", "listunseen",
                 "-> Delete message from/to contact/group", "delmsg <message id from group or contact>",
 
@@ -176,7 +176,7 @@ public class ClientInputUI implements Runnable {
                 case "memberrm" -> writeToSocket(new Data(MenuOption.MEMBER_REMOVE, comParts[2], Integer.parseInt(comParts[1]), serverConnectionManager.getUserData()));// ok
                 case "rename" -> writeToSocket(new Data(MenuOption.RENAME_GROUP, comParts[2], Integer.parseInt(comParts[1]), serverConnectionManager.getUserData()));// ok
                 case "del" -> writeToSocket(new Data(MenuOption.DELETE_GROUP, serverConnectionManager.getUserData().getUsername() ,Integer.parseInt(comParts[1])));// ok
-                case "leave" ->writeToSocket(new Data(MenuOption.LEAVE_GROUP, serverConnectionManager.getUserData(), Integer.parseInt(comParts[1])));
+                case "leave" ->writeToSocket(new Data(MenuOption.LEAVE_GROUP, serverConnectionManager.getUserData(), Integer.parseInt(comParts[1]))); // ok
 
                 // Contacts
                 case "listcontact" -> writeToSocket(new Data(MenuOption.LIST_CONTACTS)); // ok
@@ -194,8 +194,8 @@ public class ClientInputUI implements Runnable {
                     else
                         writeToSocket(new Data(MenuOption.SEND_MSG_TO_GROUP, message, Integer.parseInt(comParts[2]), serverConnectionManager.getUserData(), DataType.Message));
                 }
-                case "listmsg" -> {
-                    MenuOption contactOrGroup = comParts[1].equalsIgnoreCase("contact") ? MenuOption.LIST_MSG_CONTACT : MenuOption.LIST_MSG_GROUP;
+                case "list" -> {
+                    MenuOption contactOrGroup = comParts[1].equalsIgnoreCase("contact") ? MenuOption.LIST_MSG_FILES_CONTACT : MenuOption.LIST_MSG_FILES_GROUP;
                     writeToSocket(new Data(contactOrGroup,serverConnectionManager.getUserData().getUsername(),comParts[2]));
                 }
                 case "listunseen" -> { // ok

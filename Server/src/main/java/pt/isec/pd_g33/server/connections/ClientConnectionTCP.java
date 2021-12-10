@@ -144,8 +144,8 @@ public class ClientConnectionTCP implements Runnable {
                 } else
                     writeToSocket("[WARNING] You are not a member of this group!");
             }
-            case LIST_MSG_CONTACT -> writeToSocket(databaseManager.listUserMsg(dataReceived.getContent(),dataReceived.getToUserUsername()));
-            case LIST_MSG_GROUP -> writeToSocket(databaseManager.listGroupMsg(dataReceived.getContent(),Integer.parseInt(dataReceived.getToUserUsername())));
+            case LIST_MSG_FILES_CONTACT -> writeToSocket(databaseManager.listUserMsg(dataReceived.getContent(),dataReceived.getToUserUsername()));
+            case LIST_MSG_FILES_GROUP -> writeToSocket(databaseManager.listGroupMsg(dataReceived.getContent(),Integer.parseInt(dataReceived.getToUserUsername())));
             case LIST_UNSEEN -> writeToSocket(databaseManager.listUnseen(dataReceived.getContent()));
             case DELETE_MESSAGE -> writeToSocket(databaseManager.deleteMsg(dataReceived.getContent(),dataReceived.getToGroupId() /* groupid == MSG id */));
 
