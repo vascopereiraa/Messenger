@@ -1,7 +1,9 @@
 package pt.isec.pd_g33.client.ui;
 
 import pt.isec.pd_g33.client.connections.ServerConnectionManager;
+import pt.isec.pd_g33.client.files.RequestFileProc;
 import pt.isec.pd_g33.shared.Data;
+import pt.isec.pd_g33.shared.MenuOption;
 import pt.isec.pd_g33.shared.Notification;
 
 import java.io.IOException;
@@ -23,6 +25,17 @@ public class ClientOutputUI {
             try {
                 Object o = ois.readObject();
                 if (o instanceof Data data) {
+                    if(data.getMenuOptionSelected() == MenuOption.REQUEST_FILE_FROM_CONTACT ||
+                        data.getMenuOptionSelected() == MenuOption.REQUEST_FILE_FROM_GROUP) {
+                        RequestFileProc rfc = new RequestFileProc(serverConnectionManager.getSaveLocation(),
+                                data.getContent(), data.getReadState(), data.getToUserId());
+                        Thread trfc = new Thread(rfc);
+                        trfc.start();
+
+                        trfc.join();
+                        System.out.println("File " + data.getContent() + " saved on " + serverConnectionManager.getSaveLocation().toString());
+                    }
+
                     // Login/Register success
                     if (data.getContent().contains("sucesso")) {
                         serverConnectionManager.setUserConnected(true);
@@ -64,6 +77,8 @@ public class ClientOutputUI {
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
                 return;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }

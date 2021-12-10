@@ -32,6 +32,8 @@ public enum MenuOption {
     // Files
     SEND_FILE_TO_CONTACT,
     SEND_FILE_TO_GROUP,
+    REQUEST_FILE_FROM_CONTACT,
+    REQUEST_FILE_FROM_GROUP,
 
 
     EXIT

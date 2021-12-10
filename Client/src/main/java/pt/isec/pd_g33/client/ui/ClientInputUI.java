@@ -118,6 +118,8 @@ public class ClientInputUI implements Runnable {
                 %-35s  %-100s
                 %-35s  %-100s
                 %-35s  %-100s
+                %-35s  %-100s
+                %-35s  %-100s
                 
                 %-35s  %-100s
                 %n""",
@@ -145,6 +147,8 @@ public class ClientInputUI implements Runnable {
                 "-> Send message to contact", "sendmsg contact <username> <...message...>",
                 "-> Send file to group", "sendfile group <group_id> <...path...> <...file...>",
                 "-> Send file to contact", "sendfile contact <username> <...path...> <...file...>",
+                "-> Request file from contact", "get contact <username> <...file...> <...save_location...>",
+                "-> Request file from group", "get group <group_id> <...file...> <...save_location...>",
                 "-> List messages/files to contact", "list contact <username>",
                 "-> List messages/files to group", "list group <group_id>",
                 "-> List unseen messages", "listunseen",
@@ -213,6 +217,16 @@ public class ClientInputUI implements Runnable {
                         writeToSocket(new Data(MenuOption.SEND_FILE_TO_CONTACT, comParts[4], comParts[2] ,sendFileProc.getSendFileSocketIp(),sendFileProc.getSendFileSocketPort(),serverConnectionManager.getUserData()));
                     else
                         writeToSocket(new Data(MenuOption.SEND_FILE_TO_GROUP, comParts[4], Integer.parseInt(comParts[2]) ,sendFileProc.getSendFileSocketIp(),sendFileProc.getSendFileSocketPort(),serverConnectionManager.getUserData()));
+                }
+                case "get" -> {
+                    if(serverConnectionManager.setSaveLocation(comParts[4])) {
+                        if (comParts[1].equalsIgnoreCase("contact"))
+                            writeToSocket(new Data(MenuOption.REQUEST_FILE_FROM_CONTACT, comParts[3], comParts[2], null, 0, serverConnectionManager.getUserData()));
+                        else
+                            writeToSocket(new Data(MenuOption.REQUEST_FILE_FROM_GROUP, comParts[3], Integer.parseInt(comParts[2]), null, 0, serverConnectionManager.getUserData()));
+                    }
+                    else
+                        System.out.println("[ERROR] Save location is invalid!");
                 }
 
                 default -> System.out.println("Indique um comando válido");

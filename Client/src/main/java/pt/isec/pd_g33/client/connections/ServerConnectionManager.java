@@ -4,6 +4,7 @@ import pt.isec.pd_g33.client.ui.ClientInputUI;
 import pt.isec.pd_g33.client.ui.ClientOutputUI;
 import pt.isec.pd_g33.shared.UserData;
 
+import java.io.File;
 import java.io.IOException;
 
 import java.io.ObjectInputStream;
@@ -26,6 +27,9 @@ public class ServerConnectionManager {
 
     // Sync object
     private Boolean exited = false;
+
+    // Save file location
+    private File saveLocation;
 
     public ServerConnectionManager(GRDSConnection grdsConnection) {
         this.grdsConnection = grdsConnection;
@@ -91,6 +95,20 @@ public class ServerConnectionManager {
 
     public ObjectInputStream getSocketInputStream() {
         return in;
+    }
+
+    // File save location
+    public boolean setSaveLocation(String saveLocation) {
+        File saveLoc = new File(saveLocation);
+        if (saveLoc.canWrite()) {
+            this.saveLocation = saveLoc;
+            return true;
+        }
+        return false;
+    }
+
+    public File getSaveLocation() {
+        return saveLocation;
     }
 
     // Disconnect Client

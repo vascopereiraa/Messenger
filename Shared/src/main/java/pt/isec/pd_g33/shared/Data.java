@@ -56,7 +56,7 @@ public class Data implements Serializable {
         this.content = name;
     }
 
-    public Data(MenuOption menuOptionSelected,String mensagem, int toGroupID, UserData userData) {
+    public Data(MenuOption menuOptionSelected, String mensagem, int toGroupID, UserData userData) {
         this.menuOptionSelected = menuOptionSelected;
         this.toGroupId = toGroupID;
         this.userData = userData;
@@ -81,7 +81,7 @@ public class Data implements Serializable {
         this.readState = "waiting";
     }
 
-    public Data(MenuOption menuOptionSelected,String from_username, String to_username) {
+    public Data(MenuOption menuOptionSelected, String from_username, String to_username) {
         this.menuOptionSelected = menuOptionSelected;
         this.content = from_username;
         this.toUserUsername = to_username;

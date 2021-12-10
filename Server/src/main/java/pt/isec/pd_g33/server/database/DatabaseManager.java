@@ -1044,5 +1044,23 @@ public class DatabaseManager {
         }
         return arrayOfUsernames;
     }
+
+    public boolean isFileToContact(String filename, String fromUsername, String toUsername) {
+        String sqlQuery = """
+                SELECT data_id
+                FROM `Data`
+                WHERE content LIKE '%%%s%%'
+                AND from_user_id = %d
+                AND to_user_id = %d;
+                """.formatted(filename, getUserID(fromUsername), getUserID(toUsername));
+        try (Statement statement = db.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            return resultSet.next();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return false;
+        }
+
+    }
 }
 

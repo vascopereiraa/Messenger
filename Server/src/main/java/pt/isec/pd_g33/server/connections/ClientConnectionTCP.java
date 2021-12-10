@@ -5,10 +5,7 @@ import pt.isec.pd_g33.server.database.DatabaseManager;
 import pt.isec.pd_g33.server.file.ThreadReceiveFiles;
 import pt.isec.pd_g33.shared.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -175,6 +172,17 @@ public class ClientConnectionTCP implements Runnable {
                 } else {
                     writeToSocket("[WARNING] " + dataReceived.getToUserUsername() + " does not make part of your contacts list");
                 }
+            }
+            case REQUEST_FILE_FROM_CONTACT -> {
+                if(new File(folderPath + File.separator + dataReceived.getContent()).exists()) { // Ficheiro existe no armaz. do SV
+                    if(databaseManager.isFileToContact(dataReceived.getContent(), dataReceived.getToUserUsername(), dataReceived.getUserData().getUsername())) {
+                        dataReceived.setReadState(ipToReceiveFiles);
+                        dataReceived.setToUserId(portToReceiveFiles);
+                        writeToSocket(dataReceived);
+                    } else
+                        writeToSocket("[ERROR] Don't have any file from this contact with that filename");
+                } else
+                    writeToSocket("[ERROR] Don't exist a file with that filename");
             }
 
             // Exit
