@@ -62,6 +62,7 @@ public class ThreadMessageReflection implements Runnable {
                     ttrf.start();
                 }
 
+
                 // Envia notificação ao cliente correto caso ele esteja connectado a este servidor
                 listUsers.forEach(u -> {
                     if (notification.getToUsername().equals(u.getUsername())) {

@@ -4,5 +4,5 @@ public enum DataType {
     Message,
     File,
     Contact,
-    JoinGroup
+    Group
 }

@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ClientConnectionTCP implements Runnable {
@@ -78,13 +79,9 @@ public class ClientConnectionTCP implements Runnable {
     private void processData(Data dataReceived) {
         switch (dataReceived.getMenuOptionSelected()) {
             // User
-            case EDIT_USER -> {
-                writeToSocket(databaseManager.updateUser(
-                        dataReceived.getUserData().getName(),
-                        dataReceived.getUserData().getUsername(),
-                        dataReceived.getUserData().getPassword(),
-                        dataReceived.getToUserId()));
-            }
+            case EDIT_USER ->
+                writeToSocket(databaseManager.updateUser(dataReceived.getUserData().getName(),dataReceived.getUserData().getUsername(),
+                        dataReceived.getUserData().getPassword(),dataReceived.getToUserId()));
             case LIST_USERS -> writeToSocket(databaseManager.listUsers());
             case SEARCH_USER -> writeToSocket(databaseManager.searchUserByName(dataReceived.getContent()));
 
@@ -94,21 +91,23 @@ public class ClientConnectionTCP implements Runnable {
             case JOIN_GROUP -> {
                 if(databaseManager.joinGroup(dataReceived.getUserData().getUserID(), dataReceived.getToUserId(),"pending")) {
                     writeToSocket("Foi enviado um pedido de adesão ao administrador do grupo");
-                    processNotification(new Notification(dataReceived.getUserData().getUsername(), databaseManager.getGroupAdmin(dataReceived.getToUserId()), DataType.JoinGroup));
+                    processNotification(new Notification(dataReceived.getUserData().getUsername(), databaseManager.getGroupAdmin(dataReceived.getToUserId()), DataType.Group));
                 } else
                     writeToSocket("Ocorreu um erro. Não foi possível aderir a grupo. Certifique-se que o grupo existe e que já não pertence a ele.");
             }
             case MEMBER_ACCEPT -> {
                 if(databaseManager.acceptOrRejectGroupMember(dataReceived.getToGroupId(), dataReceived.getContent(),"accept",dataReceived.getUserData().getUsername())) {
                     writeToSocket(dataReceived.getContent().trim() + " foi adicionado ao grupo");
-                    processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getContent(), DataType.Message));
+                    processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getContent(), DataType.Group, dataReceived.getToGroupId(),
+                            databaseManager.getGroupNameById(dataReceived.getToGroupId()),"aceite"));
                 } else
                     writeToSocket("Ocorreu um erro. Não foi possível aceitar um novo membro no grupo! Certifique-se que tem os dados corretos e é administrador!");
             }
             case MEMBER_REMOVE -> {
                 if(databaseManager.acceptOrRejectGroupMember(dataReceived.getToGroupId(), dataReceived.getContent(),"reject",dataReceived.getUserData().getUsername())) {
                     writeToSocket(dataReceived.getContent().trim() + " foi removido");
-                    processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getContent(), DataType.Message));
+                    processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getContent(), DataType.Group, dataReceived.getToGroupId(),
+                            databaseManager.getGroupNameById(dataReceived.getToGroupId()),"removido"));
                 } else
                     writeToSocket("Ocorreu um erro. Não foi possível aceitar um novo membro no grupo! Certifique-se que tem os dados corretos e é administrador!");
             }
@@ -228,22 +227,13 @@ public class ClientConnectionTCP implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        //todo: Verificar se cliente pertence a este servidor, caso pertença, não precisa avisar outros servidores
-        /*for(UserInfo u : listUsers) {
+        // Verificar se cliente pertence a este servidor, caso pertença, não precisa avisar outros servidores
+        for(UserInfo u : listUsers) {
             if(u.getUsername().equals(notification.getToUsername())) {
                 u.writeSocket(notification);
                 return;
             }
-        }*/
-
-        /*listUsers.forEach(u -> {
-            if(u.getUsername().equals(notification.getToUsername())){
-                System.out.println("\n\nExiste o cliente no mesmo servidor");
-                u.writeSocket(notification);
-                return;
-            }
-        });*/
+        }
 
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();

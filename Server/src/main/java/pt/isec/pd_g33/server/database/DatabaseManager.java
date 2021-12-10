@@ -5,6 +5,7 @@ import pt.isec.pd_g33.shared.UserData;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class DatabaseManager {
@@ -737,7 +738,7 @@ public class DatabaseManager {
                     FROM `Data` d2
                     WHERE d2.from_user_id = %d AND d2.to_user_id = %d;
                     """.formatted(getUserID(toUserName), getUserID(fromUsername),
-                                  getUserID(fromUsername), getUserID(toUserName));
+                                  getUserID(toUserName), getUserID(fromUsername));
             ResultSet resultSet = statement.executeQuery(sqlQuery);
             if (!resultSet.next()) {
                 return "Não tem mensagens com o " + toUserName;
@@ -903,11 +904,13 @@ public class DatabaseManager {
                 FROM `Data`
                 WHERE to_user_id = %d
                 AND read_state LIKE '%%unseen%%'
+                ORDERBY from_user_id
                 UNION
                 SELECT data_id,from_user_id,from_user_id, content, to_group_id
                 FROM `Data`
                 WHERE to_group_id IS NOT NULL
                 AND read_state LIKE '%%unseen%%'
+                ORDERBY to_group_id
                 """.formatted(getUserID(username));
         try (Statement statement = db.createStatement()) {
             ResultSet resultSet = statement.executeQuery(sqlQuery);
@@ -1016,4 +1019,30 @@ public class DatabaseManager {
             return false;
         }
     }
+
+    public ArrayList<String> getArraylistOfGroupMembers(int toGroupId) {
+        ArrayList<String> arrayOfUsernames = new ArrayList<>();
+        try {
+            Statement statement = db.createStatement();
+            String sqlQuery = """
+                    SELECT user_id
+                    FROM `Participate`
+                    WHERE group_id = %d
+                    """.formatted(toGroupId);
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if (!resultSet.next()) {
+                return null;
+            } else {
+                do {
+                    arrayOfUsernames.add(getUsernameById(resultSet.getInt("user_id")));
+                } while (resultSet.next());
+            }
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return arrayOfUsernames;
+    }
 }
+

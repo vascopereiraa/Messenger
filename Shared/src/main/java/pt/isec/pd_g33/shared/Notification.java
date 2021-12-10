@@ -11,6 +11,7 @@ public class Notification implements Serializable {
     private String toUsername;
     private String fromUsername;
     private int toGroupId;
+    private String toGroupName;
     private DataType dataType;
     private String content;
     private String ip;
@@ -30,6 +31,27 @@ public class Notification implements Serializable {
         this.ip = ip;
         this.porto = porto;
     }
+
+    public Notification(String fromUsername, int toGroupId,String toGroupName , String toUsername, DataType dataType, String filename, String ip, int porto) {
+        this.fromUsername = fromUsername;
+        this.toUsername = toUsername;
+        this.toGroupId = toGroupId;
+        this.toGroupName = toGroupName;
+        this.dataType = dataType;
+        this.content = filename;
+        this.ip = ip;
+        this.porto = porto;
+    }
+
+    public Notification(String fromUsername, String toUsername, DataType dataType,int toGroupId , String toGroupName, String aceiteRejeitado) {
+        this.fromUsername = fromUsername;
+        this.toUsername = toUsername;
+        this.toGroupId = toGroupId;
+        this.toGroupName = toGroupName;
+        this.dataType = dataType;
+        this.content = aceiteRejeitado;
+    }
+
 
     public String getToUsername() {
         return toUsername;
@@ -54,5 +76,11 @@ public class Notification implements Serializable {
     public String getContent() {
         return content;
     }
+
+    public String getToGroupName() {
+        return toGroupName;
+    }
+
+    public int getToGroupId() { return toGroupId; }
 }
 
