@@ -627,6 +627,103 @@ public class DatabaseManager {
         }
     }
 
+    public void deleteAllMsgsAndFilesInGroupSentByCertainUser(int fromUserId, int toGroupId){
+        try {
+            Statement statement = db.createStatement();
+            String sqlQuery = """
+                        DELETE FROM Data
+                        WHERE from_user_id = %d
+                        AND to_group_id = %d
+                        AND data_type LIKE '%%message%%' 
+                        OR data_type LIKE '%%file%%' 
+                        """.formatted(fromUserId, toGroupId);
+            statement.executeUpdate(sqlQuery);
+            statement.close();
+        } catch (SQLException e) {
+            System.err.println("SQLExeption deleteContact");
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteAllMsgsAndFilesToUserSentByCertainUser(int fromUserId, int toUserId){
+        try {
+            Statement statement = db.createStatement();
+            String sqlQuery = """
+                        DELETE FROM Data
+                        WHERE from_user_id = %d
+                        AND to_user_id = %d
+                        AND data_type LIKE '%%message%%' 
+                        OR data_type LIKE '%%file%%' 
+                        """.formatted(fromUserId, toUserId);
+            statement.executeUpdate(sqlQuery);
+            statement.close();
+        } catch (SQLException e) {
+            System.err.println("SQLExeption deleteContact");
+            e.printStackTrace();
+        }
+    }
+
+    public int getMessageOrFileSenderIdFromDataId(int dataId) {
+        try (Statement statement = db.createStatement()) {
+            String sqlQuery = """
+                    SELECT user_id
+                    FROM Data
+                    WHERE data_id = %d;
+                    """.formatted(dataId);
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if(resultSet.next())
+                return resultSet.getInt("user_id");
+            return -1;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+            return -1;
+        }
+    }
+
+    public void deleteCertainMsgOrFileSentByCertainUserToContact(int fromUserId, int toUserId, int dataId){
+        try {
+            if(getMessageOrFileSenderIdFromDataId(dataId) != fromUserId)
+                return;
+
+            Statement statement = db.createStatement();
+            String sqlQuery = """
+                        DELETE FROM Data
+                        WHERE from_user_id = %d
+                        AND to_user_id = %d
+                        AND data_id = %d
+                        AND data_type LIKE '%%message%%' 
+                        OR data_type LIKE '%%file%%' 
+                        """.formatted(fromUserId, toUserId, dataId);
+            statement.executeUpdate(sqlQuery);
+            statement.close();
+        } catch (SQLException e) {
+            System.err.println("SQLExeption deleteContact");
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteCertainMsgOrFileSentByCertainUserToGroup(int fromUserId, int toGroupId, int dataId){
+        try {
+            if(!isGroupMember(getUsernameById(fromUserId), toGroupId))
+                return;
+
+            Statement statement = db.createStatement();
+            String sqlQuery = """
+                        DELETE FROM Data
+                        WHERE from_user_id = %d
+                        AND to_group_id = %d
+                        AND data_id = %d
+                        AND data_type LIKE '%%message%%'
+                        OR data_type LIKE '%%file%%';
+                        """.formatted(fromUserId, toGroupId, dataId);
+            statement.executeUpdate(sqlQuery);
+            statement.close();
+        } catch (SQLException e) {
+            System.err.println("SQLExeption deleteContact");
+            e.printStackTrace();
+        }
+    }
+
     public String listUserMsg(String fromUsername, String toUserName){
         StringBuilder sb = new StringBuilder();
         try {

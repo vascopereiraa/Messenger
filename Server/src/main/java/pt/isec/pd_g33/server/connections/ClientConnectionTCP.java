@@ -155,17 +155,25 @@ public class ClientConnectionTCP implements Runnable {
                 Thread received = new Thread(threadReceiveFiles);
                 if(databaseManager.addMsgAndFilesUsers(dataReceived)) {
                     received.start();
-
-                    try {
-                        received.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
                     writeToSocket("[SUCCESS] File sent successfully to " + dataReceived.getToUserUsername());
                     processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getToUserUsername(),
                                             DataType.File,dataReceived.getContent(),ipToReceiveFiles,portToReceiveFiles));
-                }else{
+                } else {
+                    writeToSocket("[WARNING] " + dataReceived.getToUserUsername() + " does not make part of your contacts list");
+                }
+            }
+            case SEND_FILE_TO_GROUP -> {
+                ThreadReceiveFiles threadReceiveFiles = new ThreadReceiveFiles(dataReceived.getReadState(),dataReceived.getToUserId(),folderPath,dataReceived.getContent());
+                Thread received = new Thread(threadReceiveFiles);
+                if(databaseManager.addMsgAndFilesGroups(dataReceived)) {
+                    received.start();
+                    writeToSocket("[SUCCESS] File sent successfully to group id " + dataReceived.getToGroupId());
+
+                    ArrayList<String> arrayOfUsernames = databaseManager.getArraylistOfGroupMembers(dataReceived.getToGroupId());
+                    for(String toUsername  : arrayOfUsernames)
+                        processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getToGroupId(), databaseManager.getUsernameById(dataReceived.getToGroupId()),
+                                toUsername,DataType.File,dataReceived.getContent(),ipToReceiveFiles,portToReceiveFiles));
+                } else {
                     writeToSocket("[WARNING] " + dataReceived.getToUserUsername() + " does not make part of your contacts list");
                 }
             }
