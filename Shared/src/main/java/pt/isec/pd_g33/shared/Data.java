@@ -95,6 +95,7 @@ public class Data implements Serializable {
         this.toUserId = toUserId; // Porto
         this.readState = IP; // IP
         this.userData = userData; // Dados do user de origem
+        this.dataType = DataType.File;
     }
 
     // Ficheiros grupos
@@ -105,6 +106,7 @@ public class Data implements Serializable {
         this.toUserId = toUserId; // Porto
         this.readState = IP; // IP
         this.userData = userData; // Dados do user de origem
+        this.dataType = DataType.File;
     }
 
     // listar historico de msg com grupo
@@ -184,5 +186,20 @@ public class Data implements Serializable {
 
     public void setToGroupId(int toGroupId) {
         this.toGroupId = toGroupId;
+    }
+
+    @Override
+    public String toString() {
+        return "Data{" +
+                "content='" + content + '\'' +
+                ", readState='" + readState + '\'' +
+                ", dataType=" + dataType +
+                ", sentDate=" + sentDate +
+                ", toUserId=" + toUserId +
+                ", toUserUsername='" + toUserUsername + '\'' +
+                ", toGroupId=" + toGroupId +
+                ", menuOptionSelected=" + menuOptionSelected +
+                ", userData=" + userData +
+                '}';
     }
 }

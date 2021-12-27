@@ -3,20 +3,25 @@ package pt.isec.pd_g33.grds.coms;
 import pt.isec.pd_g33.grds.data.ServerList;
 import pt.isec.pd_g33.shared.ConnectionMessage;
 import pt.isec.pd_g33.shared.ConnectionType;
+import pt.isec.pd_g33.shared.Notification;
 import pt.isec.pd_g33.shared.ServerInfo;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.ArrayList;
 
 public class ThreadNewConnection implements Runnable {
 
     private final DatagramSocket ds;
     private final ServerList serverList;
+    private ArrayList<Notification> filesReceived;
 
-    public ThreadNewConnection(DatagramSocket ds, ServerList serverList) {
+    public ThreadNewConnection(DatagramSocket ds, ServerList serverList,ArrayList<Notification> filesReceived) {
         this.ds = ds;
         this.serverList = serverList;
+        this.filesReceived = filesReceived;
     }
 
     @Override

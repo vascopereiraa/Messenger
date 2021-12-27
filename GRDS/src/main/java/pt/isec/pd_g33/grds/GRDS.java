@@ -4,9 +4,11 @@ import pt.isec.pd_g33.grds.coms.ThreadHearthbeatManager;
 import pt.isec.pd_g33.grds.coms.ThreadNewConnection;
 import pt.isec.pd_g33.grds.coms.ThreadNotificationMulticast;
 import pt.isec.pd_g33.grds.data.ServerList;
+import pt.isec.pd_g33.shared.Notification;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 
 public class GRDS {
 
@@ -14,6 +16,7 @@ public class GRDS {
     private static final int MULTICAST_PORT = 3030;
 
     private ServerList serverList;
+    private ArrayList<Notification> filesReceived;
 
     public static void main(String[] args) {
         System.out.println("GRDS");
@@ -30,12 +33,13 @@ public class GRDS {
     public void startThreads(int listeningPort) {
 
         serverList = new ServerList();
+        filesReceived = new ArrayList<>();
 
         // Start threads to accept new Clients and Servers
         try {
             // Unicast thread
             DatagramSocket datagramSocket = new DatagramSocket(listeningPort);
-            ThreadNewConnection unicastThreadAccept = new ThreadNewConnection(datagramSocket, serverList);
+            ThreadNewConnection unicastThreadAccept = new ThreadNewConnection(datagramSocket, serverList,filesReceived);
             Thread t1 = new Thread(unicastThreadAccept);
             t1.start();
 
@@ -48,12 +52,12 @@ public class GRDS {
             NetworkInterface ni = NetworkInterface.getByName("en0");
             multicastSocket.joinGroup(addr, ni);*/
 
-            ThreadNewConnection multicastThreadAccept = new ThreadNewConnection(ds, serverList);
+            ThreadNewConnection multicastThreadAccept = new ThreadNewConnection(ds, serverList,filesReceived);
             Thread t2 = new Thread(multicastThreadAccept);
             t2.start();
 
             //todo: check this Notification thread
-            ThreadNotificationMulticast notificationMulticast = new ThreadNotificationMulticast();
+            ThreadNotificationMulticast notificationMulticast = new ThreadNotificationMulticast(filesReceived);
             Thread tnm = new Thread(notificationMulticast);
             tnm.start();
 

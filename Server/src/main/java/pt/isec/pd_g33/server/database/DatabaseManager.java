@@ -1,6 +1,8 @@
 package pt.isec.pd_g33.server.database;
 
 import pt.isec.pd_g33.shared.Data;
+import pt.isec.pd_g33.shared.DataType;
+import pt.isec.pd_g33.shared.MenuOption;
 import pt.isec.pd_g33.shared.UserData;
 
 import java.sql.*;
@@ -342,10 +344,6 @@ public class DatabaseManager {
     }
 
     public String pendingContact(String username) {
-
-        System.out.println("PENDING CONTACT USERNAME: " + username);
-        System.out.println("PENDING CONTACT USERNAME ID: " + getUserID(username));
-
         StringBuilder sb = new StringBuilder();
         try {
             Statement statement = db.createStatement();

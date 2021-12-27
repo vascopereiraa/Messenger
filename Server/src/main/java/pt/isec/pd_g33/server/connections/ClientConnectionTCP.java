@@ -147,7 +147,9 @@ public class ClientConnectionTCP implements Runnable {
 
             // Files
             case SEND_FILE_TO_CONTACT -> {
-                ThreadReceiveFiles threadReceiveFiles = new ThreadReceiveFiles(dataReceived.getReadState(),dataReceived.getToUserId(),folderPath,dataReceived.getContent());
+                ThreadReceiveFiles threadReceiveFiles = new ThreadReceiveFiles(dataReceived.getReadState(),// Ip
+                        dataReceived.getToUserId(), // Porto
+                        folderPath,dataReceived.getContent());
                 Thread received = new Thread(threadReceiveFiles);
                 if(databaseManager.addMsgAndFilesUsers(dataReceived)) {
                     received.start();
@@ -159,7 +161,9 @@ public class ClientConnectionTCP implements Runnable {
                 }
             }
             case SEND_FILE_TO_GROUP -> {
-                ThreadReceiveFiles threadReceiveFiles = new ThreadReceiveFiles(dataReceived.getReadState(),dataReceived.getToUserId(),folderPath,dataReceived.getContent());
+                ThreadReceiveFiles threadReceiveFiles = new ThreadReceiveFiles(dataReceived.getReadState(), // Ip
+                        dataReceived.getToUserId(), // Porto
+                        folderPath,dataReceived.getContent());
                 Thread received = new Thread(threadReceiveFiles);
                 if(databaseManager.addMsgAndFilesGroups(dataReceived)) {
                     received.start();

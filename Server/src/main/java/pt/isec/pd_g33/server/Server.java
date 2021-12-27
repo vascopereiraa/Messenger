@@ -3,9 +3,11 @@ package pt.isec.pd_g33.server;
 import pt.isec.pd_g33.server.connections.AcceptClientConnectionTCP;
 import pt.isec.pd_g33.server.connections.GRDSConnection;
 import pt.isec.pd_g33.server.connections.ThreadMessageReflection;
+import pt.isec.pd_g33.server.file.ThreadReceiveFiles;
 import pt.isec.pd_g33.server.file.ThreadSendFiles;
 import pt.isec.pd_g33.server.data.UserInfo;
 import pt.isec.pd_g33.server.database.DatabaseManager;
+import pt.isec.pd_g33.shared.Data;
 
 import java.io.File;
 import java.net.*;
@@ -22,6 +24,8 @@ public class Server {
     private static InetAddress grdsIp;
     private static int grdsPort;
     private static String dbmsLocation;
+    private static DatabaseManager databaseManager;
+    private static String folderPath;
     private static final List<UserInfo> listUsers = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -31,7 +35,7 @@ public class Server {
         if(!argsProcessing(args)) return;
 
         // Start DB connection
-        DatabaseManager databaseManager = new DatabaseManager(dbmsLocation);
+        databaseManager = new DatabaseManager(dbmsLocation);
 
         // Thread receive Files
         ThreadSendFiles tsf = new ThreadSendFiles(databaseManager);
@@ -49,11 +53,12 @@ public class Server {
         }
 
         String serverName = grdsConnection.getServerName();
-        String folderPath = MAIN_SERVER_FOLDER +  serverName + "/";
+        folderPath = MAIN_SERVER_FOLDER +  serverName + "/";
         File serverFolder = new File(folderPath);
         if(serverFolder.mkdirs()) System.out.println("Folder Created: " + folderPath);
         acceptClient.setServerFolderPath(folderPath);
         tsf.setFolderPath(folderPath);
+
 
         // Cria thread de escuta de notificações do GRDS
         ThreadMessageReflection tmr = new ThreadMessageReflection(listUsers, folderPath, tsf.getPortToReceiveFiles());
