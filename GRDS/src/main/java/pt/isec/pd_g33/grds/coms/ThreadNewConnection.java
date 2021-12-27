@@ -27,6 +27,8 @@ public class ThreadNewConnection implements Runnable {
                 DatagramPacket dp = new DatagramPacket(new byte[4096], 4096);
                 ds.receive(dp);
 
+                System.out.println("Received");
+
                 ByteArrayInputStream bais = new ByteArrayInputStream(dp.getData());
                 ObjectInputStream ois = new ObjectInputStream(bais);
                 ConnectionMessage connectionMessage = (ConnectionMessage) ois.readObject();

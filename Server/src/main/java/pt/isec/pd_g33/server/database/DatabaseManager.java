@@ -112,7 +112,12 @@ public class DatabaseManager {
         try {
 
             Statement statement = db.createStatement();
-            String sqlQuery = "SELECT user_id,username,password,name FROM User WHERE BINARY username = '" + username + "' AND BINARY password ='" + password + "'";
+            String sqlQuery = """
+                    SELECT user_id, username, password, name, status
+                    FROM User
+                    WHERE BINARY username = '%s'
+                    AND BINARY password = '%s'
+                    """.formatted(username, password);
             ResultSet resultSet = statement.executeQuery(sqlQuery);
 
             if(resultSet.next()){
@@ -120,6 +125,7 @@ public class DatabaseManager {
                         resultSet.getString("username"),
                         resultSet.getString("password"),
                         resultSet.getString("name"));
+                userData.setStatus(resultSet.getString("status"));
             } else
                 return null;
 
@@ -131,29 +137,23 @@ public class DatabaseManager {
         return userData;
     }
 
-    public boolean changeUserStatus(int userId) {
-        try {
-            String status = null;
-            String sqlQuery = """
-                SELECT status
-                FROM User
-                WHERE user_id = %d;
-                """.formatted(userId);
-            Statement statement = db.createStatement();
-            ResultSet resultSet = statement.executeQuery(sqlQuery);
-            if(resultSet.next()) {
-                status = resultSet.getString("status");
-            }
+    public boolean changeUserStatus(int userId, int status) {
 
-            System.out.println(status);
-            assert status != null;
-            status = status.equalsIgnoreCase("online") ? "Offline" : "Online";
-            sqlQuery = """
+        enum Status {
+            Offline,
+            Online
+        }
+
+        try {
+            Status s = Status.values()[status];
+            String sqlQuery = """
                     UPDATE User
                     Set status = '%s'
                     WHERE user_id = %d
-                    """.formatted(status, userId);
+                    """.formatted(s, userId);
+            Statement statement = db.createStatement();
             statement.executeUpdate(sqlQuery);
+
             return true;
         } catch (SQLException e) {
             e.printStackTrace();

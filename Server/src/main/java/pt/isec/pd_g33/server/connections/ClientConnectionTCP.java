@@ -187,7 +187,7 @@ public class ClientConnectionTCP implements Runnable {
 
             // Exit
             case EXIT -> {
-                changeUserStatus(dataReceived.getToUserId());
+                changeUserStatus(dataReceived.getToUserId(), 0);
                 writeToSocket("[GOODBYE] Client Disconnected!");
             }
         }
@@ -197,9 +197,13 @@ public class ClientConnectionTCP implements Runnable {
         try {
             UserData userData = databaseManager.checkUserLogin(login.getUsername(), login.getPassword());
             if (userData != null) {
-                changeUserStatus(userData.getUserID());
-                userInfo.setUsername(login.getUsername());
-                oos.writeObject(new Data("Login validado com sucesso!", userData));
+                if (userData.getStatus().equalsIgnoreCase("online")) {
+                    oos.writeUnshared(new Data("O utilizador já se encontra com sessão iniciada"));
+                } else {
+                    changeUserStatus(userData.getUserID(), 1);
+                    userInfo.setUsername(login.getUsername());
+                    oos.writeObject(new Data("Login validado com sucesso!", userData));
+                }
             }
             else
                 oos.writeObject(new Data("Login invalido!"));
@@ -263,7 +267,7 @@ public class ClientConnectionTCP implements Runnable {
         userInfo.writeSocket(o);
     }
 
-    private void changeUserStatus(int userId) {
-        databaseManager.changeUserStatus(userId);
+    private void changeUserStatus(int userId, int status) {
+        databaseManager.changeUserStatus(userId, status);
     }
 }

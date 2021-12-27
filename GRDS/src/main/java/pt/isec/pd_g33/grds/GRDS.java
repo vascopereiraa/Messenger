@@ -40,13 +40,15 @@ public class GRDS {
             t1.start();
 
             // Multicast thread
-            MulticastSocket multicastSocket = new MulticastSocket(MULTICAST_PORT);
+            DatagramSocket ds = new DatagramSocket(MULTICAST_PORT, InetAddress.getByName(MULTICAST_IP));
+            System.out.println(ds.getLocalAddress().getHostAddress() + ":" + ds.getLocalPort());
+            /*MulticastSocket multicastSocket = new MulticastSocket(MULTICAST_PORT);
             InetAddress ia = InetAddress.getByName(MULTICAST_IP);
             InetSocketAddress addr = new InetSocketAddress(ia, MULTICAST_PORT);
             NetworkInterface ni = NetworkInterface.getByName("en0");
-            multicastSocket.joinGroup(addr, ni);
+            multicastSocket.joinGroup(addr, ni);*/
 
-            ThreadNewConnection multicastThreadAccept = new ThreadNewConnection(multicastSocket, serverList);
+            ThreadNewConnection multicastThreadAccept = new ThreadNewConnection(ds, serverList);
             Thread t2 = new Thread(multicastThreadAccept);
             t2.start();
 
@@ -56,7 +58,6 @@ public class GRDS {
             tnm.start();
 
             //todo: Thread que vai ler a informação a ser replicada
-
 
             // Heartbeat
             ThreadHearthbeatManager heartbeatManager = new ThreadHearthbeatManager(serverList.getServerInfo());

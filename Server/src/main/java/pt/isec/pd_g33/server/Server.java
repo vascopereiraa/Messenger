@@ -27,6 +27,8 @@ public class Server {
     public static void main(String[] args) {
         System.out.println("Server");
 
+        boolean _continue = true;
+
         // Verifica argumentos
         if(!argsProcessing(args)) return;
 
@@ -34,7 +36,7 @@ public class Server {
         DatabaseManager databaseManager = new DatabaseManager(dbmsLocation);
 
         // Thread receive Files
-        ThreadSendFiles tsf = new ThreadSendFiles(databaseManager);
+        ThreadSendFiles tsf = new ThreadSendFiles(databaseManager, _continue);
         Thread ttrf = new Thread(tsf);
         ttrf.start();
 
@@ -45,6 +47,13 @@ public class Server {
         GRDSConnection grdsConnection = new GRDSConnection(grdsIp, grdsPort, acceptClient.getMessage());
         if(!grdsConnection.connectGRDS()){
             System.out.println("Server: An error occurred when connecting to GRDS");
+            _continue = false;
+            try {
+                ttrf.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            DatabaseManager.close();
             return;
         }
 

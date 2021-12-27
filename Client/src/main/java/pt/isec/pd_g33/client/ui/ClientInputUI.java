@@ -228,7 +228,7 @@ public class ClientInputUI implements Runnable {
                     else
                         System.out.println("[ERROR] Save location is invalid!");
                 }
-
+                case "exit" -> {}
                 default -> System.out.println("Indique um comando válido");
             }
 
