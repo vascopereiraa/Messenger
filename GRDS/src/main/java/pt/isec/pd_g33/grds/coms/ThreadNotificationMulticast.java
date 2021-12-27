@@ -61,7 +61,7 @@ public class ThreadNotificationMulticast implements Runnable {
     }
 
 
-    static void synchronizeFiles() {
+    public static void synchronizeFiles() {
         for (Notification notification : filesReceived) {
             System.out.println("Item: " + notification);
             //if(!(new File("", notification.getContent()).exists()))

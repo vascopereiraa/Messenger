@@ -72,6 +72,7 @@ public class GRDS {
 
         } catch (IOException e) {
             e.printStackTrace();
+            System.exit(1);
         }
     }
 }
