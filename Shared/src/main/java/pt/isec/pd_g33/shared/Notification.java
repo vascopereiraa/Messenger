@@ -82,5 +82,19 @@ public class Notification implements Serializable {
     }
 
     public int getToGroupId() { return toGroupId; }
+
+    @Override
+    public String toString() {
+        return "Notification{" +
+                "toUsername='" + toUsername + '\'' +
+                ", fromUsername='" + fromUsername + '\'' +
+                ", toGroupId=" + toGroupId +
+                ", toGroupName='" + toGroupName + '\'' +
+                ", dataType=" + dataType +
+                ", content='" + content + '\'' +
+                ", ip='" + ip + '\'' +
+                ", porto=" + porto +
+                '}';
+    }
 }
 

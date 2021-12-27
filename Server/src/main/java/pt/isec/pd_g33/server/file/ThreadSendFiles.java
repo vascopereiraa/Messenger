@@ -16,11 +16,9 @@ public class ThreadSendFiles implements Runnable {
     private final DatabaseManager databaseManager;
     private ServerSocket ss;
     private String folderPath;
-    private boolean _continue;
 
-    public ThreadSendFiles(DatabaseManager databaseManager, boolean _continue) {
+    public ThreadSendFiles(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
-        this._continue = _continue;
         try {
             this.ss = new ServerSocket(0);
         } catch (IOException e) {
@@ -41,7 +39,7 @@ public class ThreadSendFiles implements Runnable {
 
     @Override
     public void run() {
-        while(_continue) {
+        while(true) {
             try {
                 Socket sCli = ss.accept();
 

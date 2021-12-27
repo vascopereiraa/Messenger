@@ -56,6 +56,11 @@ public class ThreadNewConnection implements Runnable {
                 dp.setLength(baos.toByteArray().length);
                 ds.send(dp);
 
+                if(connectionMessage.getConnectionType() == ConnectionType.Server &&
+                    serverList.getServerInfo().get(serverList.getServerInfo().size() - 1).isNewServer() == true){
+                    // Obtenção de todos os ficheiros existentes
+                    ThreadNotificationMulticast.synchronizeFiles();
+                }
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }

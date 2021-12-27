@@ -13,6 +13,17 @@ public class ServerInfo {
     private boolean isAlive;
     private int hearthbeatFail;
 
+    // new Server
+    boolean newServer = true;
+
+    public void setNewServer(boolean newServer) {
+        this.newServer = newServer;
+    }
+
+    public boolean isNewServer() {
+        return newServer;
+    }
+
     public ServerInfo(InetAddress ip, int port) {
         this.ip = ip;
         this.port = port;
