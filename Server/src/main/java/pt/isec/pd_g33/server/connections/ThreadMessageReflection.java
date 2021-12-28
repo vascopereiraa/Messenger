@@ -6,6 +6,7 @@ import pt.isec.pd_g33.shared.DataType;
 import pt.isec.pd_g33.shared.Notification;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
@@ -52,8 +53,7 @@ public class ThreadMessageReflection implements Runnable {
                 Notification notification = (Notification) ois.readObject();
 
                 //todo: debug
-                System.out.println("Recebi uma mensagem refletida: " + notification.getFromUsername() + " : "
-                        + notification.getToUsername() + " : " + notification.getDataType());
+                // System.out.println("Recebi uma mensagem refletida: " + notification.getFromUsername() + " : "+ notification.getToUsername() + " : " + notification.getDataType());
 
                 if(notification.getDataType() == DataType.File && notification.getPorto() != sendFilesPort) {
                     ThreadReceiveFiles trf = new ThreadReceiveFiles(notification.getIp(),notification.getPorto(),
@@ -61,17 +61,22 @@ public class ThreadMessageReflection implements Runnable {
                     Thread ttrf = new Thread(trf);
                     ttrf.start();
                 }
-
-
-                // Envia notificação ao cliente correto caso ele esteja connectado a este servidor
-                listUsers.forEach(u -> {
-                    if (notification.getToUsername().equals(u.getUsername())) {
-                        System.out.println("\nVou enviar a notificação ao utilizador: " + u.getUsername()
-                        + " Notificacao: " + notification.getFromUsername() + " : " + notification.getToUsername()
-                        + " : " + notification.getDataType());
-                        u.writeSocket(notification);
-                    }
-                });
+                // Caso seja notificacao para apagar um ficheiro, vai apagar ficheiro do diretorio com o nome: x
+                if(notification.getDataType() == DataType.File && notification.getToUsername().equals("deletefile")){ // fromUserName contem o nome do ficheiro
+                    File file = new File(folderPath + File.separator + notification.getFromUsername());
+                    if (file.exists())
+                        file.delete();
+                }else{
+                    // Envia notificação ao cliente correto caso ele esteja connectado a este servidor
+                    listUsers.forEach(u -> {
+                        if (notification.getToUsername().equals(u.getUsername())) {
+                            System.out.println("\nVou enviar a notificação ao utilizador: " + u.getUsername()
+                            + " Notificacao: " + notification.getFromUsername() + " : " + notification.getToUsername()
+                            + " : " + notification.getDataType());
+                            u.writeSocket(notification);
+                        }
+                    });
+                }
 
             } catch (IOException e) {
                 System.err.println("IOException: Multicast reading");

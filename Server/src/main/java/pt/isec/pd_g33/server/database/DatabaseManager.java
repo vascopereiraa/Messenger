@@ -553,15 +553,14 @@ public class DatabaseManager {
     }
 
     public String leaveGroup(UserData member, int groupId, String membershipState){
-        System.out.println(getGroupAdmin(groupId));
-        System.out.println(member.getUsername());
         if(getGroupAdmin(groupId).equals(member.getUsername())){
             return deleteGroup(member.getUsername(), groupId);
         }
-        if(deleteParticipateMember((int)member.getUserID(), groupId, "approved")){
+        if(deleteParticipateMember(member.getUserID(), groupId, "approved")){
+            deleteAllMsgsAndFilesInGroupSentByCertainUser(member.getUserID(),groupId);
             return "Deixou de fazer parte do grupo";
         }
-        return "Não é possível abandonar o grupo. Gostam demasiado de ti!!! Não faça isto!!!";
+        return "Não é possível abandonar o grupo!";
     }
 
     public boolean deleteParticipateMember(int userId, int groupId, String membershipState){
@@ -593,10 +592,10 @@ public class DatabaseManager {
                         AND request_state LIKE '%%approved%%'
                         """.formatted(getUserID(fromUsername), getUserID(fromUsername), getUserID(toUsername), getUserID(toUsername));
                 if (statement.executeUpdate(sqlQuery) == 2) {
-
                     statement.close();
                     return "Não foi possivel eliminar o contacto " + toUsername;
                 }
+                statement.close();
             } catch (SQLException e) {
                 System.err.println("SQLExeption deleteContact");
                 e.printStackTrace();
@@ -606,6 +605,27 @@ public class DatabaseManager {
             return "Contacto Eliminado com sucesso! ";
         }
         return "Esse contacto não existe na sua lista de contactos!\n";
+    }
+
+    public String deleteFileFromUser(long fromUserId, String filename){
+        try {
+            Statement statement = db.createStatement();
+            String sqlQuery = """
+                        DELETE FROM Data
+                        WHERE from_user_id = %d
+                        AND data_type LIKE '%%File%%' 
+                        AND content = '%s' 
+                        """.formatted(fromUserId, filename);
+            if(statement.executeUpdate(sqlQuery) == 2){
+                statement.close();
+                return "Não foi possível eliminar o ficheiro " + filename + ". Certifique-se que é seu e existe.";
+            }
+            statement.close();
+        } catch (SQLException e) {
+            System.err.println("SQLExeption deleteContact");
+            e.printStackTrace();
+        }
+        return "Ficheiro eliminado com sucesso.";
     }
 
     public void deleteMsgsAndFiles(long fromUserId, long toUserId){
@@ -644,12 +664,12 @@ public class DatabaseManager {
         }
     }
 
-    public void deleteAllMsgsAndFilesToUserSentByCertainUser(int fromUserId, int toUserId){
+    public void deleteAllMsgsAndFilesToGroupSentByCertainUser(int fromUserId, int toUserId){
         try {
             Statement statement = db.createStatement();
             String sqlQuery = """
                         DELETE FROM Data
-                        WHERE from_user_id = %d
+                        WHERE to_group_id = %d
                         AND to_user_id = %d
                         AND data_type LIKE '%%message%%' 
                         OR data_type LIKE '%%file%%' 

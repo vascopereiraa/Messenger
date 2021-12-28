@@ -51,8 +51,8 @@ public class ThreadReceiveFiles implements Runnable {
             in.close();
             out.close();
             socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException e) {// Caso o ficheiro seja apagado, esta thread termina
+            System.out.println("O ficheiro " + filename + " foi apagado.");
         }
     }
 

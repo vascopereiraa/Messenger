@@ -41,9 +41,12 @@ public class ThreadNotificationMulticast implements Runnable {
                     System.out.println("GRDS received notification: " + notification.getDataType()
                             + "from: " + notification.getFromUsername() + "to: " + notification.getToUsername());
 
-                    // Adicionar as notificações de ficheiro recebidas
+                    // Caso a notificacao seja de ficheiros
                     if(notification.getDataType() == DataType.File)
-                        filesReceived.add(notification);
+                        if(notification.getToUsername().equals("deletefile"))// Notificacao para eliminar o ficheiro, remove da lista; getContent tem nome ficheiro quando é send
+                            filesReceived.removeIf(obj -> obj.getContent().equals(notification.getFromUsername())); //getFromUsername tem nome do ficheiro quando é delete
+                        else // Notificacao para adicionar ficheiro, adiciona a lista
+                            filesReceived.add(notification);
 
                     // Envio em multicast para todos os servidores
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -63,8 +66,6 @@ public class ThreadNotificationMulticast implements Runnable {
 
     public static void synchronizeFiles() {
         for (Notification notification : filesReceived) {
-            System.out.println("Item: " + notification);
-            //if(!(new File("", notification.getContent()).exists()))
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ObjectOutputStream out = new ObjectOutputStream(baos);

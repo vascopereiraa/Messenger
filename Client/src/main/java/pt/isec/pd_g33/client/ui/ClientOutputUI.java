@@ -74,11 +74,10 @@ public class ClientOutputUI {
                     System.out.println("\n" + s);
                 }
 
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
+            } catch (IOException | ClassNotFoundException | InterruptedException e) {
+                System.out.println("O servidor terminou a conexão.");
+                // e.printStackTrace();
                 return;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
     }

@@ -189,6 +189,18 @@ public class ClientConnectionTCP implements Runnable {
                     writeToSocket("[ERROR] Don't exist a file with that filename");
             }
 
+            case DELETE_FILE -> {
+                File file = new File(folderPath + File.separator + dataReceived.getContent());
+                if (file.exists()) { // Ficheiro existe no armaz. do SV
+                    String resultado = databaseManager.deleteFileFromUser(dataReceived.getToGroupId(),dataReceived.getContent());
+                    writeToSocket(resultado);
+                    if(resultado.contains("sucesso")){ // Caso o ficheiro exista, vai ser apagado do alojamento local
+                        file.delete();
+                        processNotification(new Notification(dataReceived.getContent(),"deletefile",DataType.File));
+                    }
+                }
+            }
+
             // Exit
             case EXIT -> {
                 changeUserStatus(dataReceived.getToUserId(), 0);

@@ -34,6 +34,7 @@ public enum MenuOption {
     SEND_FILE_TO_GROUP,
     REQUEST_FILE_FROM_CONTACT,
     REQUEST_FILE_FROM_GROUP,
+    DELETE_FILE,
 
 
     EXIT

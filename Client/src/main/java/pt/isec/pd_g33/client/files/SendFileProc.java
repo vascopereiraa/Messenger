@@ -34,14 +34,15 @@ public class SendFileProc implements Runnable {
 
     @Override
     public void run() {
+        File file = null;
         try (Socket sCli = serverSocket.accept()) {
 
             OutputStream out = sCli.getOutputStream();
             ObjectInputStream ois = new ObjectInputStream(sCli.getInputStream());
 
             System.out.println("Vou enviar o ficheiro: [" + filename + "] para o socket: " + getSendFileSocketIp() + ":" + getSendFileSocketPort());
-
-            FileInputStream fis = new FileInputStream(new File(path + File.separator + filename).toString());
+            file = new File(path + File.separator + filename);
+            FileInputStream fis = new FileInputStream(file.toString());
             // int fileSize = 0;
             int lidos;
             while(fis.available() != 0){
@@ -61,6 +62,7 @@ public class SendFileProc implements Runnable {
 
             System.out.println("Mensagem enviada com sucesso! "/* + fileSize*/);
         } catch (IOException | ClassNotFoundException e) {
+            file.delete(); // Apaga ficheiro caso ocorra algo mal, ficheiro esta incompleto
             e.printStackTrace();
             System.err.println("IOException: run");
         }
