@@ -557,7 +557,6 @@ public class DatabaseManager {
             return deleteGroup(member.getUsername(), groupId);
         }
         if(deleteParticipateMember(member.getUserID(), groupId, "approved")){
-            deleteAllMsgsAndFilesInGroupSentByCertainUser(member.getUserID(),groupId);
             return "Deixou de fazer parte do grupo";
         }
         return "Não é possível abandonar o grupo!";

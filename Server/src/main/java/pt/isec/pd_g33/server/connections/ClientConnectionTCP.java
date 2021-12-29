@@ -53,7 +53,7 @@ public class ClientConnectionTCP implements Runnable {
                 dataReceived = ois.readObject();
             } catch (IOException | ClassNotFoundException e) {
                 System.err.println("IOException: Cliente fechou a conexão");
-                e.printStackTrace();
+                //e.printStackTrace();
                 break;
             }
 

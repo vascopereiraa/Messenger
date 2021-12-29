@@ -4,6 +4,7 @@ import pt.isec.pd_g33.client.connections.GRDSConnection;
 import pt.isec.pd_g33.client.connections.ServerConnectionManager;
 
 import java.net.*;
+import java.util.ArrayList;
 
 public class Client {
 
@@ -32,23 +33,26 @@ public class Client {
 
     public static void main(String[] args) {
         System.out.println("Client");
-
+        String[] loginOrRegister = {"empty"};
         if(!argsProcessing(args)) return;
+        do{
+            GRDSConnection grdsConnection = new GRDSConnection(grdsIp, grdsPort);
+            if (!grdsConnection.connectGRDS()) {
+                System.out.println("Client: An error occurred when connecting to GRDS");
+                return;
+            }
 
-        GRDSConnection grdsConnection = new GRDSConnection(grdsIp, grdsPort);
-        if (!grdsConnection.connectGRDS()) {
-            System.out.println("Client: An error occurred when connecting to GRDS");
-            return;
-        }
+            ServerConnectionManager serverConnectionManager = new ServerConnectionManager(grdsConnection,loginOrRegister);
+            // Caso o return (posicao 0 do arraylist retornado) seja 0, quer dizer que o cliente quis sair.
+            ArrayList<Object> returnValue = serverConnectionManager.connectToServer();
+            if((int) returnValue.get(0) == 0)
+                break;
+            // Caso contrario, vai existir uma troca de servidor.
+            loginOrRegister = (String[]) returnValue.get(1);
 
-        ServerConnectionManager serverConnectionManager = new ServerConnectionManager(grdsConnection);
-        serverConnectionManager.connectToServer();
+        }while(true);
 
-        /*
-            ThreadServerConnection threadServerConnection = new ThreadServerConnection(grdsConnection);
-            Thread serverConnection = new Thread(threadServerConnection);
-            serverConnection.start();
-        */
+        System.exit(0);
     }
 }
 

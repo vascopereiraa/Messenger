@@ -8,20 +8,22 @@ import pt.isec.pd_g33.shared.Notification;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.net.SocketTimeoutException;
 
 public class ClientOutputUI {
 
     private final ServerConnectionManager serverConnectionManager;
     private ObjectInputStream ois;
+    private Thread thread;
 
-    public ClientOutputUI(ServerConnectionManager scm) {
+    public ClientOutputUI(ServerConnectionManager scm, Thread t) {
+        this.thread = t;
         this.serverConnectionManager = scm;
         ois = serverConnectionManager.getSocketInputStream();
     }
 
-    public void begin() {
+    public int begin() {
         while (!serverConnectionManager.getExited()) {
-
             try {
                 Object o = ois.readObject();
                 if (o instanceof Data data) {
@@ -41,8 +43,7 @@ public class ClientOutputUI {
                         serverConnectionManager.setUserConnected(true);
                         serverConnectionManager.setUserData(data.getUserData());
                     }
-                    System.out.println("Recebi content: " + data.getContent());
-
+                    System.out.println("Info servidor: " + data.getContent());
                 }
                 if (o instanceof Notification notification) {
                     System.out.print("Recebeu uma notificação: ");
@@ -74,11 +75,15 @@ public class ClientOutputUI {
                     System.out.println("\n" + s);
                 }
 
-            } catch (IOException | ClassNotFoundException | InterruptedException e) {
-                System.out.println("O servidor terminou a conexão.");
+            }catch (SocketTimeoutException e ){
+                if(!thread.isAlive()) // Caso o jogador de exit no login, a thread de input deixa de existir, logo esta tem que deixar tambem
+                    return 0;
+            }catch (IOException | ClassNotFoundException | InterruptedException e) {
+                System.out.println("O servidor terminou a conexão. Pressione [ENTER] para obter um novo servidor.");
                 // e.printStackTrace();
-                return;
+                return 1;
             }
         }
+        return 0;
     }
 }
