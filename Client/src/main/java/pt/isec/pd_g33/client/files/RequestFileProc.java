@@ -7,10 +7,10 @@ public class RequestFileProc implements Runnable {
 
     public static final int DATA_SIZE = 4000;
 
-    private File saveLocation;
-    private String filename;
-    private String requestFileIp;
-    private int requestFilePort;
+    private final File saveLocation;
+    private final String filename;
+    private final String requestFileIp;
+    private final int requestFilePort;
 
     public RequestFileProc(File saveLocation, String filename, String requestFileIp, int requestFilePort) {
         this.saveLocation = saveLocation;

@@ -8,8 +8,8 @@ import pt.isec.pd_g33.shared.Notification;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.SocketTimeoutException;
 
+// Thread dedicada para receber notificações assincronas TCP vindas do servidor
 public class ClientOutputUI {
 
     private final ServerConnectionManager serverConnectionManager;

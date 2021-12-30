@@ -2,8 +2,6 @@ package pt.isec.pd_g33.shared;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
 
 public class UserData implements Serializable {
 
@@ -11,11 +9,10 @@ public class UserData implements Serializable {
     private final static long serialVersionUID = 1L;
 
     private int userID;
-    private String username;
-    private String password;
+    private final String username;
+    private final String password;
     private String status;
-    private String name;
-    private Date lastSeen;
+    private final String name;
 
     // Em caso de registo
     public UserData(String username, String password, String name){
@@ -35,16 +32,8 @@ public class UserData implements Serializable {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public String getPassword() {
         return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getStatus() {
@@ -59,23 +48,7 @@ public class UserData implements Serializable {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Date getLastSeen() {
-        return lastSeen;
-    }
-
-    public void setLastSeen(Date lastSeen) {
-        this.lastSeen = lastSeen;
-    }
-
     public int getUserID() {
         return userID;
-    }
-
-    public void setUserID(int userID) {
-        this.userID = userID;
     }
 }

@@ -1,6 +1,5 @@
 package pt.isec.pd_g33.shared;
 
-import java.awt.*;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
@@ -116,24 +115,19 @@ public class Data implements Serializable {
         this.toGroupId = toGroupId;
     }
 
+    public Data(MenuOption menuOption, UserData userData, DataType dataType) {
+        this.menuOptionSelected = menuOption;
+        this.userData = userData;
+        this.dataType = dataType;
+    }
+
+
     public MenuOption getMenuOptionSelected() {
         return menuOptionSelected;
     }
     
-    public void setMenuOptionSelected(MenuOption menuOptionSelected) {
-        this.menuOptionSelected = menuOptionSelected;
-    }
-
-    public void setUserData(UserData userData) {
-        this.userData = userData;
-    }
-
     public String getContent() {
         return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
 
     public String getReadState() {
@@ -148,24 +142,8 @@ public class Data implements Serializable {
         return dataType;
     }
 
-    public void setDataType(DataType dataType) {
-        this.dataType = dataType;
-    }
-
-    public Date getSentDate() {
-        return sentDate;
-    }
-
-    public void setSentDate(Date sentDate) {
-        this.sentDate = sentDate;
-    }
-
     public UserData getUserData() {
         return userData;
-    }
-
-    public void setFromUserId(UserData senderData) {
-        this.userData = senderData;
     }
 
     public int getToUserId() {
@@ -182,10 +160,6 @@ public class Data implements Serializable {
 
     public String getToUserUsername() {
         return toUserUsername;
-    }
-
-    public void setToGroupId(int toGroupId) {
-        this.toGroupId = toGroupId;
     }
 
     @Override

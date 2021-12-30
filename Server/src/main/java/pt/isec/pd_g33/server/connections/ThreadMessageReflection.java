@@ -8,24 +8,18 @@ import pt.isec.pd_g33.shared.Notification;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
-import java.net.NetworkInterface;
 import java.util.List;
 
+// Thread para receber datagramas UDP enviados pelo GRDS
 public class ThreadMessageReflection implements Runnable {
-
-    public static final String REFLECTION_IP = "255.255.255.255" ;
-    public static final int REFLECTION_PORT = 1000;
 
     private static List<UserInfo> listUsers;
     private final String folderPath;
     private final int sendFilesPort;
-    private MulticastSocket multicastSocket;
+    private final MulticastSocket multicastSocket;
 
     public ThreadMessageReflection(List<UserInfo> listUsers, String folderPath, int sendFilesPort, MulticastSocket multicastSocket) {
         this.multicastSocket = multicastSocket;
@@ -45,7 +39,6 @@ public class ThreadMessageReflection implements Runnable {
                 ObjectInputStream ois = new ObjectInputStream(bais);
                 Notification notification = (Notification) ois.readObject();
 
-                //todo: debug
                 // System.out.println("Recebi uma mensagem refletida: " + notification.getFromUsername() + " : "+ notification.getToUsername() + " : " + notification.getDataType());
 
                 if(notification.getDataType() == DataType.File && notification.getPorto() != sendFilesPort) {
@@ -79,11 +72,8 @@ public class ThreadMessageReflection implements Runnable {
     }
 
     public static void terminaClientes(ConnectionMessage connectionMessage){
-        System.out.println(connectionMessage.toString());
         ClientConnectionTCP.sendNotificationToGRDS(new Notification("serverTerminated",connectionMessage.getPort(),DataType.Message));
-        listUsers.forEach(u -> {
-            u.writeSocket(new Notification("serverTerminated",DataType.Message));
-        });
+        listUsers.forEach(u -> u.writeSocket(new Notification("serverTerminated",DataType.Message)));
     }
 
 }

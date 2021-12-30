@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 public class Register implements Serializable {
 
-    private String username;
-    private String password;
-    private String name;
+    private final String username;
+    private final String password;
+    private final String name;
 
     public Register(String username, String password, String name) {
         this.username = username;

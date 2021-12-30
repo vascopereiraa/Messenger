@@ -12,7 +12,7 @@ public class ConnectionMessage implements Serializable {
     private InetAddress ip;
     private int port;
     private String message;
-    private ConnectionType connectionType;
+    private final ConnectionType connectionType;
 
     // Client Constructor
     public ConnectionMessage(ConnectionType connectionType) {

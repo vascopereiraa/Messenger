@@ -1,7 +1,6 @@
 package pt.isec.pd_g33.grds.coms;
 
 import pt.isec.pd_g33.grds.data.ServerList;
-import pt.isec.pd_g33.shared.Data;
 import pt.isec.pd_g33.shared.DataType;
 import pt.isec.pd_g33.shared.Notification;
 
@@ -10,15 +9,15 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+// Thread que recebe notificações vindas de 1 servidor para depois refletir pelos restantes servidores.
 public class ThreadNotificationMulticast implements Runnable {
 
     private static final int UNICAST_SEND_NOTIFICATION_PORT = 1000;
     private static final int UNICAST_RECEIVE_NOTIFICATION_PORT = 2000;
     private static final String UNICAST_RECEIVE_NOTIFICATION_IP = "255.255.255.255";
-    private static CopyOnWriteArrayList<Notification> filesReceived = new CopyOnWriteArrayList<>();;
+    private static final CopyOnWriteArrayList<Notification> filesReceived = new CopyOnWriteArrayList<>();
 
     private static DatagramSocket ds;
     private static MulticastSocket multicastSocket;

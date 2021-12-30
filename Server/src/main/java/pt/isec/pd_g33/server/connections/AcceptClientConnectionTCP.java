@@ -12,15 +12,16 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 
+// Thread dedicada a receber novos clientes para se conectar por TCP
 public class AcceptClientConnectionTCP implements Runnable {
 
-    private ServerSocket ss;
-    private DatabaseManager databaseManager;
-    private int portToReceiveFiles;
-    private String ipToReceiveFiles;
+    private final ServerSocket ss;
+    private final DatabaseManager databaseManager;
+    private final int portToReceiveFiles;
+    private final String ipToReceiveFiles;
 
     // Client information
-    private List<UserInfo> listUsers;
+    private final List<UserInfo> listUsers;
     private String folderPath;
 
     public AcceptClientConnectionTCP(DatabaseManager databaseManager, List<UserInfo> listUsers, int portToReceiveFiles, String ipToReceiveFiles, ServerSocket ss) {
@@ -42,6 +43,7 @@ public class AcceptClientConnectionTCP implements Runnable {
             while (true) {
                 Socket sCli = ss.accept();
 
+                // Ligações Socket para cada cliente criadas.
                 ObjectOutputStream oos = null;
                 ObjectInputStream ois = null;
                 try {
@@ -52,9 +54,10 @@ public class AcceptClientConnectionTCP implements Runnable {
                 }
 
                 // Add new user to users list
-                UserInfo user = new UserInfo(sCli, oos);
+                UserInfo user = new UserInfo(oos);
                 listUsers.add(user);
 
+                // Thread lançada para ligacao TCP com cada cliente em especifico que se conecta ao servidor por TCP.
                 ClientConnectionTCP cliConn = new ClientConnectionTCP(databaseManager, user, listUsers, oos, ois,
                         portToReceiveFiles, ipToReceiveFiles, folderPath);
                 Thread cli = new Thread(cliConn);
@@ -63,7 +66,6 @@ public class AcceptClientConnectionTCP implements Runnable {
         } catch (IOException e) {
             System.out.println("AcceptClientConnectionTCP thread terminada.");
         }
-
     }
 
     public void setServerFolderPath(String folderPath) {

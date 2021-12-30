@@ -4,23 +4,21 @@ import pt.isec.pd_g33.client.connections.ServerConnectionManager;
 import pt.isec.pd_g33.client.files.SendFileProc;
 import pt.isec.pd_g33.shared.*;
 
-import java.awt.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.concurrent.Delayed;
 
 public class ClientInputUI implements Runnable {
 
     private final ServerConnectionManager serverConnectionManager;
-    private final ObjectOutputStream oos;
+    private static ObjectOutputStream oos;
     private final Scanner scanner;
     private String[] command = {"empty"};
     // Variavel possivel de obter fora da thread
     private volatile String[] loginOrRegister;
-    private ObjectInputStream oisClientInput; // Para fechar o OutputUI aquando dos Exit's.
+    private final ObjectInputStream oisClientInput; // Para fechar o OutputUI aquando dos Exit's.
 
     public ClientInputUI(ServerConnectionManager scm, String[] loginOrRegister, ObjectInputStream oisClientInput) {
         this.loginOrRegister = loginOrRegister;
@@ -46,9 +44,6 @@ public class ClientInputUI implements Runnable {
     }
 
     private boolean executeLogin()  {
-        /*System.out.println("Dados loginRegisto");
-        for(String item : loginOrRegister)
-            System.out.print(item);*/
         if(!loginOrRegister[0].equalsIgnoreCase("empty")){
             writeToSocket(new Login(loginOrRegister[1], loginOrRegister[2]));
         }else {
@@ -237,9 +232,8 @@ public class ClientInputUI implements Runnable {
                         MenuOption contactOrGroup = command[1].equalsIgnoreCase("contact") ? MenuOption.LIST_MSG_FILES_CONTACT : MenuOption.LIST_MSG_FILES_GROUP;
                         writeToSocket(new Data(contactOrGroup,serverConnectionManager.getUserData().getUsername(),command[2]));
                     }
-                    case "listunseen" -> { // ok
-                        writeToSocket(new Data(MenuOption.LIST_UNSEEN,serverConnectionManager.getUserData().getUsername()));
-                    }
+                    case "listunseen" -> writeToSocket(new Data(MenuOption.LIST_UNSEEN,serverConnectionManager.getUserData().getUsername()));
+
                     case "delmsg" -> writeToSocket(new Data(MenuOption.DELETE_MESSAGE,serverConnectionManager.getUserData().getUsername() , Integer.parseInt(command[1])));
 
                     // Files
@@ -275,7 +269,7 @@ public class ClientInputUI implements Runnable {
         disconnect();
     }
 
-    private void writeToSocket(Object o) {
+    public static void writeToSocket(Object o) {
         try {
             oos.writeUnshared(o);
             oos.flush();

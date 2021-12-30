@@ -5,6 +5,7 @@ public enum MenuOption {
     LIST_USERS,
     SEARCH_USER,
 
+    // Client
     LIST_CONTACTS,
     ADD_CONTACT,
     DELETE_CONTACT,
@@ -21,6 +22,9 @@ public enum MenuOption {
     LIST_GROUPS,
     LIST_UNSEEN,
 
+    SET_ONLINE,
+
+    // Groups
     CREATE_GROUP,
     JOIN_GROUP,
     RENAME_GROUP,
@@ -35,7 +39,6 @@ public enum MenuOption {
     REQUEST_FILE_FROM_CONTACT,
     REQUEST_FILE_FROM_GROUP,
     DELETE_FILE,
-
 
     EXIT
 }

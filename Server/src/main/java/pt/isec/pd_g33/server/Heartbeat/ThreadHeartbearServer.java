@@ -1,4 +1,4 @@
-package pt.isec.pd_g33.server;
+package pt.isec.pd_g33.server.Heartbeat;
 
 import pt.isec.pd_g33.server.connections.GRDSConnection;
 

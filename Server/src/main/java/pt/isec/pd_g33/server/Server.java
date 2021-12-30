@@ -1,5 +1,7 @@
 package pt.isec.pd_g33.server;
 
+import pt.isec.pd_g33.server.Heartbeat.ThreadHeartbearServer;
+import pt.isec.pd_g33.server.Heartbeat.ThreadHeartbeatClient;
 import pt.isec.pd_g33.server.connections.AcceptClientConnectionTCP;
 import pt.isec.pd_g33.server.connections.GRDSConnection;
 import pt.isec.pd_g33.server.connections.ThreadMessageReflection;
@@ -90,6 +92,11 @@ public class Server {
         Thread tths = new Thread(ths);
         tths.start();
 
+        // Heartbeat client, 30 em 30 seg
+        ThreadHeartbeatClient thc = new ThreadHeartbeatClient(databaseManager);
+        Thread tthc = new Thread(thc);
+        tthc.start();
+
         // Thread para terminar server intencionalmente
         ThreadTerminateServer tts = new ThreadTerminateServer();
         Thread ttts = new Thread(tts);
@@ -99,11 +106,14 @@ public class Server {
         try {
             // Espera que o user faça EXIT do server.
             ttts.join();
-            ThreadMessageReflection.terminaClientes(connectionMessage);
-            // Indica para a termina Thread Heartbeat
-            tths.stop();
-            System.out.println("Thread TerminateServer files ended");
             // Informar os clientes para terminar
+            ThreadMessageReflection.terminaClientes(connectionMessage);
+            // Indica para a Thread Heartbeat Server e Client terminar
+            tths.stop();
+            tths.join();
+            tthc.stop();
+            tthc.join();
+            System.out.println("Thread TerminateServer files ended");
             // Termina Thread send files
             sendFilesSS.close();
             ttsf.join();

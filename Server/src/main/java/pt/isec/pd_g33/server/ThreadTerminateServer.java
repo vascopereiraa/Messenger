@@ -6,7 +6,7 @@ public class ThreadTerminateServer implements Runnable {
 
     @Override
     public void run() {
-        String input = "";
+        String input;
         Scanner scanner = new Scanner(System.in);
         do{
             System.out.println("A qualquer momento, escreva exit para terminar o servidor.");

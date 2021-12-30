@@ -9,8 +9,8 @@ import java.net.*;
 public class GRDSConnection {
 
     // GRDS location
-    private InetAddress grdsIp;
-    private int grdsPort;
+    private final InetAddress grdsIp;
+    private final int grdsPort;
 
     // Server to connect location
     private InetAddress serverIp;

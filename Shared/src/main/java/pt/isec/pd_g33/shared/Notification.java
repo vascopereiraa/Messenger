@@ -12,7 +12,7 @@ public class Notification implements Serializable {
     private String fromUsername;
     private int toGroupId;
     private String toGroupName;
-    private DataType dataType;
+    private final DataType dataType;
     private String content;
     private String ip;
     private int porto;
@@ -55,7 +55,6 @@ public class Notification implements Serializable {
     public Notification(String content,int porto, DataType dataType) {
         this.content = content;
         this.dataType = dataType;
-        this.ip = ip;
         this.porto = porto;
     }
 

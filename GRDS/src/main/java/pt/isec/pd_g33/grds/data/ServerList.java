@@ -3,7 +3,6 @@ package pt.isec.pd_g33.grds.data;
 import pt.isec.pd_g33.grds.coms.ThreadNotificationMulticast;
 import pt.isec.pd_g33.shared.ServerInfo;
 
-import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ServerList {
@@ -47,6 +46,13 @@ public class ServerList {
 
     public CopyOnWriteArrayList<ServerInfo> getServerInfo(){
         return serverList;
+    }
+
+    public ServerInfo getServerInfoByPorto(int porto){
+        for(ServerInfo server : serverList)
+            if(server.getPort() == porto)
+                return server;
+        return null;
     }
 
     public int getNextIndex() { return index++;}

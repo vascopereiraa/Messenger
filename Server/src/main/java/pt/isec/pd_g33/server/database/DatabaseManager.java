@@ -1,13 +1,12 @@
 package pt.isec.pd_g33.server.database;
 
 import pt.isec.pd_g33.shared.Data;
-import pt.isec.pd_g33.shared.DataType;
-import pt.isec.pd_g33.shared.MenuOption;
 import pt.isec.pd_g33.shared.UserData;
 
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 public class DatabaseManager {
@@ -76,7 +75,6 @@ public class DatabaseManager {
     }
 
     public String updateUser(String name, String newUsername, String password, int userID) {
-        //todo: verificar se ja existe um username igual
         if(getUserID(newUsername) != -1)
             return "Já existe um username com esse nome, coloque outro.";
         try {
@@ -140,12 +138,10 @@ public class DatabaseManager {
     }
 
     public boolean changeUserStatus(int userId, int status) {
-
         enum Status {
             Offline,
             Online
         }
-
         try {
             Status s = Status.values()[status];
             String sqlQuery = """
@@ -214,7 +210,6 @@ public class DatabaseManager {
     }
 
     public String listContacts(int user_id) {
-
         StringBuilder sb = new StringBuilder();
         try {
 
@@ -230,7 +225,7 @@ public class DatabaseManager {
                     FROM User u2, Contact c2
                     WHERE c2.from_user_id = u2.user_id
                     AND c2.to_user_id = %d
-                    AND c2.request_state LIKE '%%approved%%';     
+                    AND c2.request_state LIKE '%%approved%%';
                     """.formatted(user_id, user_id);
             ResultSet resultSet = statement.executeQuery(sqlQuery);
             if (!resultSet.next()) {
@@ -261,9 +256,7 @@ public class DatabaseManager {
                         """.formatted(getUserID(username_member), group_id);
         try (Statement statement = db.createStatement()) {
             ResultSet resultSet = statement.executeQuery(sqlQuery);
-            if (resultSet.next())
-                return true;
-            return false;
+            return resultSet.next();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -272,9 +265,7 @@ public class DatabaseManager {
 
     public boolean isContact(String from_username, String toUsername){
         String data = listContacts((int)getUserID(from_username));
-        if(data.contains(toUsername))
-            return true;
-        return false;
+        return data.contains(toUsername);
     }
 
     public String getUsernameById(int user_id){
@@ -450,9 +441,7 @@ public class DatabaseManager {
                         AND admin_user_id = %d
                         """.formatted(groupName,adminUserId);
             ResultSet resultSet = statement.executeQuery(sqlQuery);
-            if (resultSet.next())
-                return false;
-            return true;
+            return !resultSet.next();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -496,9 +485,8 @@ public class DatabaseManager {
             return false;
 
         try {
-            PreparedStatement prepStatement = null;
             if (acceptReject.equalsIgnoreCase("accept")) {
-                prepStatement = db.prepareStatement("UPDATE Participate SET membership_state = ? WHERE user_id =? AND group_id =?");
+                PreparedStatement prepStatement = db.prepareStatement("UPDATE Participate SET membership_state = ? WHERE user_id =? AND group_id =?");
                 prepStatement.setString(1, "approved");
                 prepStatement.setInt(2, (int) getUserID(memberUsername));
                 prepStatement.setInt(3, groupId);
@@ -552,7 +540,7 @@ public class DatabaseManager {
         return null;
     }
 
-    public String leaveGroup(UserData member, int groupId, String membershipState){
+    public String leaveGroup(UserData member, int groupId){
         if(getGroupAdmin(groupId).equals(member.getUsername())){
             return deleteGroup(member.getUsername(), groupId);
         }
@@ -612,8 +600,8 @@ public class DatabaseManager {
             String sqlQuery = """
                         DELETE FROM Data
                         WHERE from_user_id = %d
-                        AND data_type LIKE '%%File%%' 
-                        AND content = '%s' 
+                        AND data_type LIKE '%%File%%'
+                        AND content = '%s'
                         """.formatted(fromUserId, filename);
             if(statement.executeUpdate(sqlQuery) == 2){
                 statement.close();
@@ -634,8 +622,8 @@ public class DatabaseManager {
                         DELETE FROM Data
                         WHERE to_user_id = %d OR from_user_id = %d
                         AND from_user_id = %d OR to_user_id = %d
-                        AND data_type LIKE '%%message%%' 
-                        OR data_type LIKE '%%file%%' 
+                        AND data_type LIKE '%%message%%'
+                        OR data_type LIKE '%%file%%'
                         """.formatted(fromUserId, fromUserId, toUserId, toUserId);
             statement.executeUpdate(sqlQuery);
             statement.close();
@@ -644,8 +632,8 @@ public class DatabaseManager {
             e.printStackTrace();
         }
     }
-
-    public void deleteAllMsgsAndFilesInGroupSentByCertainUser(int fromUserId, int toGroupId){
+    // Functions not used
+    /*public void deleteAllMsgsAndFilesInGroupSentByCertainUser(int fromUserId, int toGroupId){
         try {
             Statement statement = db.createStatement();
             String sqlQuery = """
@@ -697,7 +685,7 @@ public class DatabaseManager {
             return -1;
         }
     }
-
+    // Functions not used
     public void deleteCertainMsgOrFileSentByCertainUserToContact(int fromUserId, int toUserId, int dataId){
         try {
             if(getMessageOrFileSenderIdFromDataId(dataId) != fromUserId)
@@ -740,8 +728,7 @@ public class DatabaseManager {
             System.err.println("SQLExeption deleteContact");
             e.printStackTrace();
         }
-    }
-
+    }*/
     public String listUserMsg(String fromUsername, String toUserName){
         StringBuilder sb = new StringBuilder();
         try {
@@ -785,9 +772,7 @@ public class DatabaseManager {
                     AND membership_state LIKE '%%approved%%';
                     """.formatted(getUserID(fromUsername), groupId);
             ResultSet resultSet = statement.executeQuery(sqlQuery);
-            if (resultSet.next())
-                return true;
-            return false;
+            return resultSet.next();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -803,7 +788,7 @@ public class DatabaseManager {
             Statement statement = db.createStatement();
             String sqlQuery = """
                     SELECT from_user_id, content, read_state
-                    FROM Data 
+                    FROM Data
                     WHERE to_user_id = %d OR from_user_id = %d
                     """.formatted(getUserID(fromUsername), groupId);
             ResultSet resultSet = statement.executeQuery(sqlQuery);
@@ -954,7 +939,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            return "SQLException: listUnseen";
+            return "Não tem mensagens por ver!\n\n";
         }
         return sb.toString();
     }
@@ -1078,6 +1063,74 @@ public class DatabaseManager {
             return false;
         }
 
+    }
+
+    public boolean setClientOnline(UserData userData) {
+        try {
+            String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            PreparedStatement statement = db.prepareStatement("UPDATE User SET last_seen = ?, status = ? WHERE user_id =?");
+            statement.setString(1, date);
+            statement.setString(2, "Online");
+            statement.setInt(3, userData.getUserID());
+            statement.executeUpdate();
+            statement.close();
+        } catch (SQLException e) {
+            System.err.println("SQLException: Erro no update do user.");
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+
+    public void updateAllUserStatus() {
+        Calendar calendar = Calendar.getInstance();
+        System.out.println("Date b4: " + calendar.getTime());
+        calendar.add(Calendar.SECOND, -30);
+        System.out.println("Date after: " + calendar.getTime());
+        Date date = calendar.getTime();
+        String dateNow = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+        System.out.println("DateNow: " + dateNow);
+        try {
+            Statement statement = db.createStatement();
+            String sqlQuery = """
+                    SELECT user_id,last_seen
+                    FROM `User` 
+                    WHERE status = '%s';
+                    """.formatted("Online");
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if (!resultSet.next()) {
+                return;
+            } else {
+                do {
+                    System.out.println("Last_seen: " + resultSet.getString("last_seen") + " .: datenow .: " + dateNow);
+                    if(dateNow.compareTo(resultSet.getString("last_seen")) > 0){
+                        System.out.println("Offline: " + resultSet.getInt("user_id"));
+                        updateUserStatus(resultSet.getInt("user_id"));
+                    }
+                } while (resultSet.next());
+            }
+            statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return;
+    }
+
+
+    public void updateUserStatus(int user_id) {
+        try {
+            PreparedStatement statement = db.prepareStatement(
+                    "UPDATE User SET status = ? " +
+                            "WHERE user_id = ?");
+            statement.setString(1, "Offline");
+            statement.setInt(2, user_id);
+            statement.executeUpdate();
+            statement.close();
+        } catch (SQLException e) {
+            System.err.println("SQLException: Erro no update do user.");
+            e.printStackTrace();
+        }
     }
 }
 

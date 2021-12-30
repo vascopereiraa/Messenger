@@ -12,21 +12,22 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+// Thread criada para cada ligação TCP entre servidor clientes
 public class ClientConnectionTCP implements Runnable {
 
     private static final int UNICAST_NOTIFICATION_PORT = 2000;
     private final DatabaseManager databaseManager;
 
-    private ObjectOutputStream oos;
-    private ObjectInputStream ois;
-    private int portToReceiveFiles;
-    private String ipToReceiveFiles;
+    private final ObjectOutputStream oos;
+    private final ObjectInputStream ois;
+    private final int portToReceiveFiles;
+    private final String ipToReceiveFiles;
 
     private Object dataReceived;
     private final UserInfo userInfo;
-    private List<UserInfo> listUsers;
+    private final List<UserInfo> listUsers;
 
-    private String folderPath;
+    private final String folderPath;
 
     public ClientConnectionTCP(DatabaseManager databaseManager, UserInfo userInfo, List<UserInfo> listUsers,
                                ObjectOutputStream oos, ObjectInputStream ois, int portToReceiveFiles,
@@ -110,7 +111,7 @@ public class ClientConnectionTCP implements Runnable {
             }
             case RENAME_GROUP -> writeToSocket(databaseManager.updateGroupName(dataReceived.getContent(), dataReceived.getToGroupId(),dataReceived.getUserData().getUsername()));
             case DELETE_GROUP -> writeToSocket(databaseManager.deleteGroup(dataReceived.getContent(), dataReceived.getToGroupId()));
-            case LEAVE_GROUP -> writeToSocket(databaseManager.leaveGroup(dataReceived.getUserData(), dataReceived.getToUserId(), "approved"));
+            case LEAVE_GROUP -> writeToSocket(databaseManager.leaveGroup(dataReceived.getUserData(), dataReceived.getToUserId()));
 
             // Contacts
             case LIST_CONTACTS -> writeToSocket(databaseManager.listContacts((int) databaseManager.getUserID(userInfo.getUsername())));
@@ -200,8 +201,12 @@ public class ClientConnectionTCP implements Runnable {
                     }
                 }
             }
-
-            // Exit
+            // Recebe heartbeat para colocar cliente online
+            case SET_ONLINE -> {
+                System.out.println("Recebi heartbeat do: " + dataReceived.getUserData().getUsername());
+                databaseManager.setClientOnline(dataReceived.getUserData());
+            }
+             // Exit
             case EXIT -> {
                 changeUserStatus(dataReceived.getToUserId(), 0);
                 writeToSocket("[GOODBYE] Client Disconnected!");
@@ -250,12 +255,6 @@ public class ClientConnectionTCP implements Runnable {
     }
 
     private void processNotification(Notification notification) {
-        //todo: why ?
-        /*try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }*/
         // Verificar se cliente pertence a este servidor, caso pertença, não precisa avisar outros servidores
         for(UserInfo u : listUsers) {
             if(u.getUsername().equals(notification.getToUsername())) {

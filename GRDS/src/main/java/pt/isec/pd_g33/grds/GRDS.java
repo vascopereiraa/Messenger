@@ -35,13 +35,13 @@ public class GRDS {
 
         // Start threads to accept new Clients and Servers
         try {
-            // Unicast thread
+            // Unicast thread para servidores
             DatagramSocket datagramSocket = new DatagramSocket(listeningPort);
             ThreadNewConnection unicastThreadAccept = new ThreadNewConnection(datagramSocket, serverList);
             Thread t1 = new Thread(unicastThreadAccept);
             t1.start();
 
-            // Multicast thread
+            // Multicast thread para efeitos de descoberta de servidores
             MulticastSocket multicastSocket = new MulticastSocket(MULTICAST_PORT);
             InetAddress ia = InetAddress.getByName(MULTICAST_IP);
             InetSocketAddress addr = new InetSocketAddress(ia, MULTICAST_PORT);

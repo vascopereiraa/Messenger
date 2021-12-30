@@ -2,18 +2,14 @@ package pt.isec.pd_g33.server.data;
 
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
 
 public class UserInfo {
 
     private String username;
-    private final Socket sCli;
-    private ObjectOutputStream oos;
+    private final ObjectOutputStream oos;
 
-    public UserInfo(Socket sCli, ObjectOutputStream oos) {
-        this.sCli = sCli;
+    public UserInfo(ObjectOutputStream oos) {
         this.oos = oos;
     }
 

@@ -2,7 +2,6 @@ package pt.isec.pd_g33.grds.coms;
 
 import pt.isec.pd_g33.shared.ServerInfo;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 

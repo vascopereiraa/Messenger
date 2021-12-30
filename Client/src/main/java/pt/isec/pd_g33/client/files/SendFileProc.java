@@ -3,7 +3,6 @@ package pt.isec.pd_g33.client.files;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Paths;
 
 public class SendFileProc implements Runnable {
 
@@ -62,7 +61,8 @@ public class SendFileProc implements Runnable {
 
             System.out.println("Mensagem enviada com sucesso! "/* + fileSize*/);
         } catch (IOException | ClassNotFoundException e) {
-            file.delete(); // Apaga ficheiro caso ocorra algo mal, ficheiro esta incompleto
+            if (file != null)
+                file.delete(); // Apaga ficheiro caso ocorra algo mal, ficheiro esta incompleto
             e.printStackTrace();
             System.err.println("IOException: run");
         }

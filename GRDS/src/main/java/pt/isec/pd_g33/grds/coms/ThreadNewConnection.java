@@ -3,15 +3,13 @@ package pt.isec.pd_g33.grds.coms;
 import pt.isec.pd_g33.grds.data.ServerList;
 import pt.isec.pd_g33.shared.ConnectionMessage;
 import pt.isec.pd_g33.shared.ConnectionType;
-import pt.isec.pd_g33.shared.Notification;
 import pt.isec.pd_g33.shared.ServerInfo;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.ArrayList;
 
+// Thread dedicada a receber conexões UDP por parte do servidor, via UDP unicast e UDP multicast
 public class ThreadNewConnection implements Runnable {
 
     private final DatagramSocket ds;
@@ -59,8 +57,9 @@ public class ThreadNewConnection implements Runnable {
                 dp.setLength(baos.toByteArray().length);
                 ds.send(dp);
 
-                if(connectionMessage.getConnectionType() == ConnectionType.Server &&
-                    serverList.getServerInfo().get(serverList.getServerInfo().size() - 1).isNewServer() == true){
+                // Tem em conta conexões em que existiu um fail do hearthbeat, bem como servidores novos. Reenvia os ficheiros todos
+                if(connectionMessage.getConnectionType() == ConnectionType.Server && serverList.getServerInfo().get(serverList.getServerInfo().size() - 1).isNewServer()
+                ||(connectionMessage.getConnectionType() == ConnectionType.Server && serverList.getServerInfoByPorto(connectionMessage.getPort()).getHearthbeatFail() > 0)){
                     // Obtenção de todos os ficheiros existentes
                     ThreadNotificationMulticast.synchronizeFiles();
                 }

@@ -1,11 +1,8 @@
 package pt.isec.pd_g33.server.file;
 
-import pt.isec.pd_g33.server.database.DatabaseManager;
-
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 /*
@@ -14,9 +11,9 @@ import java.util.ArrayList;
 */
 public class ThreadSendFiles implements Runnable {
 
-    private volatile ServerSocket ss;
+    private final ServerSocket ss;
     private String folderPath;
-    private ArrayList<Socket> socketsCreated = new ArrayList<>();
+    private final ArrayList<Socket> socketsCreated = new ArrayList<>();
 
     public ThreadSendFiles(ServerSocket ss) {
             this.ss = ss;
@@ -63,7 +60,7 @@ class SendFilesProcedure implements Runnable {
 
     private static final int DATA_SIZE = 4000;
 
-    private Socket sCli;
+    private final Socket sCli;
     private OutputStream oos;
     private ObjectInputStream ois;
     private final String folderPath;

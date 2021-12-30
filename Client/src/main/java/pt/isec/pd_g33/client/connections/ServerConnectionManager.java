@@ -1,5 +1,6 @@
 package pt.isec.pd_g33.client.connections;
 
+import pt.isec.pd_g33.client.ThreadHeartbeatClient;
 import pt.isec.pd_g33.client.ui.ClientInputUI;
 import pt.isec.pd_g33.client.ui.ClientOutputUI;
 import pt.isec.pd_g33.shared.UserData;
@@ -34,8 +35,8 @@ public class ServerConnectionManager {
     private File saveLocation;
 
     // Atualizar para caso seja preciso trocar de servidor, o login ser feito automatico caso o user esteja ligado ja
-    private volatile String[] loginOrRegister;
-    private ArrayList<Object> returnValues = new ArrayList<>(Arrays.asList(0,new String[]{"empty"}));
+    private final String[] loginOrRegister;
+    private final ArrayList<Object> returnValues = new ArrayList<>(Arrays.asList(0,new String[]{"empty"}));
     private boolean exit;
 
     public ServerConnectionManager(GRDSConnection grdsConnection, String[] loginOrRegister) {
@@ -58,13 +59,18 @@ public class ServerConnectionManager {
         }
         serverConnected = true;
 
-        // Thread to print everything socket receives
+        // Thread para obter input do user para mandar pedidos ao servidor
         ClientInputUI clientInputUI = new ClientInputUI(this,loginOrRegister, oisClientInput);
         Thread t = new Thread(clientInputUI);
         t.start();
 
+        // Criação da thread para envio de heartbeats para o servidor
+        ThreadHeartbeatClient ths = new ThreadHeartbeatClient(this);
+        Thread tths = new Thread(ths);
+        tths.start();
 
-        // Continuity of this thread to write everything to socket
+
+        // Classe para receber respostas dos servidores, resposta a pedidos e notificações.
         ClientOutputUI outputUI = new ClientOutputUI(this,oisClientInput);
         returnValues.set(0,outputUI.begin()); // Atualiza return do arrayList com o return de outputUI.begin()
 
@@ -73,13 +79,12 @@ public class ServerConnectionManager {
             t.join();
             // Para manter atualizado dados de login do user
             returnValues.set(1,clientInputUI.getLoginOrRegister());
-            /*System.err.print("\nnTerminou a thread, resultadoOutput: " + returnValues.get(0) + " loginOrRegister: ");
-            for(String item : (String[]) returnValues.get(1))
-                System.out.print(item);
-            System.out.println("\n\n");*/
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        serverConnected = false;
+
+
         return returnValues;
     }
 
@@ -132,6 +137,10 @@ public class ServerConnectionManager {
     }
     public void setExit(boolean exit) {
         this.exit = exit;
+    }
+
+    public boolean getServerConnected(){
+        return serverConnected;
     }
 
     public boolean isUserConnected() {
