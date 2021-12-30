@@ -4,15 +4,16 @@ import pt.isec.pd_g33.grds.coms.ThreadNotificationMulticast;
 import pt.isec.pd_g33.shared.ServerInfo;
 
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ServerList {
 
-    private final ArrayList<ServerInfo> serverList;
+    private final CopyOnWriteArrayList<ServerInfo> serverList;
     private int next;
     private int index;
 
     public ServerList() {
-        serverList = new ArrayList<>();
+        serverList = new CopyOnWriteArrayList<>();
         next = 0;
         index = 0;
     }
@@ -44,7 +45,7 @@ public class ServerList {
         return aux;
     }
 
-    public ArrayList<ServerInfo> getServerInfo(){
+    public CopyOnWriteArrayList<ServerInfo> getServerInfo(){
         return serverList;
     }
 

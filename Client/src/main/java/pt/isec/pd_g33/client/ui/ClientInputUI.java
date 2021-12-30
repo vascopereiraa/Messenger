@@ -6,6 +6,7 @@ import pt.isec.pd_g33.shared.*;
 
 import java.awt.*;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -19,15 +20,14 @@ public class ClientInputUI implements Runnable {
     private String[] command = {"empty"};
     // Variavel possivel de obter fora da thread
     private volatile String[] loginOrRegister;
+    private ObjectInputStream oisClientInput; // Para fechar o OutputUI aquando dos Exit's.
 
-    public ClientInputUI(ServerConnectionManager scm, String[] loginOrRegister) {
-        System.out.println("Dados loginRegisto CONSTRUTOR");
-        for(String item : loginOrRegister)
-            System.out.print(item);
+    public ClientInputUI(ServerConnectionManager scm, String[] loginOrRegister, ObjectInputStream oisClientInput) {
         this.loginOrRegister = loginOrRegister;
         this.serverConnectionManager = scm;
         oos = serverConnectionManager.getSocketOutputStream();
         this.scanner = new Scanner(System.in);
+        this.oisClientInput = oisClientInput;
     }
 
     @Override
@@ -74,6 +74,8 @@ public class ClientInputUI implements Runnable {
                             writeToSocket(new Register(command[1].toLowerCase(), command[2], name));
                         }
                         case "exit" -> {
+                            serverConnectionManager.setExit(true);
+                            disconnect();
                             return false;
                         }
                         default -> System.out.println("Insira um comando valido. Para consultar comandos escreva: commands ");
@@ -82,20 +84,23 @@ public class ClientInputUI implements Runnable {
                     System.out.println("Insira um comando valido. Para consultar comandos escreva: commands ");
                     //e.printStackTrace();
                 }
-
-                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
             } while (!serverConnectionManager.isServerConnected() || !serverConnectionManager.isUserConnected());
         }
         // Caso o user esteja conectado, vai ser guardado na variavel volatil os dados de login. Para poder ser acedido
         // por outras classes (ServerConnectionManager), caso seja  atribuido um novo servidor, não seja necessário fazer o login de novo.
-        if(serverConnectionManager.isServerConnected())
+        if(serverConnectionManager.isServerConnected() && serverConnectionManager.isUserConnected())
             loginOrRegister = command;
         return true;
+    }
+
+    private void disconnect(){
+        writeToSocket(new Data(MenuOption.EXIT, serverConnectionManager.getUserData(), serverConnectionManager.getUserData().getUserID()));
+        serverConnectionManager.disconnectClient();
+        try {
+            oisClientInput.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void showLoginCommands() {
@@ -259,15 +264,15 @@ public class ClientInputUI implements Runnable {
                         else
                             System.out.println("[ERROR] Save location is invalid!");
                     }
-                    case "exit" -> {}
+                    case "exit" -> serverConnectionManager.setExit(true);
+
                     default -> System.out.println("Indique um comando válido");
                 }
             }catch (Exception  e){
                 System.out.println("Insira um comando valido. Para consultar comandos escreva: commands ");
             }
         } while (!command[0].equalsIgnoreCase("exit"));
-        writeToSocket(new Data(MenuOption.EXIT, serverConnectionManager.getUserData(), serverConnectionManager.getUserData().getUserID()));
-        serverConnectionManager.disconnectClient();
+        disconnect();
     }
 
     private void writeToSocket(Object o) {

@@ -16,7 +16,6 @@ public class GRDS {
     private static final int MULTICAST_PORT = 3030;
 
     private ServerList serverList;
-    private ArrayList<Notification> filesReceived;
 
     public static void main(String[] args) {
         System.out.println("GRDS");
@@ -33,41 +32,35 @@ public class GRDS {
     public void startThreads(int listeningPort) {
 
         serverList = new ServerList();
-        filesReceived = new ArrayList<>();
 
         // Start threads to accept new Clients and Servers
         try {
             // Unicast thread
             DatagramSocket datagramSocket = new DatagramSocket(listeningPort);
-            ThreadNewConnection unicastThreadAccept = new ThreadNewConnection(datagramSocket, serverList,filesReceived);
+            ThreadNewConnection unicastThreadAccept = new ThreadNewConnection(datagramSocket, serverList);
             Thread t1 = new Thread(unicastThreadAccept);
             t1.start();
 
             // Multicast thread
-            /*DatagramSocket ds = new DatagramSocket(MULTICAST_PORT, InetAddress.getByName(MULTICAST_IP));
-            System.out.println(ds.getLocalAddress().getHostAddress() + ":" + ds.getLocalPort());*/
             MulticastSocket multicastSocket = new MulticastSocket(MULTICAST_PORT);
             InetAddress ia = InetAddress.getByName(MULTICAST_IP);
             InetSocketAddress addr = new InetSocketAddress(ia, MULTICAST_PORT);
             NetworkInterface ni = NetworkInterface.getByName("en0");
             multicastSocket.joinGroup(addr, ni);
 
-            ThreadNewConnection multicastThreadAccept = new ThreadNewConnection(multicastSocket, serverList,filesReceived);
+            ThreadNewConnection multicastThreadAccept = new ThreadNewConnection(multicastSocket, serverList);
             Thread t2 = new Thread(multicastThreadAccept);
             t2.start();
 
-            //todo: check this Notification thread
-            ThreadNotificationMulticast notificationMulticast = new ThreadNotificationMulticast(filesReceived);
+            // Thread que trata notificações
+            ThreadNotificationMulticast notificationMulticast = new ThreadNotificationMulticast(serverList);
             Thread tnm = new Thread(notificationMulticast);
             tnm.start();
-
-            //todo: Thread que vai ler a informação a ser replicada
 
             // Heartbeat
             ThreadHearthbeatManager heartbeatManager = new ThreadHearthbeatManager(serverList.getServerInfo());
             Thread hearthbeatManager = new Thread(heartbeatManager);
             hearthbeatManager.start();
-
 
 
         } catch (IOException e) {

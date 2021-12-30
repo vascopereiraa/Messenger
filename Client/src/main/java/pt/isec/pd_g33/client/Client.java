@@ -35,6 +35,7 @@ public class Client {
         System.out.println("Client");
         String[] loginOrRegister = {"empty"};
         if(!argsProcessing(args)) return;
+
         do{
             GRDSConnection grdsConnection = new GRDSConnection(grdsIp, grdsPort);
             if (!grdsConnection.connectGRDS()) {

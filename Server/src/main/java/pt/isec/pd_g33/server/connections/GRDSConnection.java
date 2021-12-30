@@ -83,6 +83,10 @@ public class GRDSConnection {
         return grdsConnection;
     }
 
+    public void setGrdsConnection(Boolean conn){
+        grdsConnection = conn;
+    }
+
     public String getServerName() {
         return serverName;
     }

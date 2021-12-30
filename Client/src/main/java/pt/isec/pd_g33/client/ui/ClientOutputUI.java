@@ -14,12 +14,11 @@ public class ClientOutputUI {
 
     private final ServerConnectionManager serverConnectionManager;
     private ObjectInputStream ois;
-    private Thread thread;
 
-    public ClientOutputUI(ServerConnectionManager scm, Thread t) {
-        this.thread = t;
+    public ClientOutputUI(ServerConnectionManager scm,ObjectInputStream ois) {
         this.serverConnectionManager = scm;
-        ois = serverConnectionManager.getSocketInputStream();
+        this.ois = ois;
+        this.ois = serverConnectionManager.getSocketInputStream();
     }
 
     public int begin() {
@@ -49,6 +48,11 @@ public class ClientOutputUI {
                     System.out.print("Recebeu uma notificação: ");
                     switch (notification.getDataType()) {
                         case Message -> {
+                            // Servidor terminou ordenadamente, terminando assim o cliente, tal como o exit.
+                            if(notification.getContent().equals("serverTerminated")){
+                                System.out.println("Servidor fechou. Cliente vai terminar. Prima [ENTER] para confirmar.");
+                                return 0;
+                            }
                             if (notification.getToGroupId() != 0)
                                 System.out.println("Tem uma mensagem por visualizar no grupo " + notification.getToGroupId() + ".:" +
                                         notification.getToGroupName() + " enviada por " + notification.getFromUsername() + ".");
@@ -74,13 +78,10 @@ public class ClientOutputUI {
                 if (o instanceof String s) {
                     System.out.println("\n" + s);
                 }
-
-            }catch (SocketTimeoutException e ){
-                if(!thread.isAlive()) // Caso o jogador de exit no login, a thread de input deixa de existir, logo esta tem que deixar tambem
-                    return 0;
             }catch (IOException | ClassNotFoundException | InterruptedException e) {
+                if(serverConnectionManager.getExited())
+                    return 0;
                 System.out.println("O servidor terminou a conexão. Pressione [ENTER] para obter um novo servidor.");
-                // e.printStackTrace();
                 return 1;
             }
         }

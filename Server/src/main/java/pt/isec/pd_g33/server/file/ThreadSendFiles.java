@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 /*
 * Estar a escuta de conexões com outros servidores que irao requisitar o envio de determinado ficheiro
@@ -13,17 +14,12 @@ import java.nio.file.Paths;
 */
 public class ThreadSendFiles implements Runnable {
 
-    private final DatabaseManager databaseManager;
-    private ServerSocket ss;
+    private volatile ServerSocket ss;
     private String folderPath;
+    private ArrayList<Socket> socketsCreated = new ArrayList<>();
 
-    public ThreadSendFiles(DatabaseManager databaseManager) {
-        this.databaseManager = databaseManager;
-        try {
-            this.ss = new ServerSocket(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public ThreadSendFiles(ServerSocket ss) {
+            this.ss = ss;
     }
 
     public int getPortToReceiveFiles() { return ss.getLocalPort(); }
@@ -46,11 +42,18 @@ public class ThreadSendFiles implements Runnable {
                 SendFilesProcedure sfp = new SendFilesProcedure(sCli, folderPath);
                 Thread tsfp = new Thread(sfp);
                 tsfp.start();
+                // Termina Clientes
+                socketsCreated.add(sCli);
 
             } catch (IOException e) {
-                System.err.println("IOException: Cliente fechou a conexão");
-                e.printStackTrace();
-
+                System.err.println("Thread send files foi terminada.");
+                try{
+                    for(Socket socket : socketsCreated)
+                        socket.close();
+                }catch(Exception ex){
+                    System.err.println("Exception: Closing sendfiles sockets");
+                }
+                return;
             }
         }
     }
@@ -78,8 +81,9 @@ class SendFilesProcedure implements Runnable {
 
     @Override
     public void run() {
+        String filename = "";
         try {
-            String filename = (String) ois.readUnshared();
+            filename = (String) ois.readUnshared();
             System.out.println("Vou enviar o ficheiro: [" + filename + "] para o socket: " + sCli.getInetAddress().getHostAddress() + " : " + sCli.getPort());
 
             FileInputStream fis = new FileInputStream(new File(folderPath + File.separator + filename).toString());
@@ -98,9 +102,8 @@ class SendFilesProcedure implements Runnable {
             ois.close();
             sCli.close();
 
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-            System.err.println("IOException: run");
+        } catch (Exception e) {
+            System.err.println("IOException: Thread sendfile " + filename + " closed.");
         }
     }
 

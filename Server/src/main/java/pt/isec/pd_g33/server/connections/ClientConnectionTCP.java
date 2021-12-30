@@ -250,11 +250,12 @@ public class ClientConnectionTCP implements Runnable {
     }
 
     private void processNotification(Notification notification) {
-        try {
-            Thread.sleep(5000);
+        //todo: why ?
+        /*try {
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
         // Verificar se cliente pertence a este servidor, caso pertença, não precisa avisar outros servidores
         for(UserInfo u : listUsers) {
             if(u.getUsername().equals(notification.getToUsername())) {
@@ -262,21 +263,8 @@ public class ClientConnectionTCP implements Runnable {
                 return;
             }
         }
-
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(notification);
-            oos.flush();
-
-            DatagramSocket ds = new DatagramSocket();
-            // todo: Acertar IPS -> dp tem de ter o IP do GRDS passado pela cmdLine
-            DatagramPacket dp = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length, InetAddress.getByName("127.0.0.1"), UNICAST_NOTIFICATION_PORT);
-            ds.send(dp);
-        } catch (IOException e) {
-            System.err.println("IOException: processNotification");
-            e.printStackTrace();
-        }
+        // Envia notificacao ao GRDS
+        sendNotificationToGRDS(notification);
     }
 
     private void writeToSocket(Object o) {
@@ -286,4 +274,21 @@ public class ClientConnectionTCP implements Runnable {
     private void changeUserStatus(int userId, int status) {
         databaseManager.changeUserStatus(userId, status);
     }
+
+    public static void sendNotificationToGRDS(Notification notification){
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(notification);
+            oos.flush();
+
+            DatagramSocket ds = new DatagramSocket();
+            DatagramPacket dp = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length, InetAddress.getByName("127.0.0.1"), UNICAST_NOTIFICATION_PORT);
+            ds.send(dp);
+        } catch (IOException e) {
+            System.err.println("IOException: processNotification");
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -27,7 +27,7 @@ public class ThreadReceiveFiles implements Runnable {
             return;
 
         try {
-            System.out.println("\nSOU O PORTO DO RECEIVE: Ip: " + ip + "Porto: " + port);
+            //System.out.println("\nSOU O PORTO DO RECEIVE: Ip: " + ip + "Porto: " + port);
             Socket socket = new Socket(ip, port);
             InputStream in = socket.getInputStream();
 

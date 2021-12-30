@@ -3,13 +3,13 @@ package pt.isec.pd_g33.server;
 import pt.isec.pd_g33.server.connections.AcceptClientConnectionTCP;
 import pt.isec.pd_g33.server.connections.GRDSConnection;
 import pt.isec.pd_g33.server.connections.ThreadMessageReflection;
-import pt.isec.pd_g33.server.file.ThreadReceiveFiles;
 import pt.isec.pd_g33.server.file.ThreadSendFiles;
 import pt.isec.pd_g33.server.data.UserInfo;
 import pt.isec.pd_g33.server.database.DatabaseManager;
-import pt.isec.pd_g33.shared.Data;
+import pt.isec.pd_g33.shared.ConnectionMessage;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +20,7 @@ public class Server {
 
     private static final String MULTICAST_GRDS_IP = "230.30.30.30" ;
     private static final int MULTICAST_GRDS_PORT = 3030;
+    public static final int REFLECTION_PORT = 1000;
 
     private static InetAddress grdsIp;
     private static int grdsPort;
@@ -28,8 +29,22 @@ public class Server {
     private static String folderPath;
     private static final List<UserInfo> listUsers = new ArrayList<>();
 
+    // Criação dos Sockets para poder fecha-los quando for necessário para conseguir fechar threads.
+    private static ServerSocket sendFilesSS, acceptClientConnectionSS;
+    private static MulticastSocket MessageReflectionMulticastSocket;
+    private static ConnectionMessage connectionMessage;
+
     public static void main(String[] args) {
         System.out.println("Server");
+
+        // Criação dos ServerSockets e MulticastSocket.
+        try {
+            sendFilesSS = new ServerSocket(0);
+            acceptClientConnectionSS = new ServerSocket(0);
+            MessageReflectionMulticastSocket = new MulticastSocket(REFLECTION_PORT);
+        } catch (IOException e) {
+            System.err.println("Erro na criação dos Sockets.");
+        }
 
         // Verifica argumentos
         if(!argsProcessing(args)) return;
@@ -37,16 +52,17 @@ public class Server {
         // Start DB connection
         databaseManager = new DatabaseManager(dbmsLocation);
 
-        // Thread receive Files
-        ThreadSendFiles tsf = new ThreadSendFiles(databaseManager);
-        Thread ttrf = new Thread(tsf);
-        ttrf.start();
+        // Thread send Files
+        ThreadSendFiles tsf = new ThreadSendFiles(sendFilesSS);
+        Thread ttsf = new Thread(tsf);
+        ttsf.start();
 
         // Criar o SocketServer para ligações TCP com os Clients
-        AcceptClientConnectionTCP acceptClient = new AcceptClientConnectionTCP(databaseManager, listUsers, tsf.getPortToReceiveFiles(), tsf.getIpToReceiveFiles());
+        AcceptClientConnectionTCP acceptClient = new AcceptClientConnectionTCP(databaseManager, listUsers, tsf.getPortToReceiveFiles(), tsf.getIpToReceiveFiles(),acceptClientConnectionSS);
 
+        connectionMessage = acceptClient.getMessage();
         // Regista o IP TCP no GRDS
-        GRDSConnection grdsConnection = new GRDSConnection(grdsIp, grdsPort, acceptClient.getMessage());
+        GRDSConnection grdsConnection = new GRDSConnection(grdsIp, grdsPort,connectionMessage);
         if(!grdsConnection.connectGRDS()){
             System.out.println("Server: An error occurred when connecting to GRDS");
             System.exit(1);
@@ -61,7 +77,7 @@ public class Server {
 
 
         // Cria thread de escuta de notificações do GRDS
-        ThreadMessageReflection tmr = new ThreadMessageReflection(listUsers, folderPath, tsf.getPortToReceiveFiles());
+        ThreadMessageReflection tmr = new ThreadMessageReflection(listUsers, folderPath, tsf.getPortToReceiveFiles(), MessageReflectionMulticastSocket);
         Thread ttmr = new Thread(tmr);
         ttmr.start();
 
@@ -74,6 +90,35 @@ public class Server {
         Thread tths = new Thread(ths);
         tths.start();
 
+        // Thread para terminar server intencionalmente
+        ThreadTerminateServer tts = new ThreadTerminateServer();
+        Thread ttts = new Thread(tts);
+        ttts.start();
+
+        // Espera o fim do servidor, caso termine ordenadamente.
+        try {
+            // Espera que o user faça EXIT do server.
+            ttts.join();
+            ThreadMessageReflection.terminaClientes(connectionMessage);
+            // Indica para a termina Thread Heartbeat
+            tths.stop();
+            System.out.println("Thread TerminateServer files ended");
+            // Informar os clientes para terminar
+            // Termina Thread send files
+            sendFilesSS.close();
+            ttsf.join();
+            System.out.println("Thread send files ended");
+            // Terminar Thread aceita clientes
+            acceptClientConnectionSS.close();
+            clientAcceptionThread.join();
+            // Termina Thread MessageReflection
+            MessageReflectionMulticastSocket.close();
+            ttmr.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Erro no termino da thread.");
+        }
+        System.out.println("Servidor foi terminado");
         // Close DB connection
         DatabaseManager.close();
     }

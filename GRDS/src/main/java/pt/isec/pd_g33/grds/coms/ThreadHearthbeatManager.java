@@ -4,6 +4,7 @@ import pt.isec.pd_g33.shared.ServerInfo;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /*
  * Ponto 5.
@@ -13,9 +14,9 @@ import java.util.Iterator;
  */
 public class ThreadHearthbeatManager implements Runnable {
 
-    private final ArrayList<ServerInfo> serverList;
+    private final CopyOnWriteArrayList<ServerInfo> serverList;
 
-    public ThreadHearthbeatManager(ArrayList<ServerInfo> serverList){
+    public ThreadHearthbeatManager(CopyOnWriteArrayList<ServerInfo> serverList){
         this.serverList = serverList;
     }
 
@@ -33,12 +34,13 @@ public class ThreadHearthbeatManager implements Runnable {
                     }
                     else {
                         sv.incHearthbeatFail();
-                        if(sv.getHearthbeatFail() == 3)
+                        if(sv.getHearthbeatFail() == 3){
                             it.remove();
+                        }
                     }
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                System.out.println("Servidor já foi eliminado");
             }
         }
     }

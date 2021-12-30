@@ -2,6 +2,7 @@ package pt.isec.pd_g33.server.connections;
 
 import pt.isec.pd_g33.server.data.UserInfo;
 import pt.isec.pd_g33.server.file.ThreadReceiveFiles;
+import pt.isec.pd_g33.shared.ConnectionMessage;
 import pt.isec.pd_g33.shared.DataType;
 import pt.isec.pd_g33.shared.Notification;
 
@@ -21,11 +22,13 @@ public class ThreadMessageReflection implements Runnable {
     public static final String REFLECTION_IP = "255.255.255.255" ;
     public static final int REFLECTION_PORT = 1000;
 
-    private final List<UserInfo> listUsers;
+    private static List<UserInfo> listUsers;
     private final String folderPath;
     private final int sendFilesPort;
+    private MulticastSocket multicastSocket;
 
-    public ThreadMessageReflection(List<UserInfo> listUsers, String folderPath, int sendFilesPort) {
+    public ThreadMessageReflection(List<UserInfo> listUsers, String folderPath, int sendFilesPort, MulticastSocket multicastSocket) {
+        this.multicastSocket = multicastSocket;
         this.listUsers = listUsers;
         this.folderPath = folderPath;
         this.sendFilesPort = sendFilesPort;
@@ -33,16 +36,6 @@ public class ThreadMessageReflection implements Runnable {
 
     @Override
     public void run() {
-        MulticastSocket multicastSocket = null;
-        try {
-            multicastSocket = new MulticastSocket(REFLECTION_PORT);
-
-        } catch (IOException e) {
-            System.err.println("IOException: Multicast");
-            e.printStackTrace();
-        }
-
-
         while(true){
             try {
                 DatagramPacket dp = new DatagramPacket(new byte[4096], 4096);
@@ -78,13 +71,19 @@ public class ThreadMessageReflection implements Runnable {
                     });
                 }
 
-            } catch (IOException e) {
-                System.err.println("IOException: Multicast reading");
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                System.err.println("Multicast reading terminado!");
+                break;
             }
-
         }
     }
+
+    public static void terminaClientes(ConnectionMessage connectionMessage){
+        System.out.println(connectionMessage.toString());
+        ClientConnectionTCP.sendNotificationToGRDS(new Notification("serverTerminated",connectionMessage.getPort(),DataType.Message));
+        listUsers.forEach(u -> {
+            u.writeSocket(new Notification("serverTerminated",DataType.Message));
+        });
+    }
+
 }

@@ -52,6 +52,18 @@ public class Notification implements Serializable {
         this.content = aceiteRejeitado;
     }
 
+    public Notification(String content,int porto, DataType dataType) {
+        this.content = content;
+        this.dataType = dataType;
+        this.ip = ip;
+        this.porto = porto;
+    }
+
+    public Notification(String content, DataType dataType) {
+        this.content = content;
+        this.dataType = dataType;
+    }
+
 
     public String getToUsername() {
         return toUsername;

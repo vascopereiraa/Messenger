@@ -23,12 +23,8 @@ public class AcceptClientConnectionTCP implements Runnable {
     private List<UserInfo> listUsers;
     private String folderPath;
 
-    public AcceptClientConnectionTCP(DatabaseManager databaseManager, List<UserInfo> listUsers, int portToReceiveFiles, String ipToReceiveFiles) {
-        try {
-            ss = new ServerSocket(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public AcceptClientConnectionTCP(DatabaseManager databaseManager, List<UserInfo> listUsers, int portToReceiveFiles, String ipToReceiveFiles, ServerSocket ss) {
+        this.ss = ss;
         this.databaseManager = databaseManager;
         this.listUsers = listUsers;
         this.portToReceiveFiles = portToReceiveFiles;
@@ -65,7 +61,7 @@ public class AcceptClientConnectionTCP implements Runnable {
                 cli.start();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("AcceptClientConnectionTCP thread terminada.");
         }
 
     }

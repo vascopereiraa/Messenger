@@ -1,5 +1,7 @@
 package pt.isec.pd_g33.grds.coms;
 
+import pt.isec.pd_g33.grds.data.ServerList;
+import pt.isec.pd_g33.shared.Data;
 import pt.isec.pd_g33.shared.DataType;
 import pt.isec.pd_g33.shared.Notification;
 
@@ -9,19 +11,21 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ThreadNotificationMulticast implements Runnable {
 
     private static final int UNICAST_SEND_NOTIFICATION_PORT = 1000;
     private static final int UNICAST_RECEIVE_NOTIFICATION_PORT = 2000;
     private static final String UNICAST_RECEIVE_NOTIFICATION_IP = "255.255.255.255";
-    private static ArrayList<Notification> filesReceived;
+    private static CopyOnWriteArrayList<Notification> filesReceived = new CopyOnWriteArrayList<>();;
 
     private static DatagramSocket ds;
     private static MulticastSocket multicastSocket;
+    private static ServerList serverList;
 
-    public ThreadNotificationMulticast(ArrayList<Notification> filesReceived) {
-        this.filesReceived = filesReceived;
+    public ThreadNotificationMulticast(ServerList serverList) {
+        this.serverList = serverList;
     }
 
     @Override
@@ -38,8 +42,7 @@ public class ThreadNotificationMulticast implements Runnable {
                     ByteArrayInputStream bais = new ByteArrayInputStream(dp.getData());
                     ObjectInputStream ois = new ObjectInputStream(bais);
                     Notification notification = (Notification) ois.readObject();
-                    System.out.println("GRDS received notification: " + notification.getDataType()
-                            + "from: " + notification.getFromUsername() + "to: " + notification.getToUsername());
+                    System.out.println("GRDS received notification: " + notification.getDataType());
 
                     // Caso a notificacao seja de ficheiros
                     if(notification.getDataType() == DataType.File)
@@ -47,6 +50,12 @@ public class ThreadNotificationMulticast implements Runnable {
                             filesReceived.removeIf(obj -> obj.getContent().equals(notification.getFromUsername())); //getFromUsername tem nome do ficheiro quando é delete
                         else // Notificacao para adicionar ficheiro, adiciona a lista
                             filesReceived.add(notification);
+
+                    // Apagar servidor da lista de servers, caso ele faça EXIT.
+                    if(notification.getContent().equals("serverTerminated") && notification.getDataType() == DataType.Message){
+                        System.out.println("O servidor " + notification.getPorto() + " foi eliminado");
+                        serverList.getServerInfo().removeIf(obj -> obj.getPort() == obj.getPort());
+                    }
 
                     // Envio em multicast para todos os servidores
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -13,7 +13,6 @@ public class ThreadHeartbearServer implements Runnable {
     @Override
     @SuppressWarnings("BusyWait")
     public void run() {
-
         try {
             while(grdsConnection.getGrdsConnection()){
                 Thread.sleep(20000);

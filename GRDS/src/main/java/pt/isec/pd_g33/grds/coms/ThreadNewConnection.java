@@ -16,12 +16,10 @@ public class ThreadNewConnection implements Runnable {
 
     private final DatagramSocket ds;
     private final ServerList serverList;
-    private ArrayList<Notification> filesReceived;
 
-    public ThreadNewConnection(DatagramSocket ds, ServerList serverList,ArrayList<Notification> filesReceived) {
+    public ThreadNewConnection(DatagramSocket ds, ServerList serverList) {
         this.ds = ds;
         this.serverList = serverList;
-        this.filesReceived = filesReceived;
     }
 
     @Override

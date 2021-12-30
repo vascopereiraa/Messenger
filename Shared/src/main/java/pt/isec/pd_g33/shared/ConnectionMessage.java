@@ -45,7 +45,17 @@ public class ConnectionMessage implements Serializable {
         this.message = message;
     }
 
-    
+
+    @Override
+    public String toString() {
+        return "ConnectionMessage{" +
+                "ip=" + ip +
+                ", port=" + port +
+                ", message='" + message + '\'' +
+                ", connectionType=" + connectionType +
+                '}';
+    }
+
     public void insertServerInfo(ServerInfo serverInfo) {
         ip = serverInfo.getIp();
         port = serverInfo.getPort();
