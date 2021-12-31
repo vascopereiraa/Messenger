@@ -90,10 +90,9 @@ class SendFilesProcedure implements Runnable {
                 nBytes = fis.read(fileChunck);
                 oos.write(fileChunck,0,nBytes);
                 //oos.flush();
-                System.out.println("Sent " + nBytes);
             }
             //todo: debug
-            System.out.println("Mensagem recebida com sucesso!");
+            System.out.println("Ficheiro recebida com sucesso!");
             fis.close();
             oos.flush();
             ois.close();

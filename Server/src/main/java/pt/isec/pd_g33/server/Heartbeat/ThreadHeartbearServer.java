@@ -16,6 +16,7 @@ public class ThreadHeartbearServer implements Runnable {
         try {
             while(grdsConnection.getGrdsConnection()){
                 Thread.sleep(20000);
+                //todo: uncomment
                 System.out.println("Heartbeat sent to GRDS");
                 if(!grdsConnection.connectGRDS()){
                     System.err.println("Server: An error occurred when connecting to GRDS");

@@ -53,15 +53,18 @@ public class ThreadMessageReflection implements Runnable {
                     if (file.exists())
                         file.delete();
                 }else{
-                    // Envia notificação ao cliente correto caso ele esteja connectado a este servidor
-                    listUsers.forEach(u -> {
-                        if (notification.getToUsername().equals(u.getUsername())) {
-                            System.out.println("\nVou enviar a notificação ao utilizador: " + u.getUsername()
-                            + " Notificacao: " + notification.getFromUsername() + " : " + notification.getToUsername()
-                            + " : " + notification.getDataType());
-                            u.writeSocket(notification);
-                        }
-                    });
+                    System.out.println(notification);
+                    if(!notification.isUpdateFiles()){ // Caso não seja um update de ficheiros, avisa o cliente da notificação normal.
+                        // Envia notificação ao cliente correto caso ele esteja connectado a este servidor
+                        listUsers.forEach(u -> {
+                            if (notification.getToUsername().equals(u.getUsername())) {
+                                System.out.println("\nVou enviar a notificação ao utilizador: " + u.getUsername()
+                                + " Notificacao: " + notification.getFromUsername() + " : " + notification.getToUsername()
+                                + " : " + notification.getDataType());
+                                u.writeSocket(notification);
+                            }
+                        });
+                    }
                 }
 
             } catch (Exception e) {

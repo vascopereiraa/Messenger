@@ -49,6 +49,7 @@ public class ClientOutputUI {
                     switch (notification.getDataType()) {
                         case Message -> {
                             // Servidor terminou ordenadamente, terminando assim o cliente, tal como o exit.
+
                             if(notification.getContent().equals("serverTerminated")){
                                 System.out.println("Servidor fechou. Cliente vai terminar. Prima [ENTER] para confirmar.");
                                 return 0;

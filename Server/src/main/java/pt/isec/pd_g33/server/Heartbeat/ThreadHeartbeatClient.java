@@ -21,7 +21,7 @@ public class ThreadHeartbeatClient implements Runnable {
         try {
             while(true){
                 Thread.sleep(30000);
-                System.out.println("Heartbeat client status");
+                //System.out.println("Heartbeat client status");
                 databaseManager.updateAllUserStatus();
             }
         } catch (InterruptedException e) {

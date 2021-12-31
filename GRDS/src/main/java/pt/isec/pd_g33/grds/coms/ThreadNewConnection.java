@@ -46,7 +46,6 @@ public class ThreadNewConnection implements Runnable {
                     connectionMessage.insertServerInfo(serverList.getNextServer());
                     // System.out.println("New client info: " + connectionMessage.getIp() + " : " + connectionMessage.getPort());
                 }
-
                 // Envio de mensagem de volta ao cliente(informa de server a conectar) e servidor
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ObjectOutputStream out = new ObjectOutputStream(baos);
@@ -58,11 +57,13 @@ public class ThreadNewConnection implements Runnable {
                 ds.send(dp);
 
                 // Tem em conta conexões em que existiu um fail do hearthbeat, bem como servidores novos. Reenvia os ficheiros todos
-                if(connectionMessage.getConnectionType() == ConnectionType.Server && serverList.getServerInfo().get(serverList.getServerInfo().size() - 1).isNewServer()
-                ||(connectionMessage.getConnectionType() == ConnectionType.Server && serverList.getServerInfoByPorto(connectionMessage.getPort()).getHearthbeatFail() > 0)){
+                if((connectionMessage.getConnectionType() == ConnectionType.Server && serverList.getServerInfo().get(serverList.getServerInfo().size() - 1).isNewServer())
+                || (connectionMessage.getConnectionType() == ConnectionType.Server && serverList.getServerInfoByPorto(connectionMessage.getPort()).getHearthbeatFail() > 0)){
                     // Obtenção de todos os ficheiros existentes
+                    System.out.println("Vou fazer syncronized");
                     ThreadNotificationMulticast.synchronizeFiles();
                 }
+
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }

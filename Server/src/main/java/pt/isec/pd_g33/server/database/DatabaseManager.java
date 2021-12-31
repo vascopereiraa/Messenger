@@ -305,7 +305,7 @@ public class DatabaseManager {
             return false;
         String sqlQuery = """
                 INSERT INTO Data(read_state, sent_date, from_user_id, to_user_id, data_type, content)
-                VALUES('pending', NOW(), %d, %d, '%s', '%s');
+                VALUES('unseen', NOW(), %d, %d, '%s', '%s');
                 """.formatted(data.getUserData().getUserID(), getUserID(data.getToUserUsername()), data.getDataType(), data.getContent());
         try (Statement statement = db.createStatement()) {
             statement.executeUpdate(sqlQuery);
@@ -323,16 +323,59 @@ public class DatabaseManager {
         }
         String sqlQuery = """
                 INSERT INTO Data(read_state, sent_date, from_user_id, to_group_id, data_type, content)
-                VALUES('pending', NOW(), %d, %d, '%s', '%s');
+                VALUES('unseen', NOW(), %d, %d, '%s', '%s');
                 """.formatted(data.getUserData().getUserID(), data.getToGroupId(), data.getDataType(), data.getContent());
         try (Statement statement = db.createStatement()) {
             statement.executeUpdate(sqlQuery);
+            System.out.println("Generated Keys"  + statement.getGeneratedKeys());
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
+
+    public int getFileIDFromGroup(Data data){
+        try (Statement statement = db.createStatement()) {
+            String sqlQuery1 = """
+                        SELECT data_id
+                        FROM `Data`
+                        WHERE from_user_id = %d
+                        AND to_group_id = %d
+                        AND content = '%s'
+                        """.formatted(data.getUserData().getUserID(), data.getToGroupId(), data.getContent());
+            ResultSet resultSet = statement.executeQuery(sqlQuery1);
+            if (resultSet.next()) {
+                return resultSet.getInt("data_id");
+            } else
+                return -1;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return -1;
+    }
+
+
+    public int getFileIDFromUser(Data data){
+        try (Statement statement = db.createStatement()) {
+            String sqlQuery1 = """
+                        SELECT data_id
+                        FROM `Data`
+                        WHERE from_user_id = %d
+                        AND to_user_id = %d
+                        AND content = '%s'
+                        """.formatted(data.getUserData().getUserID(), getUserID(data.getToUserUsername()), data.getContent());
+            ResultSet resultSet = statement.executeQuery(sqlQuery1);
+            if (resultSet.next()) {
+                return resultSet.getInt("data_id");
+            } else
+                return -1;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return -1;
+    }
+
 
     public String pendingContact(String username) {
         StringBuilder sb = new StringBuilder();
@@ -900,22 +943,20 @@ public class DatabaseManager {
 
 
     public String listUnseen(String username) {
-        StringBuilder sb = new StringBuilder("Listagem de todas as mensagens não vistas:\n\n");
+        StringBuilder sb = new StringBuilder("Listagem de todas as mensagens não vistas:\n");
         String sqlQuery = """
-                SELECT data_id,from_user_id,from_user_id, content, to_group_id
-                FROM `Data`
-                WHERE to_user_id = %d
-                AND read_state LIKE '%%unseen%%'
-                ORDERBY from_user_id
+                SELECT d1.data_id,d1.from_user_id,d1.from_user_id, d1.content, d1.to_group_id
+                FROM `Data` d1
+                WHERE d1.to_user_id = %d
+                AND d1.read_state LIKE '%%unseen%%'
                 UNION
-                SELECT data_id,from_user_id,from_user_id, content, to_group_id
-                FROM `Data`
-                WHERE to_group_id IS NOT NULL
-                AND read_state LIKE '%%unseen%%'
-                ORDERBY to_group_id
+                SELECT d2.data_id,d2.from_user_id,d2.from_user_id, d2.content, d2.to_group_id
+                FROM `Data` d2
+                WHERE d2.to_group_id IS NOT NULL
+                AND d2.read_state LIKE '%%unseen%%'
                 """.formatted(getUserID(username));
         try (Statement statement = db.createStatement()) {
-            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            ResultSet resultSet = statement.executeQuery(sqlQuery + "");
             if (!resultSet.next()) {
                 return "Não tem mensagens por ver!\n\n";
             } else {
@@ -1085,12 +1126,8 @@ public class DatabaseManager {
 
     public void updateAllUserStatus() {
         Calendar calendar = Calendar.getInstance();
-        System.out.println("Date b4: " + calendar.getTime());
         calendar.add(Calendar.SECOND, -30);
-        System.out.println("Date after: " + calendar.getTime());
-        Date date = calendar.getTime();
-        String dateNow = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-        System.out.println("DateNow: " + dateNow);
+        String dateNow = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime());
         try {
             Statement statement = db.createStatement();
             String sqlQuery = """
@@ -1103,9 +1140,7 @@ public class DatabaseManager {
                 return;
             } else {
                 do {
-                    System.out.println("Last_seen: " + resultSet.getString("last_seen") + " .: datenow .: " + dateNow);
                     if(dateNow.compareTo(resultSet.getString("last_seen")) > 0){
-                        System.out.println("Offline: " + resultSet.getInt("user_id"));
                         updateUserStatus(resultSet.getInt("user_id"));
                     }
                 } while (resultSet.next());
@@ -1125,6 +1160,21 @@ public class DatabaseManager {
                             "WHERE user_id = ?");
             statement.setString(1, "Offline");
             statement.setInt(2, user_id);
+            statement.executeUpdate();
+            statement.close();
+        } catch (SQLException e) {
+            System.err.println("SQLException: Erro no update do user.");
+            e.printStackTrace();
+        }
+    }
+
+    public void updateFileName(int fileID,String filename) {
+        try {
+            PreparedStatement statement = db.prepareStatement(
+                    "UPDATE `Data` SET content = ? " +
+                            "WHERE data_id = ?");
+            statement.setString(1,  filename);
+            statement.setInt(2, fileID);
             statement.executeUpdate();
             statement.close();
         } catch (SQLException e) {

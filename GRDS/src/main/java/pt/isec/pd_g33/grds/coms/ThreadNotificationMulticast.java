@@ -71,10 +71,12 @@ public class ThreadNotificationMulticast implements Runnable {
         }
     }
 
-
     public static void synchronizeFiles() {
         for (Notification notification : filesReceived) {
             try {
+                // Feito para que todos os servidores que estejam a escuta no multicast,
+                // não enviem de novo a notificação ao cliente, pois é usado o mesmo socket para avisar o novo server dos ficheiros.
+                notification.setUpdateFiles(true);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ObjectOutputStream out = new ObjectOutputStream(baos);
                 out.writeUnshared(notification);

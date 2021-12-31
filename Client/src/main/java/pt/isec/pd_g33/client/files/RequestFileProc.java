@@ -36,7 +36,7 @@ public class RequestFileProc implements Runnable {
                 int nBytes = in.read(buf);
                 if(nBytes == -1)
                     break;
-                System.out.println("Li: " + nBytes);
+               // System.out.println("Li: " + nBytes);
                 fileOutputStream.write(buf, 0, nBytes);
                 buf = new byte[DATA_SIZE];
             }

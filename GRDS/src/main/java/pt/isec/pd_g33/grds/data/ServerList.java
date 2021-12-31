@@ -19,8 +19,9 @@ public class ServerList {
 
     public boolean addServer(ServerInfo newServer){
         if(serverList.contains(newServer)) {
-            if(!serverList.get(serverList.indexOf(newServer)).getHearthbeat())
+            /*if(!serverList.get(serverList.indexOf(newServer)).getHearthbeat()){
                 ThreadNotificationMulticast.synchronizeFiles();
+            }*/
             serverList.get(serverList.indexOf(newServer)).markAsAlive();
             serverList.get(serverList.indexOf(newServer)).setNewServer(false);
             // System.out.println("O servidor já estava registado! -> Hearthbeat a zeros");

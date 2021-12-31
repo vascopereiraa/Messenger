@@ -44,11 +44,11 @@ public class ClientInputUI implements Runnable {
     }
 
     private boolean executeLogin()  {
+        // Caso ja tenha feito o login antes, é porque trocou de servidor e vai se reconectar automaticamente
         if(!loginOrRegister[0].equalsIgnoreCase("empty")){
             writeToSocket(new Login(loginOrRegister[1], loginOrRegister[2]));
         }else {
             do {
-                // Caso ja tenha feito o login antes, é porque trocou de servidor e vai se reconectar automaticamente
                 // Caso seja a primeira vez a entrar
                 System.out.print("$> ");
                 command = scanner.nextLine().split("\\s");
@@ -76,8 +76,8 @@ public class ClientInputUI implements Runnable {
                         default -> System.out.println("Insira um comando valido. Para consultar comandos escreva: commands ");
                     }
                 } catch (Exception e) {
-                    System.out.println("Insira um comando valido. Para consultar comandos escreva: commands ");
-                    //e.printStackTrace();
+                    System.out.println("EXCEPTION: Insira um comando valido. Para consultar comandos escreva: commands ");
+                    e.printStackTrace();
                 }
             } while (!serverConnectionManager.isServerConnected() || !serverConnectionManager.isUserConnected());
         }
@@ -89,7 +89,6 @@ public class ClientInputUI implements Runnable {
     }
 
     private void disconnect(){
-        writeToSocket(new Data(MenuOption.EXIT, serverConnectionManager.getUserData(), serverConnectionManager.getUserData().getUserID()));
         serverConnectionManager.disconnectClient();
         try {
             oisClientInput.close();
@@ -266,6 +265,7 @@ public class ClientInputUI implements Runnable {
                 System.out.println("Insira um comando valido. Para consultar comandos escreva: commands ");
             }
         } while (!command[0].equalsIgnoreCase("exit"));
+        writeToSocket(new Data(MenuOption.EXIT, serverConnectionManager.getUserData(), serverConnectionManager.getUserData().getUserID()));
         disconnect();
     }
 

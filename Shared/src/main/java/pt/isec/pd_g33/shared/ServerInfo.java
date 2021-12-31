@@ -21,6 +21,10 @@ public class ServerInfo {
     }
 
     public boolean isNewServer() {
+        if(newServer){
+            newServer = false;
+            return true;
+        }
         return newServer;
     }
 

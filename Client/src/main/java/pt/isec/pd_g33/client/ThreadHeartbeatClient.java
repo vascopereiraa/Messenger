@@ -20,7 +20,7 @@ public class ThreadHeartbeatClient implements Runnable {
         try {
             while(scm.getServerConnected()){
                 Thread.sleep(25000);
-                System.out.println("Heartbeat sent to Server");
+                //System.out.println("Heartbeat sent to Server");
                 ClientInputUI.writeToSocket(new Data(MenuOption.SET_ONLINE,scm.getUserData(),DataType.Message));
             }
         } catch (InterruptedException e) {

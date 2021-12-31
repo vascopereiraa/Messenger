@@ -8,10 +8,10 @@ public class ThreadReceiveFiles implements Runnable {
 
     private static final int DATA_SIZE = 4000;
 
-    public String ip;
-    public int port;
-    public String filename;
-    public String path;
+    private String ip;
+    private int port;
+    private String filename;
+    private String path;
 
     public ThreadReceiveFiles(String ip, int port, String path, String filename) {
         this.ip = ip;
@@ -40,7 +40,7 @@ public class ThreadReceiveFiles implements Runnable {
                 int nBytes = in.read(buf);
                 if(nBytes == -1)
                     break;
-                System.out.println("Li: " + nBytes);
+                //System.out.println("Li: " + nBytes);
                 fileOutputStream.write(buf, 0, nBytes);
                 buf = new byte[DATA_SIZE];
             }

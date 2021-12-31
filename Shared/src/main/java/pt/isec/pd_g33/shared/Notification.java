@@ -16,23 +16,29 @@ public class Notification implements Serializable {
     private String content;
     private String ip;
     private int porto;
+    private int fileID;
+    private boolean updateFiles = false;
 
     public Notification(String fromUsername, String toUsername, DataType dataType) {
         this.fromUsername = fromUsername;
         this.toUsername = toUsername;
         this.dataType = dataType;
+        this.content = "";
     }
-
-    public Notification(String fromUsername, String toUsername, DataType dataType, String filename,String ip,int porto) {
+    // Ficheiros para contactos
+    public Notification(String fromUsername, String toUsername,int fileID, DataType dataType, String filename,
+                        String ip,int porto) {
         this.fromUsername = fromUsername;
         this.toUsername = toUsername;
         this.dataType = dataType;
         this.content = filename;
         this.ip = ip;
         this.porto = porto;
+        this.fileID = fileID;
     }
-
-    public Notification(String fromUsername, int toGroupId,String toGroupName , String toUsername, DataType dataType, String filename, String ip, int porto) {
+    // Ficheiros para grupos
+    public Notification(String fromUsername, int toGroupId, String toGroupName, String toUsername,
+                        DataType dataType, String filename, String ip, int porto, int fileID) {
         this.fromUsername = fromUsername;
         this.toUsername = toUsername;
         this.toGroupId = toGroupId;
@@ -41,6 +47,7 @@ public class Notification implements Serializable {
         this.content = filename;
         this.ip = ip;
         this.porto = porto;
+        this.fileID = fileID;
     }
 
     public Notification(String fromUsername, String toUsername, DataType dataType,int toGroupId , String toGroupName, String aceiteRejeitado) {
@@ -63,6 +70,9 @@ public class Notification implements Serializable {
         this.dataType = dataType;
     }
 
+    public int getFileID() {
+        return fileID;
+    }
 
     public String getToUsername() {
         return toUsername;
@@ -93,6 +103,14 @@ public class Notification implements Serializable {
     }
 
     public int getToGroupId() { return toGroupId; }
+
+    public boolean isUpdateFiles() {
+        return updateFiles;
+    }
+
+    public void setUpdateFiles(boolean updateFiles) {
+        this.updateFiles = updateFiles;
+    }
 
     @Override
     public String toString() {
