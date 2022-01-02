@@ -327,7 +327,6 @@ public class DatabaseManager {
                 """.formatted(data.getUserData().getUserID(), data.getToGroupId(), data.getDataType(), data.getContent());
         try (Statement statement = db.createStatement()) {
             statement.executeUpdate(sqlQuery);
-            System.out.println("Generated Keys"  + statement.getGeneratedKeys());
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -427,6 +426,8 @@ public class DatabaseManager {
             e.printStackTrace();
             return "SQLException: acceptRejectContact";
         }
+        if(acceptReject.equals("reject"))
+            return "Contacto rejeitado com sucesso. Pedido de " + fromUsername + " já não está pendente";
         return "Contacto aceite com sucesso. " + fromUsername + " pertence agora a sua lista de contactos.";
     }
 
@@ -526,6 +527,9 @@ public class DatabaseManager {
 
     public boolean acceptOrRejectGroupMember(int groupId, String memberUsername, String acceptReject,String groupAdmin, boolean isRemove){
         if(!getGroupAdmin(groupId).equals(groupAdmin))
+            return false;
+
+        if(isRemove && getGroupAdmin(groupId).equals(memberUsername))
             return false;
 
         try {

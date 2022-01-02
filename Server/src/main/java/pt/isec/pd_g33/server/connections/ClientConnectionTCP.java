@@ -95,7 +95,7 @@ public class ClientConnectionTCP implements Runnable {
                 }
                 case MEMBER_ACCEPT -> {
                     if (databaseManager.acceptOrRejectGroupMember(dataReceived.getToGroupId(), dataReceived.getContent(), "accept", dataReceived.getUserData().getUsername(),false)) {
-                        writeToSocket(dataReceived.getContent().trim() + " foi adicionado ao grupo");
+                        writeToSocket(dataReceived.getContent().trim() + " foi adicionado ao grupo.");
                         processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getContent(), DataType.Group, dataReceived.getToGroupId(),
                                 databaseManager.getGroupNameById(dataReceived.getToGroupId()), "aceite"));
                     } else
@@ -103,7 +103,7 @@ public class ClientConnectionTCP implements Runnable {
                 }
                 case MEMBER_REMOVE -> {
                     if (databaseManager.acceptOrRejectGroupMember(dataReceived.getToGroupId(), dataReceived.getContent(), "reject", dataReceived.getUserData().getUsername(),true)) {
-                        writeToSocket(dataReceived.getContent().trim() + " foi removido");
+                        writeToSocket(dataReceived.getContent().trim() + " foi removido do grupo.");
                         processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getContent(), DataType.Group, dataReceived.getToGroupId(),
                                 databaseManager.getGroupNameById(dataReceived.getToGroupId()), "removido"));
                     } else
@@ -135,9 +135,12 @@ public class ClientConnectionTCP implements Runnable {
                 case SEND_MSG_TO_GROUP -> {
                     if (databaseManager.addMsgAndFilesGroups(dataReceived)) {
                         writeToSocket("[SUCCESS] Message sent successfully to " + databaseManager.getGroupNameById(dataReceived.getToGroupId()));
-                        processNotification(new Notification(dataReceived.getUserData().getUsername(),
-                                databaseManager.getGroupNameById(dataReceived.getToGroupId()), // Obter nome do grupo pelo ID
-                                dataReceived.getDataType()));
+
+                        ArrayList<String> arrayOfUsernames = databaseManager.getArraylistOfGroupMembers(dataReceived.getToGroupId());
+                        for (String toUsername : arrayOfUsernames)
+                            if(!toUsername.equals(userInfo.getUsername()))
+                                processNotification(new Notification(dataReceived.getUserData().getUsername(),
+                                        toUsername,dataReceived.getToGroupId(),databaseManager.getGroupNameById(dataReceived.getToGroupId()) ,dataReceived.getDataType()));
                     } else
                         writeToSocket("[WARNING] You are not a member of this group!");
                 }
@@ -164,7 +167,7 @@ public class ClientConnectionTCP implements Runnable {
 
                         writeToSocket("[SUCCESS] File sent successfully to " + dataReceived.getToUserUsername());
                         processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getToUserUsername(), databaseManager.getFileIDFromGroup(dataReceived),
-                                DataType.File, dataReceived.getContent(), ipToReceiveFiles, portToReceiveFiles));
+                                DataType.File, dataReceived.getContent() + " received!", ipToReceiveFiles, portToReceiveFiles));
                     } else {
                         writeToSocket("[WARNING] " + dataReceived.getToUserUsername() + " does not make part of your contacts list");
                     }
@@ -187,8 +190,9 @@ public class ClientConnectionTCP implements Runnable {
 
                         ArrayList<String> arrayOfUsernames = databaseManager.getArraylistOfGroupMembers(dataReceived.getToGroupId());
                         for (String toUsername : arrayOfUsernames)
-                            processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getToGroupId(), databaseManager.getUsernameById(dataReceived.getToGroupId()),
-                                    toUsername, DataType.File, dataReceived.getContent(), ipToReceiveFiles, portToReceiveFiles, databaseManager.getFileIDFromGroup(dataReceived)));
+                            if(!toUsername.equals(userInfo.getUsername()))
+                                processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getToGroupId(), databaseManager.getUsernameById(dataReceived.getToGroupId()),
+                                        toUsername, DataType.File, dataReceived.getContent(), ipToReceiveFiles, portToReceiveFiles, databaseManager.getFileIDFromGroup(dataReceived)));
 
                     } else {
                         writeToSocket("[WARNING] " + dataReceived.getToUserUsername() + " does not make part of your contacts list");
@@ -205,7 +209,9 @@ public class ClientConnectionTCP implements Runnable {
                     } else
                         writeToSocket("[ERROR] Don't exist a file with that filename");
                 }
+                case REQUEST_FILE_FROM_GROUP -> {
 
+                }
                 case DELETE_FILE -> {
                     File file = new File(folderPath + File.separator + dataReceived.getContent());
                     if (file.exists()) { // Ficheiro existe no armaz. do SV

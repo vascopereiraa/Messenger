@@ -63,6 +63,9 @@ public class ThreadMessageReflection implements Runnable {
                                 + " : " + notification.getDataType());
                                 u.writeSocket(notification);
                             }
+
+
+
                         });
                     }
                 }

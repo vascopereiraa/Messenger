@@ -25,6 +25,15 @@ public class Notification implements Serializable {
         this.dataType = dataType;
         this.content = "";
     }
+
+    public Notification(String fromUsername, String toUsername,int toGroupId,String toGroupName, DataType dataType) {
+        this.fromUsername = fromUsername;
+        this.toUsername = toUsername;
+        this.dataType = dataType;
+        this.toGroupId = toGroupId;
+        this.toGroupName = toGroupName;
+        this.content = "";
+    }
     // Ficheiros para contactos
     public Notification(String fromUsername, String toUsername,int fileID, DataType dataType, String filename,
                         String ip,int porto) {
