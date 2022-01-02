@@ -120,8 +120,10 @@ public class ClientConnectionTCP implements Runnable {
                 case ACCEPT_CONTACT -> writeToSocket(databaseManager.acceptRejectContact(dataReceived.getToUserUsername(), dataReceived.getContent(), "accept"));
                 case REJECT_CONTACT -> writeToSocket(databaseManager.acceptRejectContact(dataReceived.getToUserUsername(), dataReceived.getContent(), "reject"));
                 case ADD_CONTACT -> {
-                    writeToSocket(databaseManager.insertContact(dataReceived.getContent(), dataReceived.getToUserUsername()));
-                    processNotification(new Notification(dataReceived.getContent(), dataReceived.getToUserUsername(), DataType.Contact));
+                    String a = databaseManager.insertContact(dataReceived.getContent(), dataReceived.getToUserUsername());
+                    writeToSocket(a);
+                    if(!a.contains("Não é possivel adicionar-se a si mesmo como contacto"))
+                        processNotification(new Notification(dataReceived.getContent(), dataReceived.getToUserUsername(), DataType.Contact));
                 }
                 // Messages
                 case SEND_MSG_TO_CONTACT -> {

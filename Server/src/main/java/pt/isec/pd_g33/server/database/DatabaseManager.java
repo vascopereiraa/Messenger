@@ -94,6 +94,8 @@ public class DatabaseManager {
     }
 
     public String insertContact(String fromUserId, String toUserId){
+        if(fromUserId.equals(toUserId))
+            return "Não é possivel adicionar-se a si mesmo como contacto";
         try (Statement statement = db.createStatement()) {
            String sqlQuery = "INSERT INTO Contact(from_user_id, to_user_id, request_state) VALUES('"+
                    getUserID(fromUserId) + "','" + getUserID(toUserId) + "','pending')";
