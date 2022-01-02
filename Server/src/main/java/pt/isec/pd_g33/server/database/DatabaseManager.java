@@ -872,7 +872,7 @@ public class DatabaseManager {
             } else {
                 do {
                     sb.append("O [").append(getUsernameById(resultSet.getInt("from_user_id")))
-                            .append("] enviou uma mensagem para o grupo [").append(getGroupNameById(groupId))
+                            .append("] enviou uma mensagem para o grupo [").append(getGroupNameById(groupId)).append(']')
                             .append("\tRead State: ").append(resultSet.getString("read_state"))
                             .append("\nMensagem: ").append(resultSet.getString("content")).append("\n");
                 } while (resultSet.next());

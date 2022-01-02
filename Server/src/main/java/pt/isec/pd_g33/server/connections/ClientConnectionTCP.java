@@ -141,8 +141,8 @@ public class ClientConnectionTCP implements Runnable {
                         ArrayList<String> arrayOfUsernames = databaseManager.getArraylistOfGroupMembers(dataReceived.getToGroupId());
                         for (String toUsername : arrayOfUsernames)
                             if(!toUsername.equals(userInfo.getUsername()))
-                                processNotification(new Notification(dataReceived.getUserData().getUsername(),
-                                        toUsername,dataReceived.getToGroupId(),databaseManager.getGroupNameById(dataReceived.getToGroupId()) ,dataReceived.getDataType()));
+                                processNotification(new Notification(dataReceived.getUserData().getUsername(),toUsername,dataReceived.getToGroupId(),
+                                        databaseManager.getGroupNameById(dataReceived.getToGroupId()) ,dataReceived.getDataType()));
                     } else
                         writeToSocket("[WARNING] You are not a member of this group!");
                 }
@@ -169,7 +169,7 @@ public class ClientConnectionTCP implements Runnable {
 
                         writeToSocket("[SUCCESS] File sent successfully to " + dataReceived.getToUserUsername());
                         processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getToUserUsername(), databaseManager.getFileIDFromGroup(dataReceived),
-                                DataType.File, dataReceived.getContent() + " received!", ipToReceiveFiles, portToReceiveFiles));
+                                DataType.File, dataReceived.getContent(), ipToReceiveFiles, portToReceiveFiles));
                     } else {
                         writeToSocket("[WARNING] " + dataReceived.getToUserUsername() + " does not make part of your contacts list");
                     }
@@ -193,13 +193,15 @@ public class ClientConnectionTCP implements Runnable {
                         ArrayList<String> arrayOfUsernames = databaseManager.getArraylistOfGroupMembers(dataReceived.getToGroupId());
                         for (String toUsername : arrayOfUsernames)
                             if(!toUsername.equals(userInfo.getUsername()))
-                                processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getToGroupId(), databaseManager.getUsernameById(dataReceived.getToGroupId()),
+                                processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getToGroupId(),
+                                        databaseManager.getGroupNameById(dataReceived.getToGroupId()),
                                         toUsername, DataType.File, dataReceived.getContent(), ipToReceiveFiles, portToReceiveFiles, databaseManager.getFileIDFromGroup(dataReceived)));
 
                     } else {
                         writeToSocket("[WARNING] " + dataReceived.getToUserUsername() + " does not make part of your contacts list");
                     }
                 }
+                //sendfile contact <username> <...path...> <...file...>"
                 case REQUEST_FILE_FROM_CONTACT -> {
                     if (new File(folderPath + File.separator + dataReceived.getContent()).exists()) { // Ficheiro existe no armaz. do SV
                         if (databaseManager.isFileToContact(dataReceived.getContent(), dataReceived.getToUserUsername(), dataReceived.getUserData().getUsername())) {
@@ -209,10 +211,18 @@ public class ClientConnectionTCP implements Runnable {
                         } else
                             writeToSocket("[ERROR] Don't have any file from this contact with that filename");
                     } else
-                        writeToSocket("[ERROR] Don't exist a file with that filename");
+                        writeToSocket("[ERROR] Make sure you have that contact and that the file exists.");
                 }
                 case REQUEST_FILE_FROM_GROUP -> {
-
+                    if (new File(folderPath + File.separator + dataReceived.getContent()).exists()) { // Ficheiro existe no armaz. do SV
+                        if (databaseManager.belongsToGroup(userInfo.getUsername(),dataReceived.getToGroupId())) {
+                            dataReceived.setReadState(ipToReceiveFiles);
+                            dataReceived.setToUserId(portToReceiveFiles);
+                            writeToSocket(dataReceived);
+                        } else
+                            writeToSocket("[ERROR] Don't have any file from this group with that filename");
+                    } else
+                        writeToSocket("[ERROR] Make sure you belong to the group and that the file exists.");
                 }
                 case DELETE_FILE -> {
                     File file = new File(folderPath + File.separator + dataReceived.getContent());
@@ -285,7 +295,6 @@ public class ClientConnectionTCP implements Runnable {
         // Verificar se cliente pertence a este servidor, caso pertença, não precisa avisar outros servidores
         for(UserInfo u : listUsers) {
             if(u.getUsername()!=null){
-                System.out.println("Username: " + u.getUsername() + " to username: " + notification.getToUsername());
                 if(u.getUsername().equals(notification.getToUsername())) {
                     u.writeSocket(notification);
                     return;

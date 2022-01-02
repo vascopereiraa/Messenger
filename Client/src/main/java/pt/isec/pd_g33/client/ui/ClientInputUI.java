@@ -150,6 +150,7 @@ public class ClientInputUI implements Runnable {
                 %-35s  %-100s
                 %-35s  %-100s
                 %-35s  %-100s
+                %-35s  %-100s
                 
                 %-35s  %-100s
                 %n""",
