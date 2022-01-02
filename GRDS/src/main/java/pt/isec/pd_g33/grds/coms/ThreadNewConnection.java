@@ -36,13 +36,14 @@ public class ThreadNewConnection implements Runnable {
 
                 // Message Processing
                 if(connectionMessage.getConnectionType() == ConnectionType.Server) {
+                    // Tenta inserir o servidor, se ja existir, atualiza o indicador que esta vivo, caso contrario, insere servidor
                     if(serverList.addServer(new ServerInfo(dp.getAddress(), connectionMessage.getPort()))) {
                         connectionMessage.setMessage("Server_%04d".formatted(serverList.getNextIndex()));
                         // System.out.println("New server info: " + dp.getAddress().getHostAddress() + " : " + connectionMessage.getPort());
                         System.out.println(serverList);
                     }
                 }
-                else {
+                else { // Mensagem de cliente, atribui servidor
                     connectionMessage.insertServerInfo(serverList.getNextServer());
                     // System.out.println("New client info: " + connectionMessage.getIp() + " : " + connectionMessage.getPort());
                 }
@@ -60,7 +61,6 @@ public class ThreadNewConnection implements Runnable {
                 if((connectionMessage.getConnectionType() == ConnectionType.Server && serverList.getServerInfo().get(serverList.getServerInfo().size() - 1).isNewServer())
                 || (connectionMessage.getConnectionType() == ConnectionType.Server && serverList.getServerInfoByPorto(connectionMessage.getPort()).getHearthbeatFail() > 0)){
                     // Obtenção de todos os ficheiros existentes
-                    System.out.println("Vou fazer syncronized");
                     ThreadNotificationMulticast.synchronizeFiles();
                 }
 

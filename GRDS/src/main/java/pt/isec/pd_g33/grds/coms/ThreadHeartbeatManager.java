@@ -11,11 +11,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Caso nao responda, não sao mais redirecionados clientes para este servidor
  * Caso seja a 3a vez que nao responde é removido da lista de servidores
  */
-public class ThreadHearthbeatManager implements Runnable {
+public class ThreadHeartbeatManager implements Runnable {
 
     private final CopyOnWriteArrayList<ServerInfo> serverList;
 
-    public ThreadHearthbeatManager(CopyOnWriteArrayList<ServerInfo> serverList){
+    public ThreadHeartbeatManager(CopyOnWriteArrayList<ServerInfo> serverList){
         this.serverList = serverList;
     }
 

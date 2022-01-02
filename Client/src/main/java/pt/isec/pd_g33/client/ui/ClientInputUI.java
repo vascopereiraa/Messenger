@@ -177,13 +177,13 @@ public class ClientInputUI implements Runnable {
                 "-> Send message to contact", "sendmsg contact <username> <...message...>",
                 "-> Send file to group", "sendfile group <group_id> <...path...> <...file...>",
                 "-> Send file to contact", "sendfile contact <username> <...path...> <...file...>",
-                "-> Delete file sent", "deletefile <filename>",
                 "-> Request file from contact", "get contact <username> <...file...> <...save_location...>",
                 "-> Request file from group", "get group <group_id> <...file...> <...save_location...>",
                 "-> List messages/files to contact", "list contact <username>",
                 "-> List messages/files to group", "list group <group_id>",
                 "-> List unseen messages", "listunseen",
                 "-> Delete message from/to contact/group", "delmsg <message id from group or contact>",
+                "-> Delete file sent", "delfile <filename>",
 
                 "-> Exit client", "exit");
     }
@@ -246,7 +246,7 @@ public class ClientInputUI implements Runnable {
                         else
                             writeToSocket(new Data(MenuOption.SEND_FILE_TO_GROUP, command[4], Integer.parseInt(command[2]) ,sendFileProc.getSendFileSocketIp(),sendFileProc.getSendFileSocketPort(),serverConnectionManager.getUserData()));
                     }
-                    case "deletefile" -> writeToSocket(new Data(MenuOption.DELETE_FILE,command[1],serverConnectionManager.getUserData().getUserID()));
+                    case "delfile" -> writeToSocket(new Data(MenuOption.DELETE_FILE,command[1],serverConnectionManager.getUserData().getUserID()));
                     case "get" -> {
                         if(serverConnectionManager.setSaveLocation(command[4])) {
                             if (command[1].equalsIgnoreCase("contact"))

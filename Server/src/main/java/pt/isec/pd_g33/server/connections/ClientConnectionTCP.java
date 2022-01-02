@@ -94,20 +94,20 @@ public class ClientConnectionTCP implements Runnable {
                         writeToSocket("Ocorreu um erro. Não foi possível aderir a grupo. Certifique-se que o grupo existe e que já não pertence a ele.");
                 }
                 case MEMBER_ACCEPT -> {
-                    if (databaseManager.acceptOrRejectGroupMember(dataReceived.getToGroupId(), dataReceived.getContent(), "accept", dataReceived.getUserData().getUsername())) {
+                    if (databaseManager.acceptOrRejectGroupMember(dataReceived.getToGroupId(), dataReceived.getContent(), "accept", dataReceived.getUserData().getUsername(),false)) {
                         writeToSocket(dataReceived.getContent().trim() + " foi adicionado ao grupo");
                         processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getContent(), DataType.Group, dataReceived.getToGroupId(),
                                 databaseManager.getGroupNameById(dataReceived.getToGroupId()), "aceite"));
                     } else
-                        writeToSocket("Ocorreu um erro. Não foi possível aceitar um novo membro no grupo! Certifique-se que tem os dados corretos e é administrador!");
+                        writeToSocket("Ocorreu um erro. Não foi possível aceitar um novo membro no grupo! Certifique-se que tem os dados corretos, o membro existe e está pendente e é administrador!");
                 }
                 case MEMBER_REMOVE -> {
-                    if (databaseManager.acceptOrRejectGroupMember(dataReceived.getToGroupId(), dataReceived.getContent(), "reject", dataReceived.getUserData().getUsername())) {
+                    if (databaseManager.acceptOrRejectGroupMember(dataReceived.getToGroupId(), dataReceived.getContent(), "reject", dataReceived.getUserData().getUsername(),true)) {
                         writeToSocket(dataReceived.getContent().trim() + " foi removido");
                         processNotification(new Notification(dataReceived.getUserData().getUsername(), dataReceived.getContent(), DataType.Group, dataReceived.getToGroupId(),
                                 databaseManager.getGroupNameById(dataReceived.getToGroupId()), "removido"));
                     } else
-                        writeToSocket("Ocorreu um erro. Não foi possível aceitar um novo membro no grupo! Certifique-se que tem os dados corretos e é administrador!");
+                        writeToSocket("Ocorreu um erro. Não foi possível fazer o remove do membro no grupo! Certifique-se que tem os dados corretos, o membro existe e está aceite e é administrador!");
                 }
                 case RENAME_GROUP -> writeToSocket(databaseManager.updateGroupName(dataReceived.getContent(), dataReceived.getToGroupId(), dataReceived.getUserData().getUsername()));
                 case DELETE_GROUP -> writeToSocket(databaseManager.deleteGroup(dataReceived.getContent(), dataReceived.getToGroupId()));
@@ -263,7 +263,7 @@ public class ClientConnectionTCP implements Runnable {
                 userInfo.setUsername(register.getUsername());
                 oos.writeObject(new Data("Registo efetuado com sucesso",userData));
             } else
-                oos.writeObject(new Data("Registo invalido."));
+                oos.writeObject(new Data("Registo invalido. Tem que ser um novo utilizador."));
             oos.flush();
             return true;
         } catch (IOException e) {

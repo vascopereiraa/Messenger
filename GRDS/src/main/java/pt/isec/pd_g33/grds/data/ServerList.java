@@ -18,6 +18,7 @@ public class ServerList {
     }
 
     public boolean addServer(ServerInfo newServer){
+        // Caso ja exista, atualiza o seu indicador que esta vivo
         if(serverList.contains(newServer)) {
             /*if(!serverList.get(serverList.indexOf(newServer)).getHearthbeat()){
                 ThreadNotificationMulticast.synchronizeFiles();

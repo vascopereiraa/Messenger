@@ -1,14 +1,12 @@
 package pt.isec.pd_g33.grds;
 
-import pt.isec.pd_g33.grds.coms.ThreadHearthbeatManager;
+import pt.isec.pd_g33.grds.coms.ThreadHeartbeatManager;
 import pt.isec.pd_g33.grds.coms.ThreadNewConnection;
 import pt.isec.pd_g33.grds.coms.ThreadNotificationMulticast;
 import pt.isec.pd_g33.grds.data.ServerList;
-import pt.isec.pd_g33.shared.Notification;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
 
 public class GRDS {
 
@@ -58,7 +56,7 @@ public class GRDS {
             tnm.start();
 
             // Heartbeat
-            ThreadHearthbeatManager heartbeatManager = new ThreadHearthbeatManager(serverList.getServerInfo());
+            ThreadHeartbeatManager heartbeatManager = new ThreadHeartbeatManager(serverList.getServerInfo());
             Thread hearthbeatManager = new Thread(heartbeatManager);
             hearthbeatManager.start();
 
