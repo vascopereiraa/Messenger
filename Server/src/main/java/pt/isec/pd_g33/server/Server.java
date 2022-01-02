@@ -107,6 +107,7 @@ public class Server {
             // Espera que o user faça EXIT do server.
             ttts.join();
             // Informar os clientes para terminar
+            listUsers.forEach(u -> databaseManager.changeUserStatus((int) databaseManager.getUserID(u.getUsername()), 0));
             ThreadMessageReflection.terminaClientes(connectionMessage);
             // Indica para a Thread Heartbeat Server e Client terminar
             tths.stop();
