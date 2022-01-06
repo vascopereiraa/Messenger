@@ -1,5 +1,6 @@
 package pt.isec.pd_g33.grds.coms;
 
+import pt.isec.pd_g33.grds.RMI_Meta3.GetNotificationsObserverInterface;
 import pt.isec.pd_g33.grds.data.ServerList;
 import pt.isec.pd_g33.shared.ConnectionMessage;
 import pt.isec.pd_g33.shared.ConnectionType;
@@ -8,16 +9,19 @@ import pt.isec.pd_g33.shared.ServerInfo;
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 // Thread dedicada a receber conexões UDP por parte do servidor, via UDP unicast e UDP multicast
 public class ThreadNewConnection implements Runnable {
 
     private final DatagramSocket ds;
     private final ServerList serverList;
+    private final CopyOnWriteArrayList<GetNotificationsObserverInterface> observers;
 
-    public ThreadNewConnection(DatagramSocket ds, ServerList serverList) {
+    public ThreadNewConnection(DatagramSocket ds, ServerList serverList, CopyOnWriteArrayList<GetNotificationsObserverInterface> observers) {
         this.ds = ds;
         this.serverList = serverList;
+        this.observers = observers;
     }
 
     @Override
@@ -41,9 +45,15 @@ public class ThreadNewConnection implements Runnable {
                         connectionMessage.setMessage("Server_%04d".formatted(serverList.getNextIndex()));
                         // System.out.println("New server info: " + dp.getAddress().getHostAddress() + " : " + connectionMessage.getPort());
                         System.out.println(serverList);
+                        //todo: RMI, servidor adicionado, enviar notificação
+                        for(GetNotificationsObserverInterface obs : observers)
+                            obs.notifyNewNotification("Um novo servidor foi adicionado ao GRDS. Info de servidor. " + serverList.getServerInfo().get(serverList.getServerInfo().size() - 1));
                     }
                 }
                 else { // Mensagem de cliente, atribui servidor
+                    //todo: RMI, cliente adicionado, enviar notificação
+                    for(GetNotificationsObserverInterface obs : observers)
+                        obs.notifyNewNotification("Um novo cliente foi adicionado ao GRDS. Porto do cliente. " + connectionMessage.getPort());
                     connectionMessage.insertServerInfo(serverList.getNextServer());
                     // System.out.println("New client info: " + connectionMessage.getIp() + " : " + connectionMessage.getPort());
                 }

@@ -1,5 +1,6 @@
 package pt.isec.pd_g33.grds.coms;
 
+import pt.isec.pd_g33.grds.RMI_Meta3.GetNotificationsObserverInterface;
 import pt.isec.pd_g33.shared.ServerInfo;
 
 import java.util.Iterator;
@@ -14,9 +15,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ThreadHeartbeatManager implements Runnable {
 
     private final CopyOnWriteArrayList<ServerInfo> serverList;
+    private final CopyOnWriteArrayList<GetNotificationsObserverInterface> observers;
 
-    public ThreadHeartbeatManager(CopyOnWriteArrayList<ServerInfo> serverList){
+    public ThreadHeartbeatManager(CopyOnWriteArrayList<ServerInfo> serverList, CopyOnWriteArrayList<GetNotificationsObserverInterface> observers){
         this.serverList = serverList;
+        this.observers = observers;
     }
 
     @Override
@@ -34,6 +37,8 @@ public class ThreadHeartbeatManager implements Runnable {
                     else {
                         sv.incHearthbeatFail();
                         if(sv.getHearthbeatFail() == 3){
+                            for(GetNotificationsObserverInterface obs : observers)
+                                obs.notifyNewNotification("Um servidor foi eliminado do GRDS. Info do servidor. " + it);
                             it.remove();
                         }
                     }
