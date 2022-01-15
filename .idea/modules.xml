@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/GRDS/GRDS.iml" filepath="$PROJECT_DIR$/GRDS/GRDS.iml" />
       <module fileurl="file://$PROJECT_DIR$/Messenger.iml" filepath="$PROJECT_DIR$/Messenger.iml" />
       <module fileurl="file://$PROJECT_DIR$/Server/Server.iml" filepath="$PROJECT_DIR$/Server/Server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ServerAPI/ServerAPI.iml" filepath="$PROJECT_DIR$/ServerAPI/ServerAPI.iml" />
       <module fileurl="file://$PROJECT_DIR$/Shared/Shared.iml" filepath="$PROJECT_DIR$/Shared/Shared.iml" />
     </modules>
   </component>
