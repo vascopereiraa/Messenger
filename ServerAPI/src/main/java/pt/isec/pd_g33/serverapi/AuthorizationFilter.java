@@ -11,34 +11,18 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class AuthorizationFilter extends OncePerRequestFilter {
-    private final String bdmsLocation = "jdbc:mysql://localhost:3306/MessengerDB";
-    private final String username = "root";
-    private final String password = "1234";
-    private static Connection db;
-
-    public AuthorizationFilter(){
-        try {
-            db = DriverManager.getConnection(this.bdmsLocation, username, password);
-        } catch (SQLException e) {
-            System.err.println("SQLExeption: Ocorreu um erro na conexão a base de dados");
-            e.printStackTrace();
-        }
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         // Obtencao do header o token de autenticacao
         String token = request.getHeader("Authorization");
+
         //todo: Verifica se token é válido e devolve o username do user
         String username = checkToken(token);
         if (token != null && username != null)

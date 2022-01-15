@@ -18,7 +18,7 @@
       <module name="GRDS" target="16" />
       <module name="Messenger" target="16" />
       <module name="Server" target="16" />
-      <module name="ServerAPI" target="11" />
+      <module name="ServerAPI" target="15" />
       <module name="Shared" target="16" />
     </bytecodeTargetLevel>
   </component>
