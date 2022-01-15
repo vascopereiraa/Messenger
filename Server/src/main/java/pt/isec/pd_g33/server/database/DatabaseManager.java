@@ -6,10 +6,12 @@ import pt.isec.pd_g33.shared.UserData;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 
 public class DatabaseManager {
+    private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder();
     private final String bdmsLocation;
     private final String username = "root";
     private final String password = "1234";
@@ -40,9 +42,10 @@ public class DatabaseManager {
 
     public UserData insertUser(String name, String username, String password) {
         UserData userData;
+        String token = base64Encoder.encodeToString((username+password).getBytes());
         try (Statement statement = db.createStatement()) {
-            String sqlQuery = "INSERT INTO User(name, username, password, last_seen, status)" +
-                    "VALUES('" + name + "','" + username + "','" + password + "','"
+            String sqlQuery = "INSERT INTO User(name, username, token, password, last_seen, status)" +
+                    "VALUES('" + name + "','" + username + "','" + token + "','" + password + "','"
                     + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "','Online')";
             System.out.println(sqlQuery);
             statement.executeUpdate(sqlQuery);
@@ -214,7 +217,6 @@ public class DatabaseManager {
     public String listContacts(int user_id) {
         StringBuilder sb = new StringBuilder();
         try {
-
             Statement statement = db.createStatement();
             String sqlQuery = """
                     SELECT u1.username,u1.name,u1.status,u1.last_seen

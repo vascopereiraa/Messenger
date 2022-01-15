@@ -5,6 +5,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
+import pt.isec.pd_g33.serverapi.database.DatabaseManager;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -18,49 +19,29 @@ import java.util.List;
 public class AuthorizationFilter extends OncePerRequestFilter {
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+        DatabaseManager dbmanager = new DatabaseManager();
 
         // Obtencao do header o token de autenticacao
         String token = request.getHeader("Authorization");
 
         //todo: Verifica se token é válido e devolve o username do user
-        String username = checkToken(token);
+        String username = dbmanager.checkToken(token);
         if (token != null && username != null)
         {
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority("USER"));
 
-            UsernamePasswordAuthenticationToken uPAT = new UsernamePasswordAuthenticationToken(username, null, authorities);
+            UsernamePasswordAuthenticationToken uPAT = new UsernamePasswordAuthenticationToken(token, null, authorities);
 
             SecurityContextHolder.getContext().setAuthentication(uPAT);
         }
+
         filterChain.doFilter(request, response);
-    }
-
-    private String checkToken(String token){
-        try{
-            Statement statement = db.createStatement();
-            String sqlQuery = "SELECT token,username FROM User WHERE BINARY token = '" + token + "'";
-            ResultSet resultSet = statement.executeQuery(sqlQuery);
-            if(resultSet.next()){
-                statement.close();
-                return resultSet.getString("username");
-            }
-            statement.close();
-        }catch(SQLException e){
-            e.printStackTrace();
-        }
-        return null;
+        DatabaseManager.close();
     }
 
 
-    private static void close() {
-        if(db != null) {
-            try {
-                db.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+
 }
