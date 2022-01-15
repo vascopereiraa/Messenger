@@ -6,11 +6,16 @@ public class Login implements Serializable {
 
     private final String username;
     private final String password;
+    private String token;
 
     public Login(String username, String password) {
         this.username = username;
         this.password = password;
     }
+
+    public String getToken() { return token; }
+
+    public void setToken(String newToken) { token = newToken; }
 
     public String getUsername() {
         return username;
