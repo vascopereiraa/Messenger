@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Base64;
+
+
 
 public class DatabaseManager {
     private static final Base64.Encoder base64Encoder = Base64.getUrlEncoder();
@@ -42,10 +45,9 @@ public class DatabaseManager {
 
     public UserData insertUser(String name, String username, String password) {
         UserData userData;
-        String token = base64Encoder.encodeToString((username+password).getBytes());
         try (Statement statement = db.createStatement()) {
-            String sqlQuery = "INSERT INTO User(name, username, token, password, last_seen, status)" +
-                    "VALUES('" + name + "','" + username + "','" + token + "','" + password + "','"
+            String sqlQuery = "INSERT INTO User(name, username, password, last_seen, status)" +
+                    "VALUES('" + name + "','" + username + "','" + password + "','"
                     + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + "','Online')";
             System.out.println(sqlQuery);
             statement.executeUpdate(sqlQuery);

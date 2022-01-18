@@ -37,14 +37,27 @@ public class ThreadHeartbeatManager implements Runnable {
                     else {
                         sv.incHearthbeatFail();
                         if(sv.getHearthbeatFail() == 3){
-                            for(GetNotificationsObserverInterface obs : observers)
-                                obs.notifyNewNotification("Um servidor foi eliminado do GRDS. Info do servidor. " + it);
+                            sendNotification("Um servidor foi eliminado do GRDS. Info do servidor. " + it);
                             it.remove();
                         }
                     }
                 }
             } catch (Exception e) {
                 System.out.println("Servidor já foi eliminado");
+            }
+        }
+    }
+
+    private void sendNotification(String notificacao){
+        Iterator<GetNotificationsObserverInterface> it = observers.iterator();
+        GetNotificationsObserverInterface itnext = null;
+        while(it.hasNext()){
+            try {
+                itnext = it.next();
+                itnext.notifyNewNotification(notificacao);
+            } catch (Exception e) {
+                System.out.println("Listener já não existe");
+                observers.remove(itnext);
             }
         }
     }

@@ -47,14 +47,12 @@ public class ThreadNewConnection implements Runnable {
                         // System.out.println("New server info: " + dp.getAddress().getHostAddress() + " : " + connectionMessage.getPort());
                         System.out.println(serverList);
                         //todo: RMI, servidor adicionado, enviar notificação
-                        for(GetNotificationsObserverInterface obs : observers)
-                            obs.notifyNewNotification("Um novo servidor foi adicionado ao GRDS. Info de servidor. " + serverList.getServerInfo().get(serverList.getServerInfo().size() - 1));
+                        sendNotification("Um novo servidor foi adicionado ao GRDS. Info de servidor. " + serverList.getServerInfo().get(serverList.getServerInfo().size() - 1));
                     }
                 }
                 else { // Mensagem de cliente, atribui servidor
                     //todo: RMI, cliente adicionado, enviar notificação
-                    for(GetNotificationsObserverInterface obs : observers)
-                        obs.notifyNewNotification("Um novo cliente foi adicionado ao GRDS. Porto do cliente. " + connectionMessage.getPort());
+                    sendNotification("Um novo cliente foi adicionado ao GRDS. Porto do cliente. " + connectionMessage.getPort());
                     connectionMessage.insertServerInfo(serverList.getNextServer());
                     // System.out.println("New client info: " + connectionMessage.getIp() + " : " + connectionMessage.getPort());
                 }
@@ -77,6 +75,19 @@ public class ThreadNewConnection implements Runnable {
 
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+    private void sendNotification(String notificacao){
+        Iterator<GetNotificationsObserverInterface> it = observers.iterator();
+        GetNotificationsObserverInterface itnext = null;
+        while(it.hasNext()){
+            try {
+                itnext = it.next();
+                itnext.notifyNewNotification(notificacao);
+            } catch (Exception e) {
+                System.out.println("Listener já não existe");
+                observers.remove(itnext);
             }
         }
     }

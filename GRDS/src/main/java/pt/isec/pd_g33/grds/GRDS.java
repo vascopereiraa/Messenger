@@ -103,7 +103,6 @@ public class GRDS extends UnicastRemoteObject implements GetServerListGRDSInterf
             Thread hearthbeatManager = new Thread(heartbeatManager);
             hearthbeatManager.start();
 
-
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);

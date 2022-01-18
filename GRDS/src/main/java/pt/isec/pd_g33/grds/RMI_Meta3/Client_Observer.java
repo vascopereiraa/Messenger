@@ -38,11 +38,11 @@ public class Client_Observer extends UnicastRemoteObject implements GetNotificat
             do{
                 input = scanner.nextLine();
 
-                if(input.equals("serverlist"))
+                if(input.equalsIgnoreCase("serverlist"))
                     System.out.println(rti.getServerList());
-                if(input.equals("addObs"))
+                if(input.equalsIgnoreCase("addObs"))
                     rti.addObserver(CO);
-                if(input.equals("removeObs"))
+                if(input.equalsIgnoreCase("removeObs"))
                     rti.removeObserver(CO);
 
             }while (!input.equals("exit"));

@@ -11,6 +11,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.rmi.RemoteException;
+import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 // Thread que recebe notificações vindas de 1 servidor para depois refletir pelos restantes servidores.
@@ -59,8 +60,7 @@ public class ThreadNotificationMulticast implements Runnable {
                     // Apagar servidor da lista de servers, caso ele faça EXIT.
                     if(notification.getContent().equals("serverTerminated") && notification.getDataType() == DataType.Message){
                         //todo: RMI -> tratamento quando server é eliminado
-                        for(GetNotificationsObserverInterface obs : observers)
-                            obs.notifyNewNotification("Um servidor foi eliminado do GRDS. Info do servidor. " + serverList.getServerInfoByPorto(notification.getPorto()));
+                        sendNotification("Um servidor foi eliminado do GRDS. Info do servidor. " + serverList.getServerInfoByPorto(notification.getPorto()));
                         System.out.println("O servidor " + notification.getPorto() + " foi eliminado");
                         serverList.getServerInfo().removeIf(obj -> obj.getPort() == obj.getPort());
                     }
@@ -100,19 +100,18 @@ public class ThreadNotificationMulticast implements Runnable {
                     description = "Tem um ficheiro por visualizar no grupo " + notification.getToGroupId() + ".:" + notification.getToGroupName() +
                             " com o nome: " + notification.getContent() + " enviado por " + notification.getFromUsername() + ".";
                 else
-                    System.out.println("O cliente " + notification.getFromUsername() + " enviou um ficheiro com o nome: " + notification.getContent() + " para o cliente " + notification.getToUsername());
+                    description = "O cliente " + notification.getFromUsername() + " enviou um ficheiro com o nome: " + notification.getContent() + " para o cliente " + notification.getToUsername();
             }
-            case Contact -> System.out.println("O cliente : " + notification.getFromUsername() + " enviou um pedido de contacto para o cliente  " + notification.getToUsername() + ".");
+            case Contact ->  description = "O cliente : " + notification.getFromUsername() + " enviou um pedido de contacto para o cliente  " + notification.getToUsername() + ".";
             case Group ->{
                 if(notification.getContent().contains("aceite"))
-                    System.out.println("O pedido de adesão do cliente:" + notification.getFromUsername() + " ao grupo " + notification.getToGroupId() + ".:" + notification.getToGroupName() + " foi aceite.");
+                    description = "O pedido de adesão do cliente:" + notification.getFromUsername() + " ao grupo " + notification.getToGroupId() + ".:" + notification.getToGroupName() + " foi aceite.";
                 else
-                    System.out.println("O cliente: " + notification.getFromUsername() +" foi removido do grupo " + notification.getToGroupId() + ".:" + notification.getToGroupName() + " pelo administrador.");
+                    description = "O cliente: " + notification.getFromUsername() +" foi removido do grupo " + notification.getToGroupId() + ".:" + notification.getToGroupName() + " pelo administrador.";
             }
         }
         //todo: RMI, servidor adicionado, enviar notificação
-        for(GetNotificationsObserverInterface obs : observers)
-            obs.notifyNewNotification(description);
+        sendNotification(description);
     }
 
     public static void synchronizeFiles() {
@@ -129,6 +128,20 @@ public class ThreadNotificationMulticast implements Runnable {
                 multicastSocket.send(dp);
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    private void sendNotification(String notificacao){
+        Iterator<GetNotificationsObserverInterface> it = observers.iterator();
+        GetNotificationsObserverInterface itnext = null;
+        while(it.hasNext()){
+            try {
+                itnext = it.next();
+                itnext.notifyNewNotification(notificacao);
+            } catch (Exception e) {
+                System.out.println("Listener já não existe");
+                observers.remove(itnext);
             }
         }
     }
