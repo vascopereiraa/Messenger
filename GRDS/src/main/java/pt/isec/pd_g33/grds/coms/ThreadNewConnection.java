@@ -9,6 +9,7 @@ import pt.isec.pd_g33.shared.ServerInfo;
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 // Thread dedicada a receber conexões UDP por parte do servidor, via UDP unicast e UDP multicast

@@ -27,8 +27,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         String token = request.getHeader("Authorization");
 
         //todo: Verifica se token é válido e devolve o username do user
-        String username = dbmanager.checkToken(token);
-        if (token != null && username != null)
+        if (dbmanager.checkToken(token))
         {
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority("USER"));

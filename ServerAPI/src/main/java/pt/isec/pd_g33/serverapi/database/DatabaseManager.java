@@ -17,19 +17,26 @@ public class DatabaseManager {
         }
     }
 
-    public String checkToken(String token){
-        try{
-            Statement statement = db.createStatement();
-            String sqlQuery = "SELECT token, username FROM User WHERE BINARY token = '" + token + "'";
+    public boolean checkToken(String token){
+        if(token == null)
+            return false;
+
+        try(Statement statement = db.createStatement()) {
+            String sqlQuery = "SELECT token_creation FROM User WHERE BINARY token = '" + token + "';";
             ResultSet resultSet = statement.executeQuery(sqlQuery);
             if(resultSet.next()){
-                return resultSet.getString("username");
+               Timestamp d = resultSet.getTimestamp("token_creation");
+               LocalDateTime tokenTime = d.toLocalDateTime().plusMinutes(2);
+               LocalDateTime agora = LocalDateTime.now();
+               if(agora.isBefore(tokenTime))
+                   return true;
+               else
+                   return false;
             }
-            statement.close();
         }catch(SQLException e){
             e.printStackTrace();
         }
-        return null;
+        return false;
     }
 
     public static void close() {
@@ -136,8 +143,8 @@ public class DatabaseManager {
     }
 
     public String getGroupMsg(String token, int groupId){
-        String fromUsername = getUsernameById(getUserID(token));
-        if(!belongsToGroup(fromUsername,groupId))
+        /*String fromUsername = getUsernameById(getUserID(token));*/
+        if(!belongsToGroup(token,groupId))
             return "Indique por favor um grupo a que pertença.";
 
         StringBuilder sb = new StringBuilder();
@@ -198,7 +205,7 @@ public class DatabaseManager {
                             .append("\tNome:").append(resultSet.getString("name")).append("\n")
                             .append("\tUsername: ").append(resultSet.getString("username")).append("\n")
                             .append("\tStatus: ").append(resultSet.getString("status")).append("\n")
-                            .append("\tLast seen: ").append(resultSet.getString("last_seen")).append("\n");
+                            .append("\tLast seen: ").append(resultSet.getString("last_seen")).append("\n\n");
                 } while (resultSet.next());
             }
             statement.close();
@@ -276,7 +283,7 @@ public class DatabaseManager {
         }
     }
 
-    public boolean belongsToGroup(String fromUsername,int groupId){
+    public boolean belongsToGroup(String token, int groupId){
         try (Statement statement = db.createStatement()) {
             String sqlQuery = """
                     SELECT *
@@ -284,7 +291,7 @@ public class DatabaseManager {
                     WHERE user_id = %d
                     AND group_id = %d
                     AND membership_state LIKE '%%approved%%';
-                    """.formatted(getUserID(fromUsername), groupId);
+                    """.formatted(getUserID(token), groupId);
             ResultSet resultSet = statement.executeQuery(sqlQuery);
             return resultSet.next();
         } catch (SQLException e) {
@@ -323,5 +330,39 @@ public class DatabaseManager {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public boolean loginUser(String username, String password, String token) {
+        int user_id = -1;
+        try (Statement statement = db.createStatement()) {
+            String sqlQuery = """
+                SELECT user_id
+                FROM User
+                WHERE BINARY username = '%s'
+                AND BINARY password = '%s';
+                """.formatted(username, password);
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            if(resultSet.next()) {
+                user_id = resultSet.getInt("user_id");
+            }
+        } catch (SQLException e) {
+            return false;
+        }
+
+        if(user_id != -1) {
+            try (Statement statement = db.createStatement()) {
+                String sqlQuery = """
+                UPDATE User
+                SET token = '%s', token_creation = NOW()
+                WHERE BINARY user_id = '%d';
+                """.formatted(token, user_id);
+                statement.executeUpdate(sqlQuery);
+                return true;
+            } catch (SQLException e) {
+                return false;
+            }
+        }
+
+        return false;
     }
 }
