@@ -1,6 +1,9 @@
 package pt.isec.pd_g33.serverapi.database;
 
+import org.apache.tomcat.jni.Local;
+
 import java.sql.*;
+import java.time.LocalDateTime;
 
 public class DatabaseManager {
 
