@@ -30,7 +30,10 @@ public class ThreadHeartbeatManager implements Runnable {
                 Iterator<ServerInfo> it = serverList.iterator();
                 while(it.hasNext()) {
                     ServerInfo sv = it.next();
-                    if(sv.getHearthbeat()){
+                    if(sv.getHearthbeat()) {
+                        long time = System.currentTimeMillis();
+                        //System.out.println((time - sv.getDate()) / 1000);
+                        sv.setDate(time);
                         sv.resetHearthbeatFail();
                         sv.markAsDead();
                     }

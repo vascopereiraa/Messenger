@@ -23,12 +23,14 @@ public class ServerList {
             /*if(!serverList.get(serverList.indexOf(newServer)).getHearthbeat()){
                 ThreadNotificationMulticast.synchronizeFiles();
             }*/
+            serverList.get(serverList.indexOf(newServer)).setDate(System.currentTimeMillis());
             serverList.get(serverList.indexOf(newServer)).markAsAlive();
             serverList.get(serverList.indexOf(newServer)).setNewServer(false);
             // System.out.println("O servidor já estava registado! -> Hearthbeat a zeros");
             return false;
         }
         // System.out.println("Novo servidor registado");
+        newServer.setDate(System.currentTimeMillis());
         serverList.add(newServer);
         newServer.markAsAlive();
         return true;
