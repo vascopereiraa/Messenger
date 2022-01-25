@@ -30,6 +30,7 @@ public class GRDS extends UnicastRemoteObject implements GetServerListGRDSInterf
     protected GRDS() throws RemoteException {
         //todo: previne problemas de sincronização
         observers = new CopyOnWriteArrayList<>();
+        serverList = new ServerList();
     }
 
     //todo: RMI throws
@@ -54,6 +55,7 @@ public class GRDS extends UnicastRemoteObject implements GetServerListGRDSInterf
     public String getServerList() throws RemoteException {
         return serverList.toString();
     }
+
     @Override
     public void addObserver(GetNotificationsObserverInterface obsRef) throws RemoteException {
         // Guardar todas as referencias de observadores no arraylist, para depois poder informar todos quando recebe notificacao.
@@ -71,9 +73,6 @@ public class GRDS extends UnicastRemoteObject implements GetServerListGRDSInterf
 
 
     public void startThreads(int listeningPort) {
-
-        serverList = new ServerList();
-
         // Start threads to accept new Clients and Servers
         try {
             // Unicast thread para servidores

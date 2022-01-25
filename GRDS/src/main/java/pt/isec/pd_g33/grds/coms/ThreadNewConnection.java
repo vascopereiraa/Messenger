@@ -17,7 +17,7 @@ public class ThreadNewConnection implements Runnable {
 
     private final DatagramSocket ds;
     private final ServerList serverList;
-    private final CopyOnWriteArrayList<GetNotificationsObserverInterface> observers;
+    private CopyOnWriteArrayList<GetNotificationsObserverInterface> observers;
 
     public ThreadNewConnection(DatagramSocket ds, ServerList serverList, CopyOnWriteArrayList<GetNotificationsObserverInterface> observers) {
         this.ds = ds;
@@ -78,6 +78,7 @@ public class ThreadNewConnection implements Runnable {
             }
         }
     }
+
     private void sendNotification(String notificacao){
         Iterator<GetNotificationsObserverInterface> it = observers.iterator();
         GetNotificationsObserverInterface itnext = null;

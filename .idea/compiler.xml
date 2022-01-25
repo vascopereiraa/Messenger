@@ -20,6 +20,7 @@
       <module name="Server" target="16" />
       <module name="ServerAPI" target="15" />
       <module name="Shared" target="16" />
+      <module name="wrapper" target="1.5" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

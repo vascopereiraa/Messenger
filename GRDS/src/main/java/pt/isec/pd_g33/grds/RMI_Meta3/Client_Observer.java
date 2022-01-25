@@ -48,10 +48,9 @@ public class Client_Observer extends UnicastRemoteObject implements GetNotificat
             }while (!input.equals("exit"));
 
             rti.removeObserver(CO);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        } catch (NotBoundException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println("Por favor ligue o GRDS primeiro");
+            //ae.printStackTrace();
         }
     }
 

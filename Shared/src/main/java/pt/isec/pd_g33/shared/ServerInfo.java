@@ -1,6 +1,8 @@
 package pt.isec.pd_g33.shared;
 
 import java.net.InetAddress;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class ServerInfo {
@@ -12,6 +14,15 @@ public class ServerInfo {
     // Hearthbeat markers
     private boolean isAlive;
     private int hearthbeatFail;
+    private long Date;
+
+    public void setDate(long date) {
+        Date = date;
+    }
+
+    public long getDate() {
+        return Date;
+    }
 
     // new Server
     boolean newServer = true;

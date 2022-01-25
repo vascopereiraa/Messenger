@@ -38,5 +38,4 @@ public class ServerApiApplication {
                     .and().exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
         }
     }
-
 }

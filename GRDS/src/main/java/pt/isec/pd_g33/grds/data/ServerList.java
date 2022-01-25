@@ -30,6 +30,7 @@ public class ServerList {
         }
         // System.out.println("Novo servidor registado");
         serverList.add(newServer);
+        newServer.markAsAlive();
         return true;
     }
 
@@ -65,8 +66,12 @@ public class ServerList {
         ServerInfo server;
         for (int i = 0; i < serverList.size(); ++i) {
             server = serverList.get(i);
-            if(server.getHearthbeat())
-                sb.append("Server ").append(String.format("%04d", i)).append(": ").append(server).append("\n");
+            if(server.getHearthbeat()){
+                sb.append("Server ").append(String.format("%04d", i)).append(": ").append(server)
+                        .append("\tTime since heartbeat: ")
+                        .append((System.currentTimeMillis() - server.getDate()) / 1000).append(" seconds")
+                        .append("\n");
+            }
         }
         return sb.toString();
     }
